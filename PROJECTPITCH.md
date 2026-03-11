@@ -100,7 +100,7 @@ This smallest version demonstrates the **core concept of a student marketplace**
 | Area | Tool |
 |-----|-----|
 | Frontend | HTML, CSS, JavaScript |
-| Backend | Python |
+| Backend | Python, Flask |
 | Database | Mongodb |
 | Hosting | Render |
 
