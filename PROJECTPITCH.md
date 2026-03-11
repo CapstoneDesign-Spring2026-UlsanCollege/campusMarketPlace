@@ -38,6 +38,7 @@ The main users of this system will be **university students** who want to buy or
 
 Secondary users are International students or exchange students who need temporary items.
 
+<!-- Where? Be a little more specific here -->
 ---
 
 # 4. What the System Will Do
@@ -46,6 +47,8 @@ The system will allow students to create accounts, list items for sale, browse a
 
 This platform will provide a **simple and trusted environment for students to trade items within campus**.
 
+
+<!-- Take a look at what else is already in the market. What is missing? What can you do better? -->
 ---
 
 # 5. Core Features (First Version)
