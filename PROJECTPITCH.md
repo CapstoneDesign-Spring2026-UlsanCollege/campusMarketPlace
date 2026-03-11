@@ -34,19 +34,27 @@ This project aims to solve this problem by creating a **campus-focused marketpla
 
 # 3. Target Users
 
-The main users of this system will be **university students** who want to buy or sell used items within their campus community.
+# 3. Target Users
 
-Secondary users are International students or exchange students who need temporary items.
+The main users of this system will be **university students within our campus community** who want to buy or sell used items such as textbooks, electronics, and dorm supplies.
+
+This platform is designed specifically for **students studying and living on or near campus**, making it easier for them to meet and exchange items locally.
+
+Secondary users include **international students or exchange students at the university** who often need temporary items such as textbooks, kitchen supplies, or dorm furniture for a short period of time.
 
 <!-- Where? Be a little more specific here -->
 ---
+
 
 # 4. What the System Will Do
 
 The system will allow students to create accounts, list items for sale, browse available listings, and contact sellers. Users will be able to search for items and view item details before contacting the seller.
 
-This platform will provide a **simple and trusted environment for students to trade items within campus**.
+To ensure safety, the platform will include **campus-only verification**, allowing only students with a university email to register. Listings will also be organized using **semester-based categories** such as textbooks, electronics, dorm furniture, and study supplies to make searching easier for students.
 
+Additionally, the platform will include an **Item Request Board**, where students can post requests for items they are looking for so that other students can respond if they have the item available.
+
+This platform will provide a **simple and trusted environment for students to trade items within campus**.
 
 <!-- Take a look at what else is already in the market. What is missing? What can you do better? -->
 ---
