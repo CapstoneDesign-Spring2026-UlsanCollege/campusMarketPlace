@@ -1,0 +1,105 @@
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #2c7be5; /* Single color */
+    color: white;
+    height: 100vh;
+}
+
+/* NAVBAR */
+.navbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px 30px;
+}
+
+/* BUTTON BASE */
+.navbar button {
+    margin-left: 12px;
+    padding: 10px 18px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* LOGIN BUTTON */
+.login-btn {
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+}
+
+.login-btn:hover {
+    background: white;
+    color: #2c7be5;
+}
+
+/* SIGNUP BUTTON (PRIMARY CTA) */
+.signup-btn {
+    background: white;
+    color: #2c7be5;
+    border: none;
+    font-weight: bold;
+}
+
+.signup-btn:hover {
+    background: #e6e6e6;
+}
+
+/* MAIN CONTENT */
+.main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    height: calc(100vh - 80px);
+    padding: 20px;
+}
+
+/* TITLE */
+.main h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+/* TAGLINE */
+.tagline {
+    font-size: 1.2rem;
+    margin-bottom: 25px;
+}
+
+/* FEATURES */
+.features p {
+    margin: 5px 0;
+    font-size: 1rem;
+}
+
+/* 📱 RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+
+    .main h1 {
+        font-size: 2.2rem;
+    }
+
+    .tagline {
+        font-size: 1rem;
+    }
+
+    .navbar {
+        padding: 15px;
+    }
+
+    .navbar button {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}
