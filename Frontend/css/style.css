@@ -5,11 +5,19 @@
     box-sizing: border-box;
 }
 
+/* ✅ FIX: remove 100vh problem */
+html, body {
+    height: 100%;
+}
+
 body {
     font-family: Arial, sans-serif;
-    background: #2c7be5; /* Single color */
+    background: #2c7be5;
     color: white;
-    height: 100vh;
+
+    /* ✅ FLEX FIX (important) */
+    display: flex;
+    flex-direction: column;
 }
 
 /* NAVBAR */
@@ -41,7 +49,7 @@ body {
     color: #2c7be5;
 }
 
-/* SIGNUP BUTTON (PRIMARY CTA) */
+/* SIGNUP BUTTON */
 .signup-btn {
     background: white;
     color: #2c7be5;
@@ -53,15 +61,16 @@ body {
     background: #e6e6e6;
 }
 
-/* MAIN CONTENT */
+/* ✅ MAIN FIX */
 .main {
+    flex: 1; /* pushes footer down */
+
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
 
-    height: calc(100vh - 80px);
     padding: 20px;
 }
 
@@ -83,7 +92,15 @@ body {
     font-size: 1rem;
 }
 
-/* 📱 RESPONSIVE DESIGN */
+/* ✅ FOOTER FIX */
+footer {
+    text-align: center;
+    padding: 12px;
+    font-size: 14px;
+    background: rgba(0,0,0,0.1);
+}
+
+/* 📱 RESPONSIVE */
 @media (max-width: 768px) {
 
     .main h1 {
