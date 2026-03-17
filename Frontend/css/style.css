@@ -5,17 +5,17 @@
     box-sizing: border-box;
 }
 
-/* ✅ FIX: remove 100vh problem */
+/* FULL HEIGHT FIX */
 html, body {
     height: 100%;
 }
 
+/* BODY LAYOUT */
 body {
     font-family: Arial, sans-serif;
     background: #2c7be5;
     color: white;
 
-    /* ✅ FLEX FIX (important) */
     display: flex;
     flex-direction: column;
 }
@@ -61,9 +61,9 @@ body {
     background: #e6e6e6;
 }
 
-/* ✅ MAIN FIX */
+/* MAIN CONTENT */
 .main {
-    flex: 1; /* pushes footer down */
+    flex: 1;
 
     display: flex;
     flex-direction: column;
@@ -72,6 +72,22 @@ body {
     text-align: center;
 
     padding: 20px;
+
+    /* adjust for overlap logo */
+    margin-top: -60px;
+}
+
+/* LOGO - OVERLAP + GLOW */
+.logo {
+    width: 420px;
+    max-width: 90%;
+
+    display: block;
+    margin: -120px auto 30px auto;
+
+    /* glowing effect */
+    filter: drop-shadow(0 0 15px rgba(255,255,255,0.6))
+            drop-shadow(0 0 30px rgba(255,255,255,0.4));
 }
 
 /* TITLE */
@@ -92,7 +108,7 @@ body {
     font-size: 1rem;
 }
 
-/* ✅ FOOTER FIX */
+/* FOOTER */
 footer {
     text-align: center;
     padding: 12px;
@@ -102,6 +118,18 @@ footer {
 
 /* 📱 RESPONSIVE */
 @media (max-width: 768px) {
+
+    .logo {
+        width: 260px;
+        margin: -60px auto 20px auto;
+
+        filter: drop-shadow(0 0 10px rgba(255,255,255,0.6))
+                drop-shadow(0 0 20px rgba(255,255,255,0.4));
+    }
+
+    .main {
+        margin-top: -30px;
+    }
 
     .main h1 {
         font-size: 2.2rem;
