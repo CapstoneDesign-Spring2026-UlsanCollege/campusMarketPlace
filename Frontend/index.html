@@ -3,9 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Group project 2026</title>
+    <title>UC Marketplace</title>
+
+    <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
-    <h1>Group project 2026</h1>
+<h2 id="welcome-text"></h2>
+<!-- NAVBAR -->
+<div class="navbar">
+    <button class="login-btn" onclick="goToLogin()">Login</button>
+    <button class="signup-btn" onclick="goToSignup()">Sign Up</button>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+    <!-- ✅ LOGO ADDED HERE -->
+    <img src="images/logo.png" alt="UC Marketplace Logo" class="logo">
+
+    <h1>Ulsan College Marketplace</h1>
+    <p class="tagline">Buy & Sell within Ulsan College</p>
+
+    <div class="features">
+        <p>✔ Campus-only access</p>
+        <p>✔ Safe & trusted trading</p>
+        <p>✔ Verified student accounts</p>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    This website is created by students of Ulsan College
+</footer>
+<script>
+function goToLogin(){
+    window.location.href = "login.html";
+}
+
+function goToSignup(){
+    window.location.href = "signup.html";
+}
+
+/* TYPEWRITER EFFECT */
+const text = "Welcome to our Ulsan College Community!!!";
+let index = 0;
+
+function typeEffect() {
+    if (index < text.length) {
+        document.getElementById("welcome-text").innerHTML += text.charAt(index);
+        index++;
+        setTimeout(typeEffect, 50); // speed (lower = faster)
+    }
+}
+
+/* run on page load */
+window.onload = typeEffect;
+</script>
+
+<script>
+function goToLogin(){
+    window.location.href = "login.html";
+}
+
+function goToSignup(){
+    window.location.href = "signup.html";
+}
+</script>
+
 </body>
 </html>
