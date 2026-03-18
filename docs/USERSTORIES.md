@@ -1,19 +1,18 @@
 # User Stories
 
 
-## Login Page
-
-- As a student, I want to log in using my email and password, so that I can access my account.  
-- As a student, I want to see an error message if my login details are incorrect, so that I can try again.  
-- As a user, I want to stay logged in, so that I don’t have to log in every time I visit the site.  
-
----
-
 ## Sign Up Page
 
 - As a student, I want to create an account using my university email, so that I can access the marketplace.  
 - As a user, I want to verify my email, so that my account is secure and trusted.  
 - As a new user, I want the sign-up process to be simple and quick, so that I can start using the platform easily.  
+
+---
+## Login Page
+
+- As a student, I want to log in using my email and password, so that I can access my account.  
+- As a student, I want to see an error message if my login details are incorrect, so that I can try again.  
+- As a user, I want to stay logged in, so that I don’t have to log in every time I visit the site.   
 
 ---
 
