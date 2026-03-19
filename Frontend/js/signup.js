@@ -1,6 +1,5 @@
 document.getElementById("signupForm").addEventListener("submit", function(e) {
-    e.preventDefault();
+   e.preventDefault();
 
-    // validation will be added by team members
-
+   // validations will be added by team
 });
