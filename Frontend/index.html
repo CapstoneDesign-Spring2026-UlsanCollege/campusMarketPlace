@@ -9,7 +9,13 @@
 </head>
 
 <body>
+
+<!-- 🌐 LANGUAGE SELECTOR -->
+<div id="google_translate_element"></div>
+
+<!-- ✨ WELCOME TEXT -->
 <h2 id="welcome-text"></h2>
+
 <!-- NAVBAR -->
 <div class="navbar">
     <button class="login-btn" onclick="goToLogin()">Login</button>
@@ -19,7 +25,7 @@
 <!-- MAIN CONTENT -->
 <div class="main">
 
-    <!-- ✅ LOGO ADDED HERE -->
+    <!-- LOGO -->
     <img src="images/logo.png" alt="UC Marketplace Logo" class="logo">
 
     <h1>Ulsan College Marketplace</h1>
@@ -36,16 +42,40 @@
 <footer>
     This website is created by students of Ulsan College
 </footer>
+
+<!-- 🌍 GOOGLE TRANSLATE -->
 <script>
-function goToLogin(){
-    window.location.href = "login.html";
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        autoDisplay: false
+    }, 'google_translate_element');
 }
+</script>
 
-function goToSignup(){
-    window.location.href = "signup.html";
-}
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-/* TYPEWRITER EFFECT */
+<!-- 🔒 FORCE ENGLISH DEFAULT -->
+<script>
+window.addEventListener("load", function () {
+
+    const interval = setInterval(() => {
+        const select = document.querySelector(".goog-te-combo");
+
+        if (select) {
+            select.value = "en";
+            select.dispatchEvent(new Event("change"));
+
+            document.cookie = "googtrans=;path=/";
+
+            clearInterval(interval);
+        }
+    }, 300);
+});
+</script>
+
+<!-- ✨ TYPEWRITER EFFECT -->
+<script>
 const text = "Welcome to our Ulsan College Community!!!";
 let index = 0;
 
@@ -53,14 +83,14 @@ function typeEffect() {
     if (index < text.length) {
         document.getElementById("welcome-text").innerHTML += text.charAt(index);
         index++;
-        setTimeout(typeEffect, 50); // speed (lower = faster)
+        setTimeout(typeEffect, 50);
     }
 }
 
-/* run on page load */
 window.onload = typeEffect;
 </script>
 
+<!-- 🔗 NAVIGATION -->
 <script>
 function goToLogin(){
     window.location.href = "login.html";
