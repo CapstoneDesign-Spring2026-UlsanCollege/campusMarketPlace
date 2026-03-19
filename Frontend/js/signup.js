@@ -16,5 +16,18 @@ if (!emailPattern.test(email)) {
    alert("Email must be @office.uc.ac.kr");
    return;
 }
+   const firstName = document.getElementById("firstName").value.trim();
+const lastName = document.getElementById("lastName").value.trim();
+
+if (firstName === "") {
+   alert("First name is required");
+   return;
+}
+
+if (lastName === "") {
+   alert("Last name is required");
+   return;
+}
+
 
 });
