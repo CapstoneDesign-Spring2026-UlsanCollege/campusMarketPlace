@@ -20,12 +20,16 @@ body {
     flex-direction: column;
 }
 
-/* LANGUAGE SELECTOR */
 #google_translate_element {
     position: absolute;
     top: 15px;
     left: 20px;
-    z-index: 1000;
+    z-index: 1;   /* 👈 LOWER */
+}
+
+.navbar {
+    position: relative;
+    z-index: 9999;  /* 👈 HIGHER */
 }
 
 /* CLEAN GOOGLE UI */
@@ -209,4 +213,7 @@ footer {
         padding: 8px 12px;
         font-size: 12px;
     }
+}
+iframe {
+    pointer-events: none;
 }

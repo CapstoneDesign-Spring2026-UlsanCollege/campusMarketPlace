@@ -18,14 +18,18 @@
 
 <!-- NAVBAR -->
 <div class="navbar">
-    <button class="login-btn" onclick="goToLogin()">Login</button>
-    <button class="signup-btn" onclick="goToSignup()">Sign Up</button>
+    <a href="login.html">
+        <button class="login-btn">Login</button>
+    </a>
+
+    <a href="/Frontend/signup.html">
+        <button class="signup-btn">Sign Up</button>
+    </a>
 </div>
 
 <!-- MAIN CONTENT -->
 <div class="main">
 
-    <!-- LOGO -->
     <img src="images/logo.png" alt="UC Marketplace Logo" class="logo">
 
     <h1>Ulsan College Marketplace</h1>
@@ -38,7 +42,6 @@
     </div>
 </div>
 
-<!-- FOOTER -->
 <footer>
     This website is created by students of Ulsan College
 </footer>
@@ -55,51 +58,8 @@ function googleTranslateElementInit() {
 
 <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-<!-- 🔒 FORCE ENGLISH DEFAULT -->
-<script>
-window.addEventListener("load", function () {
-
-    const interval = setInterval(() => {
-        const select = document.querySelector(".goog-te-combo");
-
-        if (select) {
-            select.value = "en";
-            select.dispatchEvent(new Event("change"));
-
-            document.cookie = "googtrans=;path=/";
-
-            clearInterval(interval);
-        }
-    }, 300);
-});
-</script>
-
-<!-- ✨ TYPEWRITER EFFECT -->
-<script>
-const text = "Welcome to our Ulsan College Community!!!";
-let index = 0;
-
-function typeEffect() {
-    if (index < text.length) {
-        document.getElementById("welcome-text").innerHTML += text.charAt(index);
-        index++;
-        setTimeout(typeEffect, 50);
-    }
-}
-
-window.onload = typeEffect;
-</script>
-
-<!-- 🔗 NAVIGATION -->
-<script>
-function goToLogin(){
-    window.location.href = "login.html";
-}
-
-function goToSignup(){
-    window.location.href = "signup.html";
-}
-</script>
+<!-- ✅ CONNECTED JS FILE -->
+<script src="js/main.js"></script>
 
 </body>
 </html>
