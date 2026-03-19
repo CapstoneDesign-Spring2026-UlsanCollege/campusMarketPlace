@@ -50,4 +50,15 @@ This system ensures a **trusted environment** by allowing only verified universi
 
 ---
 
-##  Project Structure
+## Future Improvements
+
+- Mobile app version  
+- Advanced recommendation system  
+- Real-time chat  
+- Payment integration  
+
+---
+
+## License
+
+This project is for academic purposes only.
