@@ -3,6 +3,14 @@ document.getElementById("signupForm").addEventListener("submit", function(e) {
 
    const email = document.getElementById("email").value.trim();
 const emailPattern = /^[a-zA-Z0-9._%+-]+@office\.uc\.ac\.kr$/;
+const password = document.getElementById("password").value;
+
+const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+if (!strongPassword.test(password)) {
+   alert("Password must be strong");
+   return;
+}
 
 if (!emailPattern.test(email)) {
    alert("Email must be @office.uc.ac.kr");
