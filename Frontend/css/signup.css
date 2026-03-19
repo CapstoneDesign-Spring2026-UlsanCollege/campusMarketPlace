@@ -8,3 +8,23 @@ body {
     align-items: center;
     height: 100vh;
 }
+.signup-box {
+    background: white;
+    padding: 40px;
+    max-width: 400px;
+    border-radius: 12px;
+}
+
+.signup-btn {
+    width: 100%;
+    padding: 14px;
+    background: #2c7be5;
+    color: white;
+    font-size: 18px;
+}
+
+@media (max-width: 768px) {
+    .signup-box {
+        width: 90%;
+    }
+}
