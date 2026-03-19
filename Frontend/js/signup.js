@@ -29,5 +29,6 @@ if (lastName === "") {
    return;
 }
 
+ alert("Signup successful!");
 
 });
