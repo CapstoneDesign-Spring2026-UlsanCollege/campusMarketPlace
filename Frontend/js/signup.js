@@ -44,3 +44,10 @@ document.getElementById("signupForm").addEventListener("submit", function(e) {
 
    alert("Signup successful! Ready to connect to backend.");
 });
+const confirmPassword = document.getElementById("confirmPassword").value;
+
+if (password !== confirmPassword) {
+   alert("Passwords do not match");
+   return;
+}
+
