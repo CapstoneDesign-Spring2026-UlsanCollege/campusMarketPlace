@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - UC Marketplace</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    <button class="login-btn" onclick="window.location.href='index.html'">Home</button>
+    <button class="login-btn" onclick="window.location.href='login.html'">Login</button>
+</div>
+
+<!-- SIGNUP FORM -->
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">Create Account</h1>
+        <p class="auth-subtitle">Join the Ulsan College Marketplace</p>
+
+        <!-- Error/Success messages appear here -->
+        <div id="message" class="message" style="display: none;"></div>
+
+        <form id="signup-form" onsubmit="handleSignup(event)">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Choose a username"
+                    required
+                    minlength="3"
+                    maxlength="30"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="your.email@uc.ac.kr"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="e.g. MyPass@123"
+                    required
+                    minlength="8"
+                    oninput="checkPasswordStrength()"
+                >
+                <!-- PASSWORD STRENGTH METER -->
+                <div id="strength-meter" class="strength-meter" style="display: none;">
+                    <div class="strength-bar">
+                        <div id="strength-fill" class="strength-fill"></div>
+                    </div>
+                    <span id="strength-text" class="strength-text"></span>
+                </div>
+                <!-- PASSWORD RULES CHECKLIST -->
+                <div id="password-rules" class="password-rules">
+                    <p id="rule-length" class="rule fail">✗ At least 8 characters</p>
+                    <p id="rule-upper" class="rule fail">✗ At least 1 uppercase letter (A-Z)</p>
+                    <p id="rule-lower" class="rule fail">✗ At least 1 lowercase letter (a-z)</p>
+                    <p id="rule-number" class="rule fail">✗ At least 1 number (0-9)</p>
+                    <p id="rule-special" class="rule fail">✗ At least 1 special character (!@#$%^&*)</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input
+                    type="password"
+                    id="confirm-password"
+                    name="confirm-password"
+                    placeholder="Type your password again"
+                    required
+                    minlength="8"
+                >
+            </div>
+
+            <button type="submit" class="auth-btn" id="submit-btn">
+                Sign Up
+            </button>
+        </form>
+
+        <p class="auth-switch">
+            Already have an account? <a href="login.html">Login here</a>
+        </p>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    This website is created by students of Ulsan College
+</footer>
+
+<script>
+const API_URL = "http://localhost:5000";
+
+// ============================================
+// PASSWORD STRENGTH CHECKER (real-time)
+// Runs every time the user types in password field
+// ============================================
+function checkPasswordStrength() {
+    const password = document.getElementById("password").value;
+    const meter = document.getElementById("strength-meter");
+    const fill = document.getElementById("strength-fill");
+    const text = document.getElementById("strength-text");
+
+    // Show the meter once user starts typing
+    if (password.length > 0) {
+        meter.style.display = "flex";
+    } else {
+        meter.style.display = "none";
+    }
+
+    // Check each rule individually
+    const checks = {
+        length:  password.length >= 8,
+        upper:   /[A-Z]/.test(password),
+        lower:   /[a-z]/.test(password),
+        number:  /[0-9]/.test(password),
+        special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+    };
+
+    // Update each rule in the checklist (green check or red X)
+    updateRule("rule-length",  checks.length);
+    updateRule("rule-upper",   checks.upper);
+    updateRule("rule-lower",   checks.lower);
+    updateRule("rule-number",  checks.number);
+    updateRule("rule-special", checks.special);
+
+    // Count how many rules pass
+    const passed = Object.values(checks).filter(Boolean).length;
+
+    // Update the strength bar width and color
+    const percent = (passed / 5) * 100;
+    fill.style.width = percent + "%";
+
+    if (passed <= 1) {
+        fill.style.background = "#e74c3c";  // Red
+        text.textContent = "Very Weak";
+        text.style.color = "#e74c3c";
+    } else if (passed <= 2) {
+        fill.style.background = "#e67e22";  // Orange
+        text.textContent = "Weak";
+        text.style.color = "#e67e22";
+    } else if (passed <= 3) {
+        fill.style.background = "#f1c40f";  // Yellow
+        text.textContent = "Fair";
+        text.style.color = "#f1c40f";
+    } else if (passed <= 4) {
+        fill.style.background = "#27ae60";  // Green
+        text.textContent = "Strong";
+        text.style.color = "#27ae60";
+    } else {
+        fill.style.background = "#2ecc71";  // Bright green
+        text.textContent = "Very Strong ✓";
+        text.style.color = "#2ecc71";
+    }
+}
+
+function updateRule(ruleId, passed) {
+    const el = document.getElementById(ruleId);
+    if (passed) {
+        el.className = "rule pass";
+        el.textContent = "✓ " + el.textContent.substring(2);  // Replace X with checkmark
+    } else {
+        el.className = "rule fail";
+        // Make sure it starts with ✗
+        if (!el.textContent.startsWith("✗")) {
+            el.textContent = "✗ " + el.textContent.substring(2);
+        }
+    }
+}
+
+// ============================================
+// HANDLE SIGNUP FORM SUBMISSION
+// ============================================
+async function handleSignup(event) {
+    event.preventDefault();
+
+    const username = document.getElementById("username").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirm-password").value;
+
+    // --- Frontend Validation ---
+    if (password !== confirmPassword) {
+        showMessage("Passwords do not match!", "error");
+        return;
+    }
+
+    // Check password strength before sending to backend
+    const checks = {
+        length:  password.length >= 8,
+        upper:   /[A-Z]/.test(password),
+        lower:   /[a-z]/.test(password),
+        number:  /[0-9]/.test(password),
+        special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+    };
+    const allPassed = Object.values(checks).every(Boolean);
+
+    if (!allPassed) {
+        showMessage("Password does not meet all requirements. Check the rules below.", "error");
+        return;
+    }
+
+    // --- Disable button while loading ---
+    const btn = document.getElementById("submit-btn");
+    btn.textContent = "Creating account...";
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(API_URL + "/api/signup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                email: email,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showMessage("Account created! Redirecting to login...", "success");
+            setTimeout(function() {
+                window.location.href = "login.html";
+            }, 2000);
+        } else {
+            // Handle password errors from backend (backup validation)
+            if (data.password_errors) {
+                showMessage(data.password_errors.join("\n"), "error");
+            } else {
+                showMessage(data.error || "Signup failed. Try again.", "error");
+            }
+            btn.textContent = "Sign Up";
+            btn.disabled = false;
+        }
+
+    } catch (error) {
+        showMessage(
+            "Cannot connect to server. Make sure the backend is running on " + API_URL,
+            "error"
+        );
+        btn.textContent = "Sign Up";
+        btn.disabled = false;
+        console.error("Signup error:", error);
+    }
+}
+
+// ============================================
+// SHOW MESSAGE
+// ============================================
+function showMessage(text, type) {
+    const messageDiv = document.getElementById("message");
+    messageDiv.textContent = text;
+    messageDiv.className = "message " + type;
+    messageDiv.style.display = "block";
+
+    setTimeout(function() {
+        messageDiv.style.display = "none";
+    }, 6000);
+}
+</script>
+
+</body>
+</html>

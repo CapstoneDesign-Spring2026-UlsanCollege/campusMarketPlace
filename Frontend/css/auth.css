@@ -1,0 +1,204 @@
+/* ============================================
+   AUTH PAGES — Login & Signup
+   Works alongside style.css (don't edit style.css)
+   ============================================ */
+
+/* CENTER THE FORM ON THE PAGE */
+.auth-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* THE WHITE CARD */
+.auth-card {
+    background: white;
+    border-radius: 12px;
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* TITLE */
+.auth-title {
+    color: #2c7be5;
+    font-size: 1.8rem;
+    margin-bottom: 4px;
+    text-align: center;
+}
+
+/* SUBTITLE */
+.auth-subtitle {
+    color: #888;
+    font-size: 0.95rem;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* FORM GROUP (label + input pair) */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    color: #333;
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+    color: #333;
+}
+
+.form-group input:focus {
+    border-color: #2c7be5;
+}
+
+.form-group input::placeholder {
+    color: #aaa;
+}
+
+/* SUBMIT BUTTON */
+.auth-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    background: #2c7be5;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 8px;
+}
+
+.auth-btn:hover {
+    background: #1a5bb5;
+}
+
+.auth-btn:disabled {
+    background: #a0c4f1;
+    cursor: not-allowed;
+}
+
+/* SWITCH LINK (already have account? / don't have account?) */
+.auth-switch {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.auth-switch a {
+    color: #2c7be5;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+/* SUCCESS / ERROR MESSAGES */
+.message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    margin-bottom: 18px;
+    text-align: center;
+}
+
+.message.error {
+    background: #ffe0e0;
+    color: #c0392b;
+    border: 1px solid #f5c6cb;
+}
+
+.message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+/* ============================================
+   PASSWORD STRENGTH METER
+   ============================================ */
+.strength-meter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.strength-bar {
+    flex: 1;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 3px;
+    transition: width 0.3s ease, background 0.3s ease;
+}
+
+.strength-text {
+    font-size: 0.8rem;
+    font-weight: bold;
+    min-width: 90px;
+    text-align: right;
+}
+
+/* PASSWORD RULES CHECKLIST */
+.password-rules {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.password-rules .rule {
+    font-size: 0.8rem;
+    margin: 4px 0;
+    transition: color 0.2s ease;
+}
+
+.password-rules .rule.fail {
+    color: #c0392b;
+}
+
+.password-rules .rule.pass {
+    color: #27ae60;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 25px 20px;
+        margin: 10px;
+    }
+
+    .auth-title {
+        font-size: 1.5rem;
+    }
+}
