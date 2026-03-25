@@ -1,6 +1,7 @@
-document.getElementById("signupForm").addEventListener("submit", function(e) {
-   e.preventDefault();
+const form = document.getElementById("signupForm");
 
+form.addEventListener("submit", function(e) {
+   e.preventDefault();
 
    const firstName = document.getElementById("firstName").value.trim();
    const lastName = document.getElementById("lastName").value.trim();
@@ -8,46 +9,83 @@ document.getElementById("signupForm").addEventListener("submit", function(e) {
    const password = document.getElementById("password").value;
    const confirmPassword = document.getElementById("confirmPassword").value;
 
+   validateInput("firstName", "First name is required");
+   validateInput("lastName", "Last name is required");
+   validateEmail(email);
+   validatePassword(password);
+   validateConfirmPassword(password, confirmPassword);
 
-   // ✅ Name validation
-   if (firstName === "" || lastName === "") {
-       alert("First Name and Last Name are required.");
-       return;
+   if (
+       firstName !== "" &&
+       lastName !== "" &&
+       /^[a-zA-Z0-9._%+-]+@office\.uc\.ac\.kr$/.test(email) &&
+       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(password) &&
+       password === confirmPassword
+   ) {
+       alert("Signup successful! Ready to connect to backend.");
    }
-
-
-   // ✅ Email domain validation
-   const emailPattern = /^[a-zA-Z0-9._%+-]+@office\.uc\.ac\.kr$/;
-   if (!emailPattern.test(email)) {
-       alert("Email must be in the format: example@office.uc.ac.kr");
-       return;
-   }
-
-
-   // ✅ Strong password validation
-   // At least 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
-   const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
-
-
-   if (!strongPassword.test(password)) {
-       alert("Password must be at least 8 characters and include uppercase, lowercase, number, and special character.");
-       return;
-   }
-
-
-   // ✅ Confirm password
-   if (password !== confirmPassword) {
-       alert("Passwords do not match.");
-       return;
-   }
-
-
-   alert("Signup successful! Ready to connect to backend.");
 });
-const confirmPassword = document.getElementById("confirmPassword").value;
 
-if (password !== confirmPassword) {
-   alert("Passwords do not match");
-   return;
+function validateInput(id, message) {
+   const input = document.getElementById(id);
+   const group = input.parentElement;
+   const hint = group.querySelector(".hint");
+
+   if (input.value.trim() === "") {
+       group.classList.add("error");
+       group.classList.remove("success");
+       hint.textContent = message;
+   } else {
+       group.classList.remove("error");
+       group.classList.add("success");
+   }
 }
 
+function validateEmail(email) {
+   const input = document.getElementById("email");
+   const group = input.parentElement;
+   const hint = group.querySelector(".hint");
+
+   const pattern = /^[a-zA-Z0-9._%+-]+@office\.uc\.ac\.kr$/;
+
+   if (!pattern.test(email)) {
+       group.classList.add("error");
+       group.classList.remove("success");
+       hint.textContent = "Invalid campus email";
+   } else {
+       group.classList.remove("error");
+       group.classList.add("success");
+   }
+}
+
+function validatePassword(password) {
+   const input = document.getElementById("password");
+   const group = input.parentElement;
+   const hint = group.querySelector(".hint");
+
+   const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+   if (!pattern.test(password)) {
+       group.classList.add("error");
+       group.classList.remove("success");
+       hint.textContent = "Weak password";
+   } else {
+       group.classList.remove("error");
+       group.classList.add("success");
+   }
+}
+
+function validateConfirmPassword(password, confirmPassword) {
+   const input = document.getElementById("confirmPassword");
+   const group = input.parentElement;
+   const hint = group.querySelector(".hint");
+
+   if (password !== confirmPassword || confirmPassword === "") {
+       group.classList.add("error");
+       group.classList.remove("success");
+       hint.textContent = "Passwords do not match";
+   } else {
+       group.classList.remove("error");
+       group.classList.add("success");
+   }
+}
