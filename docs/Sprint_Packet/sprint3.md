@@ -31,7 +31,7 @@ TBD — will be a localhost recording or live run of `python app.py`
 
 ## Board / Project link
 
-TBD — _(create GitHub Project board and paste link here)_
+TBD — https://github.com/orgs/CapstoneDesign-Spring2026-UlsanCollege/projects/15
 
 ---
 
