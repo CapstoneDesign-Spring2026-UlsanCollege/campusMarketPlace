@@ -107,9 +107,6 @@ TBD — _(create GitHub Project board and paste link here)_
 Each member posts a comment on this issue with 2–3 links:
 
 > **[Name] — Receipts**
-> - PR: https://github.com/.../pull/XX
-> - Issue closed: https://github.com/.../issues/YY
-> - Review: https://github.com/.../pull/ZZ#discussion
 
 ---
 
