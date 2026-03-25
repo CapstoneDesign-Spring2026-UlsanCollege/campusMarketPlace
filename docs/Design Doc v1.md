@@ -92,7 +92,7 @@ Allows users to create and submit a new item listing for sale.
 **Main user action:**
 Fill out the form and submit an item.
 - image / sketch:
-![Sell Screen](../Frontend/images/sellwireframe.png)
+![Sell Screen](../Frontend/images/sellwireframee.png)
 
 ---
 ## Screen 3 - Result / Detail / Confirmation
