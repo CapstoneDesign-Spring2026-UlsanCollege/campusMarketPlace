@@ -48,6 +48,7 @@ Students often struggle to find affordable items and trustworthy buyers/sellers 
 
 ## 5) Architecture (C4-lite)
 
+https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/docs/Architecture_sketch.md
 
 ### Context view
 - users: Students (both buyers and sellers)  
@@ -61,7 +62,7 @@ Students often struggle to find affordable items and trustworthy buyers/sellers 
 - other service (if needed): –  
 
 ### Diagram or image
-(Add your hand-drawn diagram or screenshot here)
+![homepage](../Frontend/images/homepage.png)
 
 ---
 
