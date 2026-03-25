@@ -50,7 +50,7 @@ Fill out the form and submit an item.
 After submitting → item is added to marketplace and visible on the home page.
 
 ### Screenshot
-![Sell Screen](../Frontend/images/sellwireframe.png)
+![Sell Screen](../Frontend/images/sellwireframee.png)
 
 ## Screen 3 - Result / Detail / Confirmation
 
