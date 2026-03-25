@@ -45,7 +45,7 @@ This system ensures a **trusted environment** by allowing only verified universi
 |------|-----------|
 | Frontend | HTML, CSS, JavaScript |
 | Backend | Flask |
-| Database | PostgreSQL |
+| Database | MongoDB |
 | Hosting | Render |
 
 ---
