@@ -110,7 +110,7 @@ View requests or post a new request.
 
 ---
 
-## 7) Sprint 4 plan
+## 7) Sprint 1 plan
 
 ### Top goals
 1. Set up project repository and structure  
