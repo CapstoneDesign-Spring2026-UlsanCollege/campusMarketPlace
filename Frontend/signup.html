@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - UC Marketplace</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        .error {
+            color: red;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .form-container {
+            width: 300px;
+            margin: 80px auto;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="form-container">
+    <h2>Sign Up</h2>
+
+    <form id="signupForm">
+
+        <!-- Name -->
+        <label>Name</label>
+        <input type="text" id="name">
+        <span class="error" id="nameError"></span>
+
+        <!-- Email -->
+        <label>Email</label>
+        <input type="email" id="email">
+        <span class="error" id="emailError"></span>
+
+        <!-- Password -->
+        <label>Password</label>
+        <input type="password" id="password">
+        <span class="error" id="passwordError"></span>
+
+        <button type="submit">Create Account</button>
+    </form>
+</div>
+
+<script>
+document.getElementById("signupForm").addEventListener("submit", function(e) {
+    e.preventDefault(); // stop reload
+
+    console.log("form submitted");
+
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    console.log("DATA:", name, email, password);
+
+    if (!name || !email || !password) {
+        alert("All fields required");
+        return;
+    }
+
+    console.log("BEFORE FETCH");
+
+    fetch("http://127.0.0.1:5000/register", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, email, password })
+    })
+    .then(async (res) => {
+        console.log("FETCH HIT", res.status);
+
+        const data = await res.json();
+        console.log("RESPONSE:", data);
+
+        if (res.ok) {
+            alert(data.message);
+        } else {
+            alert(data.error || "Something went wrong");
+        }
+    })
+    .catch(err => {
+        console.error("Fetch error:", err);
+        alert("Server connection failed");
+    });
+});
+</script>
+
+</body>
+</html>
