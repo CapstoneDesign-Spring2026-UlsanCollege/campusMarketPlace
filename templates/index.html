@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Home - UC Marketplace{% endblock %}
+
+{% block content %}
+
+
+<!-- ✨ WELCOME TEXT -->
+<h2 id="welcome-text"></h2>
+
+<div class="text-center">
+
+    <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo">
+
+    <h1>Ulsan College Marketplace</h1>
+    <p class="tagline">Buy & Sell within Ulsan College</p>
+
+    <div class="features">
+        <p>✔ Campus-only access</p>
+        <p>✔ Safe & trusted trading</p>
+        <p>✔ Verified student accounts</p>
+    </div>
+
+</div>
+
+{% endblock %}

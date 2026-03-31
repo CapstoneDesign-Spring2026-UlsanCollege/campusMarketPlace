@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+
+<div class="signup-page">
+
+    <div class="signup-box">
+        <h2>Create Account</h2>
+        <p class="subtitle">Join the campus marketplace</p>
+
+        <form id="signupForm">
+
+            <div class="input-group">
+                <input type="text" id="firstName" placeholder="First Name *">
+                <small class="hint"></small>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="middleName" placeholder="Middle Name (Optional)">
+                <small class="hint"></small>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="lastName" placeholder="Last Name *">
+                <small class="hint"></small>
+            </div>
+
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Email *">
+                <small class="hint"></small>
+            </div>
+
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Password *">
+                <small class="hint"></small>
+            </div>
+
+            <div class="input-group">
+                <input type="password" id="confirmPassword" placeholder="Confirm Password *">
+                <small class="hint"></small>
+            </div>
+
+            <button type="submit" class="signup-btn">Sign Up</button>
+
+        </form>
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}">
+<script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+
+{% endblock %}
