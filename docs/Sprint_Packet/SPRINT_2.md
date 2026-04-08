@@ -27,6 +27,10 @@ How to use:
 
 [CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace)
 
+**Live Demo**
+
+[CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace](https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/)
+
 **PM for this Sprint**
 
 [Rai Aayuska]
