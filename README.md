@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # UC Marketplace
 
 UC Marketplace is a campus-focused web app for Ulsan College students to buy and sell items in a safer, student-only environment.
@@ -11,9 +12,30 @@ This repository currently includes:
 - A signup form with client-side validation rules
 
 Backend account creation and database persistence are not fully wired yet.
+=======
+# Campus Marketplace Frontend
 
-## Features
+This repository now contains only the React + Vite frontend for Campus Marketplace.
 
+## Project Structure
+
+- `Frontend/` - React app powered by Vite
+- `docs/` - project documentation
+
+## Run Locally
+
+```bash
+cd Frontend
+npm install
+npm run dev
+```
+
+Open the local URL shown by Vite (usually `http://localhost:5173`).
+>>>>>>> 37b116165c7601b72cb3aba5bd325bcf88d9706a
+
+## Build
+
+<<<<<<< HEAD
 ### Implemented
 - Home page with campus marketplace branding
 - Navigation layout shared across pages
@@ -65,3 +87,10 @@ campusMarketPlace/
 ## License
 
 Academic project use.
+=======
+```bash
+cd Frontend
+npm run build
+npm run preview
+```
+>>>>>>> 37b116165c7601b72cb3aba5bd325bcf88d9706a
