@@ -130,7 +130,7 @@ Issues currently in progress:
 
 Issues completed this week:
 
-- [ ] [Issue: Setup Vite for frontend environment]([issue-link](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24))
+- [x] [Issue: Setup Vite for frontend environment][issue-link(https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24)]
 - [ ] [Issue: Set up development environment](issue-link)
 - [ ] [Issue: Define database schema](issue-link)
 
@@ -188,7 +188,7 @@ Set Vite base to /campusMarketPlace/ in vite.config.js.]
 
 **PR/Issue Link:**
 
-[[Link to PR or issue](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/25)]
+[[Link to PR or issue (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/25)]
 
 ---
 
