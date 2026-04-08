@@ -1,64 +1,26 @@
-# Campus Exchange Marketplace
+# Campus Marketplace Frontend
 
-This is a web-based platform designed for university students to **buy and sell second-hand items** within their campus community safely and easily.
+This repository now contains only the React + Vite frontend for Campus Marketplace.
 
----
+## Project Structure
 
-## Project Overview
+- `Frontend/` - React app powered by Vite
+- `docs/` - project documentation
 
-Campus Exchange Marketplace is a student-focused platform where users can:
-- Buy and sell second-hand items
-- Connect with other students on campus
-- Request items they need
-- Offer services like tutoring
+## Run Locally
 
-This system ensures a **trusted environment** by allowing only verified university students to register.
+```bash
+cd Frontend
+npm install
+npm run dev
+```
 
----
+Open the local URL shown by Vite (usually `http://localhost:5173`).
 
-## Features
+## Build
 
-###  Marketplace
-- Post items for sale
-- Browse and search listings
-- View item details
-
-###  Authentication & Safety
-- User registration and login
-- Campus email verification (such as @office.uc.ac.kr)
-- Secure user accounts
-
-###  Communication
-- Contact sellers directly
-- Basic messaging system
-
-###  Student-Focused Features
-- Semester-based categories (books, electronics, dorm items)
-- Item Request Board
-- Peer tutoring / service listings
-
----
-
-##  Tech Stack
-
-| Area | Technology |
-|------|-----------|
-| Frontend | HTML, CSS, JavaScript |
-| Backend | Flask |
-| Database | MongoDB |
-| Hosting | Render |
-
----
-
-## Future Improvements
-
-- Mobile app version  
-- Advanced recommendation system  
-- Real-time chat  
-- Payment integration  
-
----
-
-## License
-
-This project is for academic purposes only.
+```bash
+cd Frontend
+npm run build
+npm run preview
+```
