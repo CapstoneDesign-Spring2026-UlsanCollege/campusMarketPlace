@@ -24,6 +24,11 @@ Week 6
 
 [CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace)
 
+**Live Demo**
+
+[CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace](https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/)
+
+
 **PM for this Week**
 
 [Rai Aayuska]
@@ -52,10 +57,6 @@ Establish a clean, well-defined, and hardened foundation for feature development
 # Demo
 
 **Status:** Preparation phase - core features stabilizing
-
-**Current Demo Environment:**
-
-[Link to staging environment or feature branch]
 
 ## Demo Script
 
@@ -129,6 +130,7 @@ Issues currently in progress:
 
 Issues completed this week:
 
+- [ ] [Issue: Setup Vite for frontend environment]([issue-link](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24))
 - [ ] [Issue: Set up development environment](issue-link)
 - [ ] [Issue: Define database schema](issue-link)
 
@@ -148,11 +150,12 @@ What actually got completed by end of Week 6:
 - [ ] API documentation updated
 - [ ] UI/UX mockups finalized for Week 7
 - [ ] Performance baseline established
+- [x] Setup Vite for frontend environment
 
 **Shipping Details:**
 
 - Merged PRs: [list PR links]
-- Completed issues: [list issue links]
+- Completed issues: [list issue links (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24)]
 - Documentation added: [list links]
 
 ---
@@ -161,23 +164,31 @@ What actually got completed by end of Week 6:
 
 Problems encountered and how they were resolved:
 
-### Problem 1: [Issue Title]
+### Problem 1: [Deploying Github Pages]
 
 **Description:** 
 
-[Description of what went wrong]
+[Deployment to GitHub Pages kept failing, and the site was not publishing the React frontend build.]
 
 **Root Cause:**
 
-[Why it happened]
+[The repository was still using the default Jekyll Pages workflow in jekyll-gh-pages.yml, which builds from the repo root instead of building the Vite app inside Frontend.
+Also, the frontend is a SPA, so it needed GitHub Pages-compatible routing and base path settings in main.jsx and vite.config.js.]
 
 **Resolution:**
 
-[How it was fixed]
+[Replaced the Jekyll workflow in jekyll-gh-pages.yml with a Node/Vite GitHub Actions workflow that:
+runs in Frontend
+installs dependencies with npm ci
+runs npm run build
+uploads Frontend/dist and deploys via GitHub Pages actions
+Set Pages source to GitHub Actions in repository settings.
+Updated routing to HashRouter in main.jsx.
+Set Vite base to /campusMarketPlace/ in vite.config.js.]
 
 **PR/Issue Link:**
 
-[Link to PR or issue]
+[[Link to PR or issue](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/25)]
 
 ---
 
