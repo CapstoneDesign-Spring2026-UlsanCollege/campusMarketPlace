@@ -1,0 +1,147 @@
+/* ===== AUTH PAGES ===== */
+.auth-page {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  background: linear-gradient(135deg, #0b3d66 0%, #0f6bae 60%, #1e88e5 100%);
+}
+
+.auth-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-card .auth-logo {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.auth-card .auth-logo .logo-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.auth-card .auth-logo h1 {
+  font-size: 1.5rem;
+  color: var(--gray-900);
+  margin-bottom: 0.25rem;
+}
+
+.auth-card .auth-logo p {
+  font-size: 0.9rem;
+  color: var(--gray-500);
+  margin: 0;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  font-size: 0.8rem;
+  color: var(--gray-400);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--gray-200);
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--gray-600);
+}
+
+.auth-footer a {
+  font-weight: 600;
+}
+
+/* Password strength */
+.password-strength {
+  margin-top: 0.5rem;
+}
+
+.strength-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--gray-200);
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.strength-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease, background 0.3s ease;
+  width: 0;
+}
+
+.strength-label {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+/* Social login */
+.social-login {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-social {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--gray-300);
+  background: var(--white);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--gray-700);
+  transition: all var(--transition);
+  font-family: var(--font-family);
+}
+
+.btn-social:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-400);
+}
+
+.btn-social .social-icon {
+  font-size: 1.1rem;
+}
+
+/* Terms */
+.terms-text {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  text-align: center;
+  margin-top: 1rem;
+  line-height: 1.6;
+}
+
+.terms-text a {
+  color: var(--primary);
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 1.75rem 1.25rem;
+    border-radius: var(--radius-md);
+  }
+}
