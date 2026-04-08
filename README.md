@@ -1,64 +1,67 @@
-# Campus Exchange Marketplace
+# UC Marketplace
 
-This is a web-based platform designed for university students to **buy and sell second-hand items** within their campus community safely and easily.
+UC Marketplace is a campus-focused web app for Ulsan College students to buy and sell items in a safer, student-only environment.
 
----
+## Current Status
 
-## Project Overview
+This repository currently includes:
+- A Flask app with page routes for home, signup, and a placeholder login page
+- A Bootstrap-based shared layout
+- A styled landing page
+- A signup form with client-side validation rules
 
-Campus Exchange Marketplace is a student-focused platform where users can:
-- Buy and sell second-hand items
-- Connect with other students on campus
-- Request items they need
-- Offer services like tutoring
-
-This system ensures a **trusted environment** by allowing only verified university students to register.
-
----
+Backend account creation and database persistence are not fully wired yet.
 
 ## Features
 
-###  Marketplace
-- Post items for sale
-- Browse and search listings
-- View item details
+### Implemented
+- Home page with campus marketplace branding
+- Navigation layout shared across pages
+- Signup UI with front-end validation for required first/last name
+- Signup UI validation for campus email format: @office.uc.ac.kr
+- Signup UI validation for password strength and confirmation matching
 
-###  Authentication & Safety
-- User registration and login
-- Campus email verification (such as @office.uc.ac.kr)
-- Secure user accounts
+### Planned
+- Functional signup/login backend
+- Buy and sell listing workflows
+- Request board and tutoring/service posts
+- MongoDB integration for user and listing data
 
-###  Communication
-- Contact sellers directly
-- Basic messaging system
-
-###  Student-Focused Features
-- Semester-based categories (books, electronics, dorm items)
-- Item Request Board
-- Peer tutoring / service listings
-
----
-
-##  Tech Stack
+## Tech Stack
 
 | Area | Technology |
-|------|-----------|
-| Frontend | HTML, CSS, JavaScript |
-| Backend | Flask |
-| Database | MongoDB |
-| Hosting | Render |
+|------|------------|
+| Backend | Flask 3 |
+| Frontend | HTML, CSS, JavaScript, Bootstrap 5 |
+| Database (planned/in progress) | MongoDB (PyMongo) |
 
----
+## Project Structure
 
-## Future Improvements
+```text
+campusMarketPlace/
+|-- app.py
+|-- requirements.txt
+|-- templates/
+|   |-- base.html
+|   |-- index.html
+|   `-- signup.html
+|-- static/
+|   |-- css/
+|   |   |-- style.css
+|   |   `-- signup.css
+|   |-- js/
+|   |   |-- main.js
+|   |   `-- signup.js
+|   `-- images/
+`-- docs/
+```
 
-- Mobile app version  
-- Advanced recommendation system  
-- Real-time chat  
-- Payment integration  
+## Getting Started
 
----
+### 1) Clone and enter the project
+
+
 
 ## License
 
-This project is for academic purposes only.
+Academic project use.
