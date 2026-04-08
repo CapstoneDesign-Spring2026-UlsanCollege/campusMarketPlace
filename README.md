@@ -88,9 +88,3 @@ campusMarketPlace/
 
 Academic project use.
 =======
-```bash
-cd Frontend
-npm run build
-npm run preview
-```
->>>>>>> 37b116165c7601b72cb3aba5bd325bcf88d9706a
