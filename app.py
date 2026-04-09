@@ -18,6 +18,10 @@ MONGODB_DB_NAME = os.getenv('MONGODB_DB_NAME', 'campus_marketplace')
 JWT_SECRET = os.getenv('JWT_SECRET', 'change-me-in-production')
 JWT_EXPIRES_HOURS = int(os.getenv('JWT_EXPIRES_HOURS', '24'))
 FRONTEND_ORIGIN = os.getenv('FRONTEND_ORIGIN', 'http://localhost:5173')
+ADDITIONAL_FRONTEND_ORIGINS = os.getenv(
+    'ADDITIONAL_FRONTEND_ORIGINS',
+    'http://localhost:5176',
+)
 
 if not MONGODB_URI:
     raise RuntimeError('MONGODB_URI is required')
@@ -36,11 +40,20 @@ try:
     users.create_index('email', unique=True)
 except Exception as exc:
     raise RuntimeError(
-        'MongoDB connection failed. Check Atlas username/password and Network Access IP allowlist.'
+        'MongoDB connection failed. Check Atlas username/password and '
+        'Network Access IP allowlist.'
     ) from exc
 
 app = Flask(__name__)
-CORS(app, resources={r'/api/*': {'origins': FRONTEND_ORIGIN}})
+allowed_origins = [FRONTEND_ORIGIN]
+allowed_origins.extend(
+    [
+        origin.strip()
+        for origin in ADDITIONAL_FRONTEND_ORIGINS.split(',')
+        if origin.strip()
+    ]
+)
+CORS(app, resources={r'/api/*': {'origins': allowed_origins}})
 
 
 def json_error(message, status_code):
