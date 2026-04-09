@@ -1,4 +1,18 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'
+const envApiBaseUrl = import.meta.env.VITE_API_BASE_URL
+
+function resolveApiBaseUrl() {
+  if (envApiBaseUrl && envApiBaseUrl.trim()) {
+    return envApiBaseUrl.trim()
+  }
+
+  if (typeof window !== 'undefined' && window.location.hostname.includes('github.io')) {
+    return 'https://campusmarketplace-lndr.onrender.com/api'
+  }
+
+  return 'http://localhost:5050/api'
+}
+
+const API_BASE_URL = resolveApiBaseUrl()
 
 export async function apiRequest(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
