@@ -1,0 +1,10 @@
+{
+  "name": "campus-marketplace",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "npm --prefix Frontend run dev",
+    "build": "npm --prefix Frontend run build",
+    "preview": "npm --prefix Frontend run preview"
+  }
+}
