@@ -46,11 +46,11 @@ Week 6
 Establish a clean, well-defined, and hardened foundation for feature development and the midterm pitch.
 
 **Key Objectives:**
-- [ ] Define final technical specifications
-- [ ] Clean up and refactor existing codebase
-- [ ] Harden core functionality and stability
-- [ ] Document architecture and design decisions
-- [ ] Prepare infrastructure for demo
+- [x] Define final technical specifications
+- [x] Clean up and refactor existing codebase
+- [x] Harden core functionality and stability
+- [x] Document architecture and design decisions
+- [x] Prepare infrastructure for demo
 
 ---
 
@@ -89,6 +89,7 @@ If live demo is not ready:
 - [ ] API endpoint documentation with curl examples
 - [ ] Database schema visualization
 
+  Current Status: Live Demo is done    
 ---
 
 # Project Board Snapshot
@@ -130,9 +131,9 @@ Issues currently in progress:
 
 Issues completed this week:
 
-- [x] [Issue: Setup Vite for frontend environment][issue-link(https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24)]
-- [ ] [Issue: Set up development environment](issue-link)
-- [ ] [Issue: Define database schema](issue-link)
+- [x] [Issue: Setup Vite for frontend environment](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24)
+- [x] [Issue: Add Email verification flow](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/27)
+- [x] [Issue: Add MongoDB Atlas](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/18)
 
 ---
 
@@ -142,21 +143,23 @@ Issues completed this week:
 
 What actually got completed by end of Week 6:
 
-- [ ] Cleaned codebase with reduced technical debt
-- [ ] Removed or deprecated unused features
+- [x] Cleaned codebase with reduced technical debt
+- [x] Removed or deprecated unused features
 - [ ] Documented architecture decisions
-- [ ] Improved test coverage to [X]%
-- [ ] Staging environment established
+- [x] Improved test coverage 
+- [x] Staging environment established
 - [ ] API documentation updated
-- [ ] UI/UX mockups finalized for Week 7
-- [ ] Performance baseline established
+- [x] UI/UX mockups finalized for Week 7
+- [x] Performance baseline established
 - [x] Setup Vite for frontend environment
 
 **Shipping Details:**
 
-- Merged PRs: [list PR links]
-- Completed issues: [list issue links (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24)]
-- Documentation added: [list links]
+- Merged PRs:    (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/26)
+- Completed issues:(https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24)
+                   (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/27)
+                   (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/18)
+- Documentation added:  (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/docs/Sprint_Packet/SPRINT_2.md)
 
 ---
 
@@ -192,45 +195,7 @@ Set Vite base to /campusMarketPlace/ in vite.config.js.]
 
 ---
 
-### Problem 2: [Issue Title]
 
-**Description:** 
-
-[Description of what went wrong]
-
-**Root Cause:**
-
-[Why it happened]
-
-**Resolution:**
-
-[How it was fixed]
-
-**PR/Issue Link:**
-
-[Link to PR or issue]
-
----
-
-### Problem 3: [Issue Title]
-
-**Description:** 
-
-[Description of what went wrong]
-
-**Root Cause:**
-
-[Why it happened]
-
-**Resolution:**
-
-[How it was fixed]
-
-**PR/Issue Link:**
-
-[Link to PR or issue]
-
----
 
 ## Next Week Plan (Week 7)
 
