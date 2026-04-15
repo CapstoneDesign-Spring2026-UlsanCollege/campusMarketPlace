@@ -137,6 +137,17 @@ Issues completed this week:
 
 ---
 
+## Definition of Done
+
+- Code review approved
+- All tests passing
+- Documentation updated
+- Change deployed to staging
+- Stakeholder review completed
+- No critical issues in the production environment
+
+---
+
 # Sprint Notes
 
 ## What Shipped This Week
