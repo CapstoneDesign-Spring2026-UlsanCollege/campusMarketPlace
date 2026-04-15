@@ -284,7 +284,7 @@ All code merged to `main` must:
 
 - [CI workflow runs](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/actions)
 - [Test coverage reports]
-- [Successful staging deployments]
+- [Successful staging deployments](https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/)
 
 ---
 
