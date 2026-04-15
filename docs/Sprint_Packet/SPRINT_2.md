@@ -145,16 +145,11 @@ Link to your **GitHub Project board**.
 
 ### Done
 
-- [The link to Decision issues #18](https://github.com/Talumaaaluu/campusMarketPlace/issues/18)
-- [The link to Decision issues #17](https://github.com/Talumaaaluu/campusMarketPlace/issues/17)
-- [The link to Decision issues #16](https://github.com/Talumaaaluu/campusMarketPlace/issues/16)
-- [The link to Decision issues #15](https://github.com/Talumaaaluu/campusMarketPlace/issues/15)
-- [The link to Decision issues #14](https://github.com/Talumaaaluu/campusMarketPlace/issues/14)
-- [The link to Pull requests #26](https://github.com/Talumaaaluu/campusMarketPlace/pull/26)
-- [The link to Pull requests #25](https://github.com/Talumaaaluu/campusMarketPlace/pull/25)
-- [The link to Pull requests #24](https://github.com/Talumaaaluu/campusMarketPlace/pull/24)
-- [The link to Pull requests #23](https://github.com/Talumaaaluu/campusMarketPlace/pull/23)
-- [The link to Pull requests #27](https://github.com/Talumaaaluu/campusMarketPlace/pull/27)
+- [The link to Decision issues #27](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/27)
+- [The link to Decision issues #24](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24)
+- [The link to Decision issues #18](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/18)
+
+- [The link to Pull requests #26](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/26)
 
 ---
 
@@ -221,9 +216,8 @@ Link to your **GitHub Project board**.
 ## What Broke
 
 **Week 6 Issues:**
-- [Problem 1]
-- [Problem 2]
-
+- [Problem 1](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/25)
+- 
 **Week 7 Issues:**
 - [Problem 1]
 - [Problem 2]
