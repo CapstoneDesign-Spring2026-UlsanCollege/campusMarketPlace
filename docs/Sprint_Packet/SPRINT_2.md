@@ -58,7 +58,7 @@ Deliver a production-ready demo and compelling midterm pitch including:
 
 **Status:** Preparation phase - core features stabilizing
 
-[link to feature branch or staging demo]
+[CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace](https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/)
 
 ### Demo Script
 
@@ -148,8 +148,20 @@ Link to your **GitHub Project board**.
 - [The link to Decision issues #27](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/27)
 - [The link to Decision issues #24](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24)
 - [The link to Decision issues #18](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/18)
+- [The link to Decision issues #28](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/28)
 
 - [The link to Pull requests #26](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/26)
+- [The link to Pull requests #29](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/29)
+
+---
+## Definition of Done
+
+- Code review approved
+- All tests passing
+- Documentation updated
+- Change deployed to staging
+- Stakeholder review completed
+- No critical issues in the production environment
 
 ---
 
@@ -199,6 +211,9 @@ Link to your **GitHub Project board**.
 - [x] Stable core feature set
 - [x] Clean, documented codebase
 - [x] Hardened infrastructure
+- [x] Performance baseline established
+- [x] Setup Vite for frontend environment
+- [x] Added Backend Setup
 
 **Week 7:**
 - [ ] Complete feature implementation
