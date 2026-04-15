@@ -13,6 +13,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 load_dotenv()
 
+
 MONGODB_URI = os.getenv('MONGODB_URI')
 MONGODB_DB_NAME = os.getenv('MONGODB_DB_NAME', 'campus_marketplace')
 JWT_SECRET = os.getenv('JWT_SECRET', 'change-me-in-production')
