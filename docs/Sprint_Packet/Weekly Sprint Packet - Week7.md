@@ -9,7 +9,7 @@ CampusMarketplace
 Sprint 7  
 
 **Repository**  
-https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace.git  
+[repo](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace.git)
 
 **PM for this Sprint**  
 Gayatri K. Bhandari 
@@ -20,7 +20,7 @@ Gayatri K. Bhandari
 
 Provide a working demo link or short video.
 
-Demo link: (https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/)
+Demo link: [demo](https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/)
 ---
 
 ## Demo Script (3 bullets)
