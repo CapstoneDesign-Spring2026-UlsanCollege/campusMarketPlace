@@ -134,7 +134,7 @@ Issues completed this week:
 - [x] [Issue: Setup Vite for frontend environment](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24)
 - [x] [Issue: Add Email verification flow](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/27)
 - [x] [Issue: Add MongoDB Atlas](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/18)
-
+- [x] [Issue: Setting up backend](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/28)
 ---
 
 ## Definition of Done
@@ -163,13 +163,16 @@ What actually got completed by end of Week 6:
 - [x] UI/UX mockups finalized for Week 7
 - [x] Performance baseline established
 - [x] Setup Vite for frontend environment
+- [x] Added Backend Setup
 
 **Shipping Details:**
 
 - Merged PRs:    (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/26)
+                 (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/29)
 - Completed issues:(https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24)
                    (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/27)
                    (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/18)
+                   (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/28)
 - Documentation added:  (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/docs/Sprint_Packet/SPRINT_2.md)
 
 ---
