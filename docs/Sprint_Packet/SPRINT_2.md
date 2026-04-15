@@ -131,10 +131,10 @@ Link to your **GitHub Project board**.
 
 ### Week 6: To Do
 
-- [ ] Architecture review and finalization
-- [ ] Code cleanup and refactoring
-- [ ] Performance optimization
-- [ ] Security hardening
+- [x] Architecture review and finalization
+- [x] Code cleanup and refactoring
+- [x] Performance optimization
+- [x] Security hardening
 
 ### Week 6: Doing
 
@@ -143,8 +143,18 @@ Link to your **GitHub Project board**.
 
 ### Week 6: Done
 
-- [ ] [Issue link]
-- [ ] [Issue link]
+### Done
+
+- [The link to Decision issues #18](https://github.com/Talumaaaluu/campusMarketPlace/issues/18)
+- [The link to Decision issues #17](https://github.com/Talumaaaluu/campusMarketPlace/issues/17)
+- [The link to Decision issues #16](https://github.com/Talumaaaluu/campusMarketPlace/issues/16)
+- [The link to Decision issues #15](https://github.com/Talumaaaluu/campusMarketPlace/issues/15)
+- [The link to Decision issues #14](https://github.com/Talumaaaluu/campusMarketPlace/issues/14)
+- [The link to Pull requests #26](https://github.com/Talumaaaluu/campusMarketPlace/pull/26)
+- [The link to Pull requests #25](https://github.com/Talumaaaluu/campusMarketPlace/pull/25)
+- [The link to Pull requests #24](https://github.com/Talumaaaluu/campusMarketPlace/pull/24)
+- [The link to Pull requests #23](https://github.com/Talumaaaluu/campusMarketPlace/pull/23)
+- [The link to Pull requests #27](https://github.com/Talumaaaluu/campusMarketPlace/pull/27)
 
 ---
 
@@ -191,9 +201,9 @@ Link to your **GitHub Project board**.
 ## What Shipped (Target)
 
 **Week 6:**
-- [ ] Stable core feature set
-- [ ] Clean, documented codebase
-- [ ] Hardened infrastructure
+- [x] Stable core feature set
+- [x] Clean, documented codebase
+- [x] Hardened infrastructure
 
 **Week 7:**
 - [ ] Complete feature implementation
