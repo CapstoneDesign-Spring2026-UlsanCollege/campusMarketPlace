@@ -118,7 +118,7 @@ The Sprint 2 document reflects the current project direction and matches the Mid
 | Commit `[7c4404b]` | Created folder for Backend (14 hours before midterm) |
 | Commit `[a1b2c3d]` | Fix root dev scripts and GitHub Pages deployment |
 | Commit `[e4f5g6h]` | Connect signup page on button |
-| GitHub Actions CI [.github/workflows/main.yml] | Vite build + deploy workflow active on every push to main |
+| GitHub Actions CI (.github/workflows/main.yml) | Vite build + deploy workflow active on every push to main |
 | Project Board | https://github.com/orgs/CapstoneDesign-Spring2026-UlsanCollege/projects/15 |
 | Total Commits | 107 commits across 8 active branches, 8 team contributors |
 | Language Stats | JS 58.3%, CSS 26.3%, HTML 1.8%, Python 13.6% |
@@ -129,10 +129,10 @@ The Sprint 2 document reflects the current project direction and matches the Mid
 
 | Phase | Status | Theme | What Gets Done |
 |-------|--------|-------|----------------|
-| Sprint 1–2 (NOW) | ✅ DONE | Foundation | React + Vite setup, strict auth validation UI, shared layout routing, GitHub Pages CI/CD |
-| Sprint 3–4 (NEXT) | 🔄 IN PROGRESS | Integration | Flask/MongoDB login binding, Buy/Sell listing workflows, session management |
-| Final (TARGET) | 🎯 PLANNED | Full Loop | Closed-loop Buy/Sell, active Request Board, Tutor postings, full end-to-end demo |
-| Post-Final | 💡 NOT PROMISED | Expansion | In-app messaging, tutoring payment gateway — intentionally out of scope |
+| Sprint 1–2 (NOW) | DONE | Foundation | React + Vite setup, strict auth validation UI, shared layout routing, GitHub Pages CI/CD |
+| Sprint 3–4 (NEXT) | IN PROGRESS | Integration | Flask/MongoDB login binding, Buy/Sell listing workflows, session management |
+| Final (TARGET) |  PLANNED | Full Loop | Closed-loop Buy/Sell, active Request Board, Tutor postings, full end-to-end demo |
+| Post-Final | NOT PROMISED | Expansion | In-app messaging, tutoring payment gateway — intentionally out of scope |
 
 > We are intentionally not promising in-app messaging or payment integration before the Final. A believable small roadmap is stronger than an overcommitted one.
 
@@ -144,7 +144,7 @@ The Sprint 2 document reflects the current project direction and matches the Mid
 |---------|--------|------|---------|
 | Sudarshan Rai | 1, 2, 3 | Opens + Problem + Solution | Intro, campus commerce friction, walled garden pitch |
 | Rai Aayuska | 4, 5 | Users + Architecture | Target users, value prop, system architecture overview |
-| **Sagar (Me)** | **6, 8** | **Technical Overview** | **Sprint 2 progress, UI/UX flow, Vite + Flask + MongoDB stack** |
+| Sagar Sob| 6, 8| Technical Overview | Sprint 2 progress, UI/UX flow, Vite + Flask + MongoDB stack |
 | Ananda Tamang | 7, 9, 10 | Demo + Engineering Proof | Live demo walkthrough, validation logic, GitHub commit evidence |
 | Gayatri K. Bhandari | 11, 12, 13 | Roadmap + Ask + Close | QA philosophy, 3-station map, team roles, ask, closing |
 
