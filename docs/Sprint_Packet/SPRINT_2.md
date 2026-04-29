@@ -27,6 +27,10 @@ How to use:
 
 [CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace)
 
+**Live Demo**
+
+[CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace](https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/)
+
 **PM for this Sprint**
 
 [Rai Aayuska]
@@ -54,7 +58,7 @@ Deliver a production-ready demo and compelling midterm pitch including:
 
 **Status:** Preparation phase - core features stabilizing
 
-[link to feature branch or staging demo]
+[CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace](https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/)
 
 ### Demo Script
 
@@ -127,10 +131,10 @@ Link to your **GitHub Project board**.
 
 ### Week 6: To Do
 
-- [ ] Architecture review and finalization
-- [ ] Code cleanup and refactoring
-- [ ] Performance optimization
-- [ ] Security hardening
+- [x] Architecture review and finalization
+- [x] Code cleanup and refactoring
+- [x] Performance optimization
+- [x] Security hardening
 
 ### Week 6: Doing
 
@@ -139,8 +143,25 @@ Link to your **GitHub Project board**.
 
 ### Week 6: Done
 
-- [ ] [Issue link]
-- [ ] [Issue link]
+### Done
+
+- [The link to Decision issues #27](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/27)
+- [The link to Decision issues #24](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24)
+- [The link to Decision issues #18](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/18)
+- [The link to Decision issues #28](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/28)
+
+- [The link to Pull requests #26](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/26)
+- [The link to Pull requests #29](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/29)
+
+---
+## Definition of Done
+
+- Code review approved
+- All tests passing
+- Documentation updated
+- Change deployed to staging
+- Stakeholder review completed
+- No critical issues in the production environment
 
 ---
 
@@ -187,9 +208,12 @@ Link to your **GitHub Project board**.
 ## What Shipped (Target)
 
 **Week 6:**
-- [ ] Stable core feature set
-- [ ] Clean, documented codebase
-- [ ] Hardened infrastructure
+- [x] Stable core feature set
+- [x] Clean, documented codebase
+- [x] Hardened infrastructure
+- [x] Performance baseline established
+- [x] Setup Vite for frontend environment
+- [x] Added Backend Setup
 
 **Week 7:**
 - [ ] Complete feature implementation
@@ -207,9 +231,8 @@ Link to your **GitHub Project board**.
 ## What Broke
 
 **Week 6 Issues:**
-- [Problem 1]
-- [Problem 2]
-
+- [Problem 1](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/25)
+- 
 **Week 7 Issues:**
 - [Problem 1]
 - [Problem 2]
@@ -261,7 +284,7 @@ All code merged to `main` must:
 
 - [CI workflow runs](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/actions)
 - [Test coverage reports]
-- [Successful staging deployments]
+- [Successful staging deployments](https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/)
 
 ---
 

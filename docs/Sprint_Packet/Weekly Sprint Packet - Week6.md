@@ -24,6 +24,11 @@ Week 6
 
 [CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace)
 
+**Live Demo**
+
+[CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace](https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/)
+
+
 **PM for this Week**
 
 [Rai Aayuska]
@@ -41,21 +46,17 @@ Week 6
 Establish a clean, well-defined, and hardened foundation for feature development and the midterm pitch.
 
 **Key Objectives:**
-- [ ] Define final technical specifications
-- [ ] Clean up and refactor existing codebase
-- [ ] Harden core functionality and stability
-- [ ] Document architecture and design decisions
-- [ ] Prepare infrastructure for demo
+- [x] Define final technical specifications
+- [x] Clean up and refactor existing codebase
+- [x] Harden core functionality and stability
+- [x] Document architecture and design decisions
+- [x] Prepare infrastructure for demo
 
 ---
 
 # Demo
 
 **Status:** Preparation phase - core features stabilizing
-
-**Current Demo Environment:**
-
-[Link to staging environment or feature branch]
 
 ## Demo Script
 
@@ -88,6 +89,7 @@ If live demo is not ready:
 - [ ] API endpoint documentation with curl examples
 - [ ] Database schema visualization
 
+  Current Status: Live Demo is done    
 ---
 
 # Project Board Snapshot
@@ -129,8 +131,20 @@ Issues currently in progress:
 
 Issues completed this week:
 
-- [ ] [Issue: Set up development environment](issue-link)
-- [ ] [Issue: Define database schema](issue-link)
+- [x] [Issue: Setup Vite for frontend environment](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24)
+- [x] [Issue: Add Email verification flow](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/27)
+- [x] [Issue: Add MongoDB Atlas](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/18)
+- [x] [Issue: Setting up backend](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/28)
+---
+
+## Definition of Done
+
+- Code review approved
+- All tests passing
+- Documentation updated
+- Change deployed to staging
+- Stakeholder review completed
+- No critical issues in the production environment
 
 ---
 
@@ -140,20 +154,26 @@ Issues completed this week:
 
 What actually got completed by end of Week 6:
 
-- [ ] Cleaned codebase with reduced technical debt
-- [ ] Removed or deprecated unused features
+- [x] Cleaned codebase with reduced technical debt
+- [x] Removed or deprecated unused features
 - [ ] Documented architecture decisions
-- [ ] Improved test coverage to [X]%
-- [ ] Staging environment established
+- [x] Improved test coverage 
+- [x] Staging environment established
 - [ ] API documentation updated
-- [ ] UI/UX mockups finalized for Week 7
-- [ ] Performance baseline established
+- [x] UI/UX mockups finalized for Week 7
+- [x] Performance baseline established
+- [x] Setup Vite for frontend environment
+- [x] Added Backend Setup
 
 **Shipping Details:**
 
-- Merged PRs: [list PR links]
-- Completed issues: [list issue links]
-- Documentation added: [list links]
+- Merged PRs:    (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/26)
+                 (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/29)
+- Completed issues:(https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24)
+                   (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/27)
+                   (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/18)
+                   (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/28)
+- Documentation added:  (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/docs/Sprint_Packet/SPRINT_2.md)
 
 ---
 
@@ -161,65 +181,35 @@ What actually got completed by end of Week 6:
 
 Problems encountered and how they were resolved:
 
-### Problem 1: [Issue Title]
+### Problem 1: [Deploying Github Pages]
 
 **Description:** 
 
-[Description of what went wrong]
+[Deployment to GitHub Pages kept failing, and the site was not publishing the React frontend build.]
 
 **Root Cause:**
 
-[Why it happened]
+[The repository was still using the default Jekyll Pages workflow in jekyll-gh-pages.yml, which builds from the repo root instead of building the Vite app inside Frontend.
+Also, the frontend is a SPA, so it needed GitHub Pages-compatible routing and base path settings in main.jsx and vite.config.js.]
 
 **Resolution:**
 
-[How it was fixed]
+[Replaced the Jekyll workflow in jekyll-gh-pages.yml with a Node/Vite GitHub Actions workflow that:
+runs in Frontend
+installs dependencies with npm ci
+runs npm run build
+uploads Frontend/dist and deploys via GitHub Pages actions
+Set Pages source to GitHub Actions in repository settings.
+Updated routing to HashRouter in main.jsx.
+Set Vite base to /campusMarketPlace/ in vite.config.js.]
 
 **PR/Issue Link:**
 
-[Link to PR or issue]
+[[Link to PR or issue (https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/25)]
 
 ---
 
-### Problem 2: [Issue Title]
 
-**Description:** 
-
-[Description of what went wrong]
-
-**Root Cause:**
-
-[Why it happened]
-
-**Resolution:**
-
-[How it was fixed]
-
-**PR/Issue Link:**
-
-[Link to PR or issue]
-
----
-
-### Problem 3: [Issue Title]
-
-**Description:** 
-
-[Description of what went wrong]
-
-**Root Cause:**
-
-[Why it happened]
-
-**Resolution:**
-
-[How it was fixed]
-
-**PR/Issue Link:**
-
-[Link to PR or issue]
-
----
 
 ## Next Week Plan (Week 7)
 

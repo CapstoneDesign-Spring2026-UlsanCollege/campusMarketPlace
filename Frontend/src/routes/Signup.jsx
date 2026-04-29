@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { apiRequest } from '../services/api'
 
 const REQUIRED_FIELDS = ['firstName', 'lastName', 'email', 'password', 'confirmPassword']
 
@@ -88,6 +90,7 @@ function validateAll(values) {
 }
 
 export default function Signup() {
+  const navigate = useNavigate()
   const [formValues, setFormValues] = useState(initialValues)
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
@@ -123,7 +126,7 @@ export default function Signup() {
     }
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
 
     const normalizedValues = {
@@ -153,10 +156,24 @@ export default function Signup() {
       return
     }
 
-    setSubmitStatus({
-      type: 'success',
-      message: 'Signup form looks good. You can now connect this to your API endpoint.',
-    })
+    try {
+      const response = await apiRequest('/auth/signup', {
+        method: 'POST',
+        body: JSON.stringify(normalizedValues),
+      })
+
+      navigate('/login', {
+        state: {
+          message: response.message || 'Account created. Please log in.',
+          email: normalizedValues.email,
+        },
+      })
+    } catch (error) {
+      setSubmitStatus({
+        type: 'error',
+        message: error.message || 'Signup failed. Please try again.',
+      })
+    }
   }
 
   function fieldError(name) {
