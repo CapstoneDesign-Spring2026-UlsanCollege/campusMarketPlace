@@ -66,13 +66,11 @@ Deployed via custom Node/Vite GitHub Actions workflow (Issue #25). Replaced brok
 - Narrated screenshots prepared as second fallback
 - Backup covers the same flow — no feature pivoting, no "please imagine this works"
 
-> **Backup Video Link:** `[Upload before Midterm day — recorded signup walkthrough]`
 
 ---
 
 ## 3. Midterm Brochure
 
-> **Brochure Link:** `[Upload before Midterm day — digital PDF with QR code shown at Slide 1]`
 
 ### What the Brochure Contains *(standalone — not a copy of the deck)*
 
