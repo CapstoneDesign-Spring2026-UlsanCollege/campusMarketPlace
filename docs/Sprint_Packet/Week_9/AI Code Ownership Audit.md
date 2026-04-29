@@ -98,8 +98,7 @@ Document any known issues that impact the MVP or user experience.
 
 | Bug / problem | Severity | Evidence link | Owner | Next action |
 |---|---|---|---|---|
-| OTP Verification | P0 |
-[Repository](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace) | [Frontend Team and Backend Team] |
+| Domain Deployment | P0 |[Repository](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace) | [Deploy lead |
 | No marketplace listing page | P1 | [Repository](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace) | [Frontend Team and Backend Team] | Design and implement product listing page |
 | Mobile responsiveness needs testing | P2 | [Live Demo](https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/) | [Frontend Team] | Test on multiple devices and fix layout issues |
 
@@ -116,7 +115,7 @@ Document any known issues that impact the MVP or user experience.
 
 | Risk | Why it matters | Mitigation | Owner |
 |---|---|---|---|
-| Database schema not defined | Cannot implement API endpoints without knowing data structure | Design MongoDB schema for users, listings, requests, messages | [Database Owner] |
+| Database schema fully defination | Cannot implement API endpoints without knowing data structure | Design MongoDB schema for users, listings, requests, messages | [Database Owner] |
 | No authentication system | Anyone can access user data; security risk | Implement JWT tokens, password hashing, session management | [Security Lead] |
 | Limited team bandwidth | Scope creep (buy/sell, requests, tutoring) may overwhelm team | Prioritize MVP (sign up, login, browse listings); defer other features to next sprint | [Project Manager] |
 | Unclear role assignments | Team members may duplicate work or leave gaps | Finalize RACI matrix and update Section 9 (Ownership Map) | [Project Manager] |
@@ -129,11 +128,11 @@ Each student must own at least one part of the project and be able to explain it
 
 | Student | Owned area | Can explain? | Evidence link | Needs help with |
 |---|---|---|---|---|
-| [Sob Sagar] | Frontend / React components | Clear / Needs work | [PR if available] | [Specify area] |
-| [Sudarshan RAi] | Backend / Flask API | Clear / Needs work | [PR if available] | [Specify area] |
-| [Ananda Tamang] | Database / MongoDB | Clear / Needs work | [PR if available] | [Specify area] |
-| [Aayuska Rai] | UI/UX Design | Clear / Needs work | [PR if available] | [Specify area] |
-| [Gayatri K. Bhandari] | DevOps / Deployment | Clear / Needs work | [PR if available] | [Specify area] |
+| [Sob Sagar] | Frontend / React components | Needs work | [PR](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/26) | [Frontend] |
+| [Sudarshan Rai] | Backend / Flask API | Needs work |[PR](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/29)  | [Frontend/app.py] |
+| [Ananda Tamang] | Database / MongoDB | Needs work | [PR](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/29) | [MongoDB Atlas] |
+| [Aayuska Rai] | UI/UX Design | Needs work | [PR](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/26) | [Frontend] |
+| [Gayatri K. Bhandari] | DevOps / Deployment | Needs work | [No PR] | [Github pages Workflow] |
 
 ---
 
