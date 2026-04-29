@@ -111,14 +111,14 @@ The Sprint 2 document reflects the current project direction and matches the Mid
 |--------------|-------------------|
 | Live Deployment | https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/ |
 | Repository | https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace |
-| Issue #28(https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24) — Vite Setup | Vite frontend environment configured and merged to main |
-| Issue #25(https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/28) — Setting up Backend | Setting up Backend Flask |
-| Issue #27(https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/27) - Add Email Verification | Full email verification flow so only verified accounts can access protected features |
-| commit [2a6bb879aeaed7a7cf0d4d3236babf545c029e71](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/commit/2a6bb879aeaed7a7cf0d4d3236babf545c029e71) | Github Pages Deployment |
-| Backend [app.py](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/app.py) | Flask3 |
+| Vite Setup | Issue #28(https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/24) — Vite frontend environment configured and merged to main |
+| Setting up Backend | Issue #25(https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/28) — Setting up Backend Flask |
+| Add Email Verification | Issue #27(https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/27) - Full email verification flow so only verified accounts can access protected features |
+| Github Pages Deployment |commit [2a6bb879aeaed7a7cf0d4d3236babf545c029e71](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/commit/2a6bb879aeaed7a7cf0d4d3236babf545c029e71) |
+| Backend | Flask3  [app.py](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/app.py)  |
 | Commit `[a1b2c3d]` | Fix root dev scripts and GitHub Pages deployment |
 | Commit `[e4f5g6h]` | Connect signup page on button |
-| GitHub Actions CI [main.yml](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/.github/workflows/main.yml) | Vite build + deploy workflow active on every push to main |
+| GitHub Actions CI  | [main.yml](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/.github/workflows/main.yml) Vite build + deploy workflow active on every push to main |
 | Project Board | https://github.com/orgs/CapstoneDesign-Spring2026-UlsanCollege/projects/15 |
 | Total Commits | 107 commits across 8 active branches, 8 team contributors |
 | Language Stats | JS 58.3%, CSS 26.3%, HTML 1.8%, Python 13.6% |
