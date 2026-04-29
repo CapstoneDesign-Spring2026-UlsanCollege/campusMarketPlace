@@ -18,7 +18,7 @@
 ## 1) Weekly Progress Demo
 
 - **Demo type:** live + video backup
-- **Demo link or evidence:** TBD
+- **Demo link or evidence:** https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/
 
 - **What changed since last week?**
   1. Stabilized login system with backend validation  
@@ -133,7 +133,7 @@ If the demo fails, we will show:
 
 **Evidence link:**
 
-- docs/PROJECT.md (update required)
+- ** https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/
 
 ---
 
@@ -141,7 +141,7 @@ If the demo fails, we will show:
 
 ### AI tools used this week
 
-- ChatGPT  
+- ChatGPT  / Copilot
 
 ### What AI helped with
 
@@ -159,13 +159,13 @@ If the demo fails, we will show:
 
 ### Code ownership map
 
-| Student | Area owned | Evidence | Can explain? |
-|---|---|---|---|
-| Ananda Tamang | Backend + DB | TBD | Clear |
-| Sob Sagar | API endpoints | TBD | Clear |
-| Gayatri K. Bhandari | Frontend | TBD | Clear |
-| Rai Aayuska | Database design | TBD | Clear |
-| Rai Sudarshan | Docs | TBD | Clear |
+| Student | Owned area | Can explain? | Evidence link | Needs help with |
+|---|---|---|---|---|
+| [Sob Sagar] | Frontend / React components | Needs work | [PR](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/26) | [Frontend] |
+| [Sudarshan Rai] | Backend / Flask API | Needs work |[PR](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/29)  | [Frontend/app.py] |
+| [Ananda Tamang] | Database / MongoDB | Needs work | [PR](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/29) | [MongoDB Atlas] |
+| [Aayuska Rai] | UI/UX Design | Needs work | [PR](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/26) | [Frontend] |
+| [Gayatri K. Bhandari] | DevOps / Deployment | Needs work | [No PR] | [Github pages Workflow] |
 
 ---
 
