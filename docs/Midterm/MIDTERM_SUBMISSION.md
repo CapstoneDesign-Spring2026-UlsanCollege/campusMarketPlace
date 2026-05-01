@@ -24,7 +24,7 @@ This document shows:
 ## 1. Midterm Presentation Deck
 
 **Deck Link:**
-`docs/Sprint_Packet/Ulsan_College_Marketplace.pdf` (in repo)
+`docs/Midterm/Ulsan_College_Marketplace.pdf`
 
 ### What the Deck Covers (9 required sections)
 
@@ -34,8 +34,8 @@ This document shows:
 | 2 | Problem — The Friction of Open Commerce on a Closed Campus (Safety / Relevance / Trust) |
 | 3 | Solution — The Walled Garden Advantage (comparison table vs. generic marketplaces) |
 | 4 | System Architecture — The Trust Funnel, campus email gate before any DB write |
-| 5 | Target Users and Value Proposition *(Aayuska)* |
-| 6 | Current Progress / Technical Overview — Sprint 2 state *(Sagar)* |
+| 5 | Target Users and Value Proposition  |
+| 6 | Current Progress / Technical Overview — Sprint 2 state |
 | 7 | Technical Engine — Frontend implemented, Backend in progress, Database planned |
 | 8 | Entering the Marketplace — Vite + React + Bootstrap 5 live stack |
 | 9 | Robust UI and Strict Authentication — 3-step signup wireframe + QA checklist |
@@ -71,15 +71,8 @@ Deployed via custom Node/Vite GitHub Actions workflow (Issue #25). Replaced brok
 
 ## 3. Midterm Brochure
 
+[Campus Marketplace Brochure](https://canva.link/0yvrpdr100d9r4x) 
 
-### What the Brochure Contains *(standalone — not a copy of the deck)*
-
-- **What the project is:** A verified campus-only peer-to-peer marketplace for Ulsan College
-- **Who it is for:** Students buying/selling textbooks, dorm essentials, and course tutoring services
-- **Why it matters:** Generic platforms have no campus identity verification — this one does, by design
-- **What works now:** Live signup UI with strict `@office.uc.ac.kr` domain validation, deployed to GitHub Pages
-- **What comes next:** Flask/MongoDB login binding and item listing workflows in Sprint 3
-- **How to get more info:** Repo link + QR code pointing to the live GitHub Pages site
 
 > The brochure story matches the deck exactly — both lead with the walled-garden trust argument and end with the same ask. No conflicting narratives.
 
@@ -88,7 +81,7 @@ Deployed via custom Node/Vite GitHub Actions workflow (Issue #25). Replaced brok
 ## 4. Sprint 2 Document
 
 **SPRINT_2.md:**
-`docs/Sprint_Packet/Weekly Sprint Packet - Week6.md` (in repo)
+`docs/Sprint_Packet/Weekly Sprint Packet - Week6.md` 
 
 ### What Sprint 2 Documents
 
