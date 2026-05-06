@@ -97,6 +97,7 @@ export default function Signup() {
   const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const passwordChecks = useMemo(() => getPasswordChecks(formValues.password), [formValues.password])
   const passwordScore = Object.values(passwordChecks).filter(Boolean).length
@@ -156,6 +157,7 @@ export default function Signup() {
       return
     }
 
+    setIsLoading(true)
     try {
       const response = await apiRequest('/auth/signup', {
         method: 'POST',
@@ -173,6 +175,8 @@ export default function Signup() {
         type: 'error',
         message: error.message || 'Signup failed. Please try again.',
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -315,8 +319,8 @@ export default function Signup() {
             )}
           </label>
 
-          <button className="button button-primary" type="submit">
-            Sign Up
+          <button className="button button-primary" type="submit" disabled={isLoading}>
+            {isLoading ? 'Creating account…' : 'Sign Up'}
           </button>
         </form>
       </section>

@@ -9,6 +9,7 @@ export default function Login() {
   const [email, setEmail] = useState(location.state?.email || '')
   const [password, setPassword] = useState('')
   const [submitStatus, setSubmitStatus] = useState({ type: '', message: location.state?.message || '' })
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (location.state?.message) {
@@ -19,6 +20,7 @@ export default function Login() {
   async function handleSubmit(event) {
     event.preventDefault()
 
+    setIsLoading(true)
     try {
       const response = await apiRequest('/auth/login', {
         method: 'POST',
@@ -33,6 +35,8 @@ export default function Login() {
         type: 'error',
         message: error.message || 'Login failed. Please check your credentials.',
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -82,8 +86,8 @@ export default function Login() {
               </button>
             </div>
           </label>
-          <button className="button button-primary" type="submit">
-            Login
+          <button className="button button-primary" type="submit" disabled={isLoading}>
+            {isLoading ? 'Logging in…' : 'Login'}
           </button>
         </form>
       </section>
