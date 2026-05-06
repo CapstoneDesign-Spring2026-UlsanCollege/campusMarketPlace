@@ -4,7 +4,7 @@
 Welcome to the Campus Marketplace! This project is a React + Vite frontend application that provides users with a sleek and modern interface to easily navigate the marketplace.
 
 ## Pages
-🚀 [Live Demo]([https://username.github.io/repo](https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/)
+🚀 [Live Demo]([https://username.github.io/repo])(https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/)
 
 ## Repository
 [Repository](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace)
