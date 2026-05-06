@@ -80,6 +80,22 @@ def is_allowed_email(email):
     return email.endswith('@office.uc.ac.kr')
 
 
+def is_strong_password(password):
+    if len(password) < 8:
+        return False, 'Password must be at least 8 characters long.'
+    if not any(c.isupper() for c in password):
+        return False, 'Password must contain at least one uppercase letter.'
+    if not any(c.islower() for c in password):
+        return False, 'Password must contain at least one lowercase letter.'
+    if not any(c.isdigit() for c in password):
+        return False, 'Password must contain at least one number.'
+    if not any(not c.isalnum() for c in password):
+        return False, 'Password must contain at least one special character.'
+    if ' ' in password:
+        return False, 'Password cannot contain spaces.'
+    return True, ''
+
+
 def issue_token(user_doc):
     payload = {
         'sub': str(user_doc['_id']),
@@ -118,6 +134,10 @@ def signup():
     last_name = data['lastName'].strip()
     email = normalize_email(data['email'])
     password = str(data['password'])
+
+    is_valid, error_msg = is_strong_password(password)
+    if not is_valid:
+        return json_error(error_msg, 400)
 
     if not is_allowed_email(email):
         return json_error(
