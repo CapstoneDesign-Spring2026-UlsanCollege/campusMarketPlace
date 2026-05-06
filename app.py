@@ -16,7 +16,25 @@ load_dotenv()
 
 MONGODB_URI = os.getenv('MONGODB_URI')
 MONGODB_DB_NAME = os.getenv('MONGODB_DB_NAME', 'campus_marketplace')
-JWT_SECRET = os.getenv('JWT_SECRET', 'change-me-in-production')
+jwt_secret_from_env = os.getenv('JWT_SECRET')
+app_env = os.getenv('APP_ENV', os.getenv('FLASK_ENV', 'development')).strip().lower()
+is_production = app_env == 'production'
+
+if not jwt_secret_from_env:
+    if is_production:
+        raise RuntimeError('JWT_SECRET is required in production')
+    JWT_SECRET = 'dev-only-insecure-secret'
+else:
+    JWT_SECRET = jwt_secret_from_env
+
+weak_secrets = {
+    'change-me-in-production',
+    'change-this-to-a-long-random-secret',
+    'replace-with-a-long-random-string',
+    'dev-only-insecure-secret',
+}
+if is_production and JWT_SECRET in weak_secrets:
+    raise RuntimeError('JWT_SECRET is insecure in production')
 JWT_EXPIRES_HOURS = int(os.getenv('JWT_EXPIRES_HOURS', '24'))
 FRONTEND_ORIGIN = os.getenv('FRONTEND_ORIGIN', 'http://localhost:5173')
 ADDITIONAL_FRONTEND_ORIGINS = os.getenv(
