@@ -23,6 +23,11 @@ This repository now contains only the React + Vite frontend for Campus Marketpla
 ## Run Locally
 
 ```bash
+# backend
+source .venv/bin/activate
+python app.py
+
+# frontend
 cd Frontend
 npm install
 npm run dev
