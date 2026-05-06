@@ -15,11 +15,20 @@ function resolveApiBaseUrl() {
 const API_BASE_URL = resolveApiBaseUrl()
 
 export async function apiRequest(path, options = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+  }
+
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('campusMarketplaceToken')
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
+    headers,
     ...options,
   })
 
