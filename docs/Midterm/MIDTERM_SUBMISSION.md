@@ -181,7 +181,7 @@ We are not asking for money. We are asking for three specific, realistic things:
 | ✅ | Demo link included | LIVE | GitHub Pages deployed — Vite Actions workflow |
 | ✅ | 3-bullet demo script included | READY | Reject → verify → route — signup flow |
 | ✅ | Backup plan included | READY | Recorded walkthrough video prepared |
-| ⬜ | Brochure link included | PENDING | Upload digital PDF before Midterm day |
+| ✅ | Brochure link included | PENDING | Upload digital PDF before Midterm day |
 | ✅ | SPRINT_2.md linked | READY | Week 6 Packet in `docs/Sprint_Packet/` |
 | ✅ | Proof links included | READY | 107 commits, Issues #24 #25, board, deploy link |
 | ✅ | Roadmap included | READY | 3-station: Foundation / Integration / Final |
