@@ -130,6 +130,10 @@ export default function Signup() {
   async function handleSubmit(event) {
     event.preventDefault()
 
+    if (isLoading) {
+      return
+    }
+
     const normalizedValues = {
       ...formValues,
       firstName: formValues.firstName.trim(),
@@ -164,16 +168,19 @@ export default function Signup() {
         body: JSON.stringify(normalizedValues),
       })
 
-      navigate('/login', {
-        state: {
-          message: response.message || 'Account created. Please log in.',
-          email: normalizedValues.email,
-        },
-      })
+      if (!response?.token || !response?.user) {
+        throw new Error('Signup completed but no session was returned.')
+      }
+
+      localStorage.setItem('campusMarketplaceToken', response.token)
+      localStorage.setItem('campusMarketplaceUser', JSON.stringify(response.user))
+
+      setSubmitStatus({ type: '', message: '' })
+      navigate('/dashboard', { replace: true })
     } catch (error) {
       setSubmitStatus({
         type: 'error',
-        message: error.message || 'Signup failed. Please try again.',
+        message: error instanceof Error ? error.message : 'Signup failed. Please try again.',
       })
     } finally {
       setIsLoading(false)
