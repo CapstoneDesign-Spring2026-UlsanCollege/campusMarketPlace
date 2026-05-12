@@ -1,7 +1,9 @@
 
 ## Campus Marketplace
 
-Welcome to the Campus Marketplace! This project is a React + Vite frontend application that provides users with a sleek and modern interface to easily navigate the marketplace.
+Campus Marketplace is a campus-only buying and selling platform built for Ulsan College students. It lets verified users create accounts with their school email, sign in securely, and browse a shared marketplace experience designed for student-to-student trading.
+
+The project combines a React + Vite frontend with a Flask + MongoDB backend. Current features include a validated signup flow, login, authenticated dashboard access, image uploads, and a marketplace feed for listings. It is meant to make it easy for students to post items, discover deals, and trade safely within the university community.
 
 ## Pages
 🚀 [Live Demo]([https://username.github.io/repo])(https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/)
