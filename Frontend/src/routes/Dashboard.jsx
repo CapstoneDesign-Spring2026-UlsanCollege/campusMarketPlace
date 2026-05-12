@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiRequest } from '../services/api'
+import { apiRequest, fetchItems } from '../services/api'
 
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
@@ -13,36 +13,6 @@ const STORIES = [
   'Furniture',
 ]
 
-const FEED_POSTS = [
-  {
-    id: 1,
-    seller: 'Sujan Kim',
-    location: 'Library Front Gate',
-    posted: '2h',
-    item: 'iPad 9th Gen 64GB',
-    price: '$210',
-    description: 'Great condition, includes charger and case. Pickup near library after classes.',
-  },
-  {
-    id: 2,
-    seller: 'Campus Kitchen Club',
-    location: 'Student Center',
-    posted: '4h',
-    item: 'Mini Rice Cooker',
-    price: '$28',
-    description: 'Used one semester only. Works perfectly for dorm meal prep.',
-  },
-  {
-    id: 3,
-    seller: 'Mina Park',
-    location: 'Dorm C Lobby',
-    posted: '7h',
-    item: 'Desk + Chair Set',
-    price: '$55',
-    description: 'Moving out next week. Selling as a set, first come first served.',
-  },
-]
-
 export default function Dashboard() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
@@ -50,6 +20,9 @@ export default function Dashboard() {
   const [uploadMessage, setUploadMessage] = useState('')
   const [uploadError, setUploadError] = useState('')
   const [isUploading, setIsUploading] = useState(false)
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const imageInputRef = useRef(null)
   const previewObjectUrlRef = useRef('')
 
@@ -83,6 +56,24 @@ export default function Dashboard() {
         URL.revokeObjectURL(previewObjectUrlRef.current)
       }
     }
+  }, [])
+
+  useEffect(() => {
+    async function loadItems() {
+      try {
+        setLoading(true)
+        setError(null)
+        const data = await fetchItems(1, 20)
+        setItems(data.items || [])
+      } catch (err) {
+        setError(err.message || 'Failed to load items')
+        console.error('Error fetching items:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadItems()
   }, [])
 
   const firstName = user?.firstName || 'Student'
@@ -199,28 +190,42 @@ export default function Dashboard() {
           </section>
 
           <section className="feed-post-list" aria-label="Marketplace feed posts">
-            {FEED_POSTS.map((post) => (
-              <article className="feed-panel post-card" key={post.id}>
-                <header className="post-header">
-                  <div className="avatar-badge" aria-hidden="true">{post.seller.slice(0, 1)}</div>
-                  <div>
-                    <strong>{post.seller}</strong>
-                    <p>{post.location} · {post.posted}</p>
+            {loading ? (
+              <div className="loading-state">
+                <p>Loading marketplace items...</p>
+              </div>
+            ) : error ? (
+              <div className="error-state">
+                <p>Error: {error}</p>
+              </div>
+            ) : items.length === 0 ? (
+              <div className="empty-state">
+                <p>No items available yet.</p>
+              </div>
+            ) : (
+              items.map((item) => (
+                <article className="feed-panel post-card" key={item._id}>
+                  <header className="post-header">
+                    <div className="avatar-badge" aria-hidden="true">{item.sellerName.slice(0, 1)}</div>
+                    <div>
+                      <strong>{item.sellerName}</strong>
+                      <p>{item.location}</p>
+                    </div>
+                  </header>
+                  <div className="post-image" aria-hidden="true" />
+                  <div className="post-body">
+                    <div className="post-price">${item.price}</div>
+                    <h2>{item.title}</h2>
+                    <p>{item.description}</p>
                   </div>
-                </header>
-                <div className="post-image" aria-hidden="true" />
-                <div className="post-body">
-                  <div className="post-price">{post.price}</div>
-                  <h2>{post.item}</h2>
-                  <p>{post.description}</p>
-                </div>
-                <footer className="post-actions" aria-label="Post actions">
-                  <button type="button">Like</button>
-                  <button type="button">Comment</button>
-                  <button type="button">Send Message</button>
-                </footer>
-              </article>
-            ))}
+                  <footer className="post-actions" aria-label="Post actions">
+                    <button type="button">Like</button>
+                    <button type="button">Comment</button>
+                    <button type="button">Send Message</button>
+                  </footer>
+                </article>
+              ))
+            )}
           </section>
 
         </section>

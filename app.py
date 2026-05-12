@@ -59,10 +59,12 @@ client = MongoClient(
 )
 db = client[MONGODB_DB_NAME]
 users = db.users
+items = db.items
 
 try:
     client.admin.command('ping')
     users.create_index('email', unique=True)
+    items.create_index('createdAt', -1)
 except Exception as exc:
     raise RuntimeError(
         'MongoDB connection failed. Check Atlas username/password and '
@@ -292,6 +294,119 @@ def me():
         return json_error('User not found.', 404)
 
     return jsonify({'user': build_user_payload(user_doc)})
+
+
+@app.get('/api/items')
+def get_items():
+    """Fetch all marketplace items with pagination and filtering."""
+    try:
+        page = request.args.get('page', 1, type=int)
+        limit = request.args.get('limit', 20, type=int)
+        category = request.args.get('category', None)
+        
+        # Validate pagination
+        if page < 1:
+            page = 1
+        if limit < 1 or limit > 100:
+            limit = 20
+        
+        skip = (page - 1) * limit
+        
+        # Build query filter
+        query_filter = {}
+        if category:
+            query_filter['category'] = category
+        
+        # Fetch items
+        items_list = list(
+            items.find(query_filter)
+            .sort('createdAt', -1)
+            .skip(skip)
+            .limit(limit)
+        )
+        
+        # Convert ObjectIds to strings
+        for item in items_list:
+            item['_id'] = str(item['_id'])
+            item['sellerId'] = str(item['sellerId'])
+        
+        total = items.count_documents(query_filter)
+        
+        return jsonify({
+            'items': items_list,
+            'pagination': {
+                'page': page,
+                'limit': limit,
+                'total': total,
+                'pages': (total + limit - 1) // limit,
+            },
+        })
+    except Exception as exc:
+        return json_error(f'Failed to fetch items: {str(exc)}', 500)
+
+
+@app.post('/api/items')
+def create_item():
+    """Create a new marketplace item."""
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return json_error('Missing bearer token.', 401)
+
+    token = auth_header.removeprefix('Bearer ').strip()
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.PyJWTError:
+        return json_error('Invalid or expired token.', 401)
+
+    seller_id = payload['sub']
+    user_doc = users.find_one({'_id': ObjectId(seller_id)})
+    if not user_doc:
+        return json_error('User not found.', 404)
+
+    data = request.get_json(silent=True) or {}
+    required_fields = ['title', 'description', 'price', 'category', 'location']
+
+    missing_fields = [
+        field
+        for field in required_fields
+        if not str(data.get(field, '')).strip()
+    ]
+    if missing_fields:
+        missing_list = ', '.join(missing_fields)
+        return json_error(f'Missing required fields: {missing_list}', 400)
+
+    try:
+        price = float(data['price'])
+        if price < 0:
+            return json_error('Price must be a positive number.', 400)
+    except (ValueError, TypeError):
+        return json_error('Price must be a valid number.', 400)
+
+    item_doc = {
+        'sellerId': ObjectId(seller_id),
+        'sellerName': f"{user_doc['firstName']} {user_doc['lastName']}",
+        'title': str(data['title']).strip(),
+        'description': str(data['description']).strip(),
+        'price': price,
+        'category': str(data['category']).strip(),
+        'location': str(data['location']).strip(),
+        'image': str(data.get('image', '')).strip() or None,
+        'status': 'available',
+        'createdAt': datetime.now(timezone.utc),
+        'updatedAt': datetime.now(timezone.utc),
+    }
+
+    try:
+        result = items.insert_one(item_doc)
+        item_doc['_id'] = str(result.inserted_id)
+        item_doc['sellerId'] = str(item_doc['sellerId'])
+        
+        return jsonify({
+            'message': 'Item created successfully.',
+            'item': item_doc,
+        }), 201
+    except Exception as exc:
+        return json_error(f'Failed to create item: {str(exc)}', 500)
 
 
 if __name__ == '__main__':
