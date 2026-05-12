@@ -1,5 +1,28 @@
 import { API_ORIGIN } from '../services/api'
 
+function getPrimaryImageValue(item) {
+  if (item?.image) {
+    if (typeof item.image === 'string') {
+      return item.image
+    }
+    if (typeof item.image === 'object' && item.image.url) {
+      return item.image.url
+    }
+  }
+
+  if (Array.isArray(item?.images) && item.images.length > 0) {
+    const first = item.images[0]
+    if (typeof first === 'string') {
+      return first
+    }
+    if (first && typeof first === 'object' && first.url) {
+      return first.url
+    }
+  }
+
+  return ''
+}
+
 function resolveImageUrl(image) {
   if (!image) {
     return ''
@@ -13,7 +36,7 @@ function resolveImageUrl(image) {
 }
 
 export default function ItemCard({ item }) {
-  const imageSrc = resolveImageUrl(item.image)
+  const imageSrc = resolveImageUrl(getPrimaryImageValue(item))
   const price = typeof item.price === 'number' ? item.price : Number(item.price)
   const formattedPrice = Number.isFinite(price)
     ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price)

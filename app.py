@@ -170,13 +170,18 @@ def serialize_item_document(item_doc):
     images = item_doc.get('images')
     if isinstance(images, list) and images:
         first = images[0]
-        # If images are objects with 'url', expose legacy `image` as URL string
-        if isinstance(first, dict) and first.get('url'):
+        # If images are objects with 'url', expose legacy `image` as URL string.
+        if isinstance(first, dict):
             item_doc['image'] = first.get('url')
         else:
             item_doc['image'] = first
     elif item_doc.get('image'):
-        item_doc['images'] = [item_doc['image']]
+        image_value = item_doc.get('image')
+        if isinstance(image_value, dict):
+            item_doc['image'] = image_value.get('url')
+            item_doc['images'] = [image_value]
+        else:
+            item_doc['images'] = [image_value]
     else:
         item_doc['images'] = []
         item_doc['image'] = None
