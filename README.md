@@ -66,19 +66,55 @@ Open the local URL shown by Vite (usually `http://localhost:5173`).
 campusMarketPlace/
 |-- app.py
 |-- requirements.txt
-|-- templates/
-|   |-- base.html
+|-- README.md
+|-- index.html
+|-- package.json
+|-- package-lock.json
+|-- .env
+|-- .env.example
+|-- Frontend/
 |   |-- index.html
-|   `-- signup.html
-|-- static/
-|   |-- css/
-|   |   |-- style.css
-|   |   `-- signup.css
-|   |-- js/
-|   |   |-- main.js
-|   |   `-- signup.js
-|   `-- images/
-`-- docs/
+|   |-- package.json
+|   |-- package-lock.json
+|   |-- vite.config.js
+|   |-- src/
+|   |   |-- App.jsx
+|   |   |-- main.jsx
+|   |   |-- assets/
+|   |   |   `-- styles/
+|   |   |       `-- global.css
+|   |   |-- components/
+|   |   |   |-- Footer.jsx
+|   |   |   |-- ItemCard.jsx
+|   |   |   |-- ItemGrid.jsx
+|   |   |   `-- Navbar.jsx
+|   |   |-- constants/
+|   |   |   `-- categories.js
+|   |   |-- routes/
+|   |   |   |-- Browse.jsx
+|   |   |   |-- Dashboard.jsx
+|   |   |   |-- Home.jsx
+|   |   |   |-- Login.jsx
+|   |   |   `-- Signup.jsx
+|   |   `-- services/
+|   |       `-- api.js
+|   `-- dist/                  (build output)
+|-- models/
+|   |-- __init__.py
+|   `-- item.py
+|-- uploads/
+|-- docs/
+|   |-- Architecture_sketch.md
+|   |-- Design Doc v1.md
+|   |-- PROJECT_1.md
+|   |-- PROJECTPITCH.md
+|   |-- TEAMAGREEMENT.md
+|   |-- USERSTORIES.md
+|   |-- WIREFRAME.md
+|   |-- questions.md
+|   |-- Midterm/
+|   `-- Sprint_Packet/
+`-- .github/
 ```
 
 
