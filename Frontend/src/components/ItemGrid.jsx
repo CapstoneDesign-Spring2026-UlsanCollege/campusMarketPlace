@@ -1,4 +1,5 @@
 import ItemCard from './ItemCard'
+import { CATEGORIES, getCategoryLabel } from '../constants/categories'
 
 function LoadingState() {
   return (
@@ -30,7 +31,16 @@ function EmptyState() {
   )
 }
 
-export default function ItemGrid({ items, isLoading, error, pagination, onPageChange, onRetry }) {
+export default function ItemGrid({
+  items,
+  isLoading,
+  error,
+  pagination,
+  currentCategory,
+  onCategoryChange,
+  onPageChange,
+  onRetry,
+}) {
   const page = pagination?.page || 1
   const pages = pagination?.pages || 1
   const total = pagination?.total || 0
@@ -45,29 +55,50 @@ export default function ItemGrid({ items, isLoading, error, pagination, onPageCh
           <p className="eyebrow">Browse listings</p>
           <h2>Explore items across campus</h2>
           <p className="browse-summary">
-            {total > 0 ? `Showing ${start}-${end} of ${total} items` : 'Browse the latest listings from students.'}
+            {total > 0
+              ? `Showing ${start}-${end} of ${total} items${currentCategory ? ` in ${getCategoryLabel(currentCategory)}` : ''}`
+              : 'Browse the latest listings from students.'}
           </p>
         </div>
 
-        <div className="pagination-summary" aria-label="Pagination summary">
-          <span>Page {page} of {pages}</span>
-          <div className="pagination-actions">
-            <button
-              className="button button-secondary"
-              type="button"
-              onClick={() => onPageChange(Math.max(1, page - 1))}
-              disabled={isLoading || page <= 1}
-            >
-              Previous
-            </button>
-            <button
-              className="button button-secondary"
-              type="button"
-              onClick={() => onPageChange(Math.min(pages, page + 1))}
-              disabled={isLoading || page >= pages}
-            >
-              Next
-            </button>
+        <div className="filter-and-pagination">
+          <select
+            className="category-filter"
+            value={currentCategory || ''}
+            onChange={(e) => onCategoryChange(e.target.value || null)}
+            disabled={isLoading}
+            aria-label="Filter by category"
+          >
+            <option value="">All Categories</option>
+            {CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+
+          <div className="pagination-summary" aria-label="Pagination summary">
+            <span>
+              Page {page} of {pages}
+            </span>
+            <div className="pagination-actions">
+              <button
+                className="button button-secondary"
+                type="button"
+                onClick={() => onPageChange(Math.max(1, page - 1))}
+                disabled={isLoading || page <= 1}
+              >
+                Previous
+              </button>
+              <button
+                className="button button-secondary"
+                type="button"
+                onClick={() => onPageChange(Math.min(pages, page + 1))}
+                disabled={isLoading || page >= pages}
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       </div>
