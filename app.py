@@ -60,7 +60,8 @@ client = MongoClient(
 db = client[MONGODB_DB_NAME]
 users = db.users
 items = db.items
-ITEM_STATUSES = {'available', 'sold', 'pending'}
+# Adopt richer status values for listings
+ITEM_STATUSES = {'draft', 'active', 'sold', 'removed'}
 
 
 def ensure_items_collection_schema():
@@ -72,7 +73,6 @@ def ensure_items_collection_schema():
                 'title',
                 'description',
                 'price',
-                'category',
                 'images',
                 'seller_id',
                 'status',
@@ -82,32 +82,55 @@ def ensure_items_collection_schema():
             'properties': {
                 'title': {'bsonType': 'string', 'minLength': 1},
                 'description': {'bsonType': 'string', 'minLength': 1},
+                # Allow either a numeric price OR a richer price object {amount, currency}
                 'price': {
-                    'bsonType': ['double', 'int', 'long', 'decimal'],
-                    'minimum': 0,
+                    'anyOf': [
+                        {'bsonType': ['double', 'int', 'long', 'decimal'], 'minimum': 0},
+                        {
+                            'bsonType': 'object',
+                            'required': ['amount', 'currency'],
+                            'properties': {
+                                'amount': {
+                                    'bsonType': ['double', 'int', 'long', 'decimal'],
+                                    'minimum': 0,
+                                },
+                                'currency': {'bsonType': 'string', 'minLength': 2},
+                            },
+                        },
+                    ]
                 },
-                'category': {'bsonType': 'string', 'minLength': 1},
+                'category': {'bsonType': ['string', 'null']},
+                # Images may be legacy strings or modern objects with url/alt/order
                 'images': {
                     'bsonType': 'array',
                     'minItems': 1,
-                    'items': {'bsonType': 'string', 'minLength': 1},
+                    'items': {
+                        'anyOf': [
+                            {'bsonType': 'string', 'minLength': 1},
+                            {
+                                'bsonType': 'object',
+                                'required': ['url'],
+                                'properties': {
+                                    'url': {'bsonType': 'string', 'minLength': 1},
+                                    'alt': {'bsonType': ['string', 'null']},
+                                    'order': {'bsonType': ['int', 'long']},
+                                },
+                            },
+                        ]
+                    },
                 },
                 'seller_id': {'bsonType': 'objectId'},
                 'seller_verified': {'bsonType': 'bool'},
                 'status': {'enum': list(ITEM_STATUSES)},
+                'condition': {'bsonType': ['string', 'null']},
+                'location': {'bsonType': ['string', 'null']},
+                'tags': {'bsonType': ['array'], 'items': {'bsonType': 'string'}},
+                'views': {'bsonType': ['int', 'long'], 'minimum': 0},
+                'favoritesCount': {'bsonType': ['int', 'long'], 'minimum': 0},
                 'createdAt': {'bsonType': 'date'},
                 'updatedAt': {'bsonType': 'date'},
                 'soldAt': {'bsonType': ['date', 'null']},
-                'location': {'bsonType': ['string', 'null']},
-                'meeting_notes': {'bsonType': ['string', 'null']},
-                'rating_count': {'bsonType': ['int', 'long'], 'minimum': 0},
-                'rating_avg': {
-                    'bsonType': ['double', 'int', 'long', 'decimal'],
-                    'minimum': 0,
-                    'maximum': 5,
-                },
                 'expiresAt': {'bsonType': ['date', 'null']},
-                'requests_count': {'bsonType': ['int', 'long'], 'minimum': 0},
             },
         }
     }
@@ -146,12 +169,30 @@ def serialize_item_document(item_doc):
 
     images = item_doc.get('images')
     if isinstance(images, list) and images:
-        item_doc['image'] = images[0]
+        first = images[0]
+        # If images are objects with 'url', expose legacy `image` as URL string
+        if isinstance(first, dict) and first.get('url'):
+            item_doc['image'] = first.get('url')
+        else:
+            item_doc['image'] = first
     elif item_doc.get('image'):
         item_doc['images'] = [item_doc['image']]
     else:
         item_doc['images'] = []
         item_doc['image'] = None
+
+    # Normalize price: keep numeric `price` for frontend compatibility,
+    # expose `price_currency` if a richer price object exists.
+    raw_price = item_doc.get('price')
+    if isinstance(raw_price, dict):
+        amount = raw_price.get('amount')
+        currency = raw_price.get('currency')
+        try:
+            item_doc['price'] = float(amount) if amount is not None else None
+        except Exception:
+            item_doc['price'] = amount
+        if currency:
+            item_doc['price_currency'] = currency
 
     for dt_field in ('createdAt', 'updatedAt', 'soldAt', 'expiresAt'):
         if dt_field in item_doc and hasattr(item_doc[dt_field], 'isoformat'):
@@ -169,6 +210,20 @@ try:
     items.create_index([('status', 1), ('createdAt', -1)])
     items.create_index([('category', 1), ('status', 1), ('createdAt', -1)])
     items.create_index([('createdAt', -1)])
+    # Index price for range queries (supports numeric price or price.amount)
+    try:
+        items.create_index([('price', 1)])
+    except Exception:
+        pass
+    try:
+        items.create_index([('price.amount', 1)])
+    except Exception:
+        pass
+    # Text index for search on title and description
+    try:
+        items.create_index([('title', 'text'), ('description', 'text')], name='items_text_idx')
+    except Exception:
+        pass
 except Exception as exc:
     raise RuntimeError(
         'MongoDB connection failed. Check Atlas username/password and '
