@@ -50,7 +50,8 @@ export async function apiRequest(path, options = {}) {
 }
 
 export async function fetchItems(page = 1, limit = 20, category = null) {
-  let path = `/items?page=${page}&limit=${limit}`
+  const skip = Math.max(0, (page - 1) * limit)
+  let path = `/items?limit=${limit}&skip=${skip}`
   if (category) {
     path += `&category=${encodeURIComponent(category)}`
   }
