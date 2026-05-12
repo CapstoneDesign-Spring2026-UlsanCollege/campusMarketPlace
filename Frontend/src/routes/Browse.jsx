@@ -1,15 +1,20 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import ItemGrid from '../components/ItemGrid'
 import { fetchItems } from '../services/api'
 
 const ITEMS_PER_PAGE = 20
 
 export default function Browse() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [items, setItems] = useState([])
   const [pagination, setPagination] = useState({ page: 1, limit: ITEMS_PER_PAGE, total: 0, pages: 1 })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [reloadToken, setReloadToken] = useState(0)
+
+  const currentPage = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
+  const currentCategory = searchParams.get('category') || null
 
   useEffect(() => {
     let isActive = true
@@ -19,7 +24,7 @@ export default function Browse() {
         setIsLoading(true)
         setError('')
 
-        const data = await fetchItems(pagination.page, ITEMS_PER_PAGE)
+        const data = await fetchItems(currentPage, ITEMS_PER_PAGE, currentCategory)
 
         if (!isActive) {
           return
@@ -46,10 +51,31 @@ export default function Browse() {
     return () => {
       isActive = false
     }
-  }, [pagination.page, reloadToken])
+  }, [currentPage, currentCategory, reloadToken])
 
   function handleRetry() {
     setReloadToken((current) => current + 1)
+  }
+
+  function handleCategoryChange(newCategory) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (newCategory) {
+        next.set('category', newCategory)
+      } else {
+        next.delete('category')
+      }
+      next.set('page', '1')
+      return next
+    })
+  }
+
+  function handlePageChange(nextPage) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set('page', String(nextPage))
+      return next
+    })
   }
 
   return (
@@ -65,7 +91,9 @@ export default function Browse() {
         isLoading={isLoading}
         error={error}
         pagination={pagination}
-        onPageChange={(nextPage) => setPagination((current) => ({ ...current, page: nextPage }))}
+        currentCategory={currentCategory}
+        onCategoryChange={handleCategoryChange}
+        onPageChange={handlePageChange}
         onRetry={handleRetry}
       />
     </main>
