@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiRequest, fetchItems } from '../services/api'
+import { apiRequest, createItem, fetchItems } from '../services/api'
 
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+const DEFAULT_ITEM_LOCATION = 'Campus'
 
 const STORIES = [
   'Engineering',
@@ -16,13 +17,28 @@ const STORIES = [
 export default function Dashboard() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
+
   const [uploadPreviewUrl, setUploadPreviewUrl] = useState('')
   const [uploadMessage, setUploadMessage] = useState('')
   const [uploadError, setUploadError] = useState('')
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadedImageUrl, setUploadedImageUrl] = useState('')
+
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  const [formData, setFormData] = useState({
+    title: '',
+    price: '',
+    description: '',
+    category: '',
+  })
+  const [formErrors, setFormErrors] = useState({})
+  const [submitMessage, setSubmitMessage] = useState('')
+  const [submitError, setSubmitError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   const imageInputRef = useRef(null)
   const previewObjectUrlRef = useRef('')
 
@@ -58,21 +74,21 @@ export default function Dashboard() {
     }
   }, [])
 
-  useEffect(() => {
-    async function loadItems() {
-      try {
-        setLoading(true)
-        setError(null)
-        const data = await fetchItems(1, 20)
-        setItems(data.items || [])
-      } catch (err) {
-        setError(err.message || 'Failed to load items')
-        console.error('Error fetching items:', err)
-      } finally {
-        setLoading(false)
-      }
+  async function loadItems() {
+    try {
+      setLoading(true)
+      setError(null)
+      const data = await fetchItems(1, 20)
+      setItems(data.items || [])
+    } catch (err) {
+      setError(err.message || 'Failed to load items')
+      console.error('Error fetching items:', err)
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     loadItems()
   }, [])
 
@@ -133,16 +149,83 @@ export default function Dashboard() {
 
       if (result?.url) {
         updatePreviewUrl(result.url)
+        setUploadedImageUrl(result.url)
       }
 
       setUploadMessage(result?.message || 'Image uploaded successfully.')
       setUploadError('')
-    } catch (error) {
-      setUploadError(error instanceof Error ? error.message : 'Image upload failed.')
+      setFormErrors((prev) => ({ ...prev, image: '' }))
+    } catch (uploadErr) {
+      setUploadError(uploadErr instanceof Error ? uploadErr.message : 'Image upload failed.')
       setUploadMessage('Preview ready locally, but upload failed.')
+      setUploadedImageUrl('')
     } finally {
       setIsUploading(false)
       fileInput.value = ''
+    }
+  }
+
+  function handleFormChange(event) {
+    const { name, value } = event.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    setFormErrors((prev) => ({ ...prev, [name]: '' }))
+    setSubmitError('')
+    setSubmitMessage('')
+  }
+
+  function validateForm() {
+    const nextErrors = {}
+    const priceValue = Number(formData.price)
+
+    if (!formData.title.trim()) nextErrors.title = 'Title is required.'
+    if (!formData.price.trim() || !Number.isFinite(priceValue) || priceValue <= 0) {
+      nextErrors.price = 'Price is required and must be a positive number.'
+    }
+    if (!formData.description.trim()) nextErrors.description = 'Description is required.'
+    if (!formData.category.trim()) nextErrors.category = 'Category is required.'
+    if (!uploadedImageUrl) nextErrors.image = 'Please upload at least one image.'
+
+    setFormErrors(nextErrors)
+    return Object.keys(nextErrors).length === 0
+  }
+
+  async function handlePostItemSubmit(event) {
+    event.preventDefault()
+    if (!validateForm()) return
+
+    setIsSubmitting(true)
+    setSubmitError('')
+    setSubmitMessage('')
+
+    try {
+      const payload = {
+        title: formData.title.trim(),
+        price: Number(formData.price),
+        description: formData.description.trim(),
+        category: formData.category.trim(),
+        location: DEFAULT_ITEM_LOCATION,
+        image: uploadedImageUrl,
+      }
+
+      await createItem(payload)
+
+      setSubmitMessage('Item posted successfully.')
+      setFormData({
+        title: '',
+        price: '',
+        description: '',
+        category: '',
+      })
+      setFormErrors({})
+      setUploadedImageUrl('')
+      updatePreviewUrl('')
+      setUploadMessage('')
+      setUploadError('')
+      await loadItems()
+    } catch (submitErr) {
+      setSubmitError(submitErr.message || 'Failed to post item.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -151,34 +234,98 @@ export default function Dashboard() {
       <section className="feed-layout">
         <section className="feed-main-col">
           <section className="feed-panel composer" aria-label="Post composer">
-            <div className="composer-row">
-              <div className="avatar-badge" aria-hidden="true">
-                {firstName.slice(0, 1)}
+            <form className="composer-form" onSubmit={handlePostItemSubmit} noValidate>
+              <div className="composer-row">
+                <div className="avatar-badge" aria-hidden="true">
+                  {firstName.slice(0, 1)}
+                </div>
+                <button
+                  className="composer-icon-button composer-camera-right"
+                  type="button"
+                  onClick={handleImageUpload}
+                  aria-label="Upload image"
+                  disabled={isUploading || isSubmitting}
+                >
+                  📷
+                </button>
               </div>
-              <button className="composer-input" type="button">
-                Do you want to sell anything?
-              </button>
-              <button className="composer-icon-button composer-camera-right" type="button" onClick={handleImageUpload} aria-label="Camera upload" disabled={isUploading}>
-                📷
-              </button>
-            </div>
-            {(uploadMessage || uploadError) && (
-              <p className={`composer-feedback ${uploadError ? 'is-error' : 'is-success'}`} aria-live="polite">
-                {uploadError || uploadMessage}
-              </p>
-            )}
-            {uploadPreviewUrl && (
-              <div className="composer-preview">
-                <img src={uploadPreviewUrl} alt="Selected upload preview" />
+
+              <div className="composer-fields">
+                <input
+                  name="title"
+                  type="text"
+                  placeholder="Title"
+                  value={formData.title}
+                  onChange={handleFormChange}
+                  className="composer-text-input"
+                />
+                {formErrors.title && <p className="composer-feedback is-error">{formErrors.title}</p>}
+
+                <input
+                  name="price"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  placeholder="Price"
+                  value={formData.price}
+                  onChange={handleFormChange}
+                  className="composer-text-input"
+                />
+                {formErrors.price && <p className="composer-feedback is-error">{formErrors.price}</p>}
+
+                <input
+                  name="category"
+                  type="text"
+                  placeholder="Category"
+                  value={formData.category}
+                  onChange={handleFormChange}
+                  className="composer-text-input"
+                />
+                {formErrors.category && <p className="composer-feedback is-error">{formErrors.category}</p>}
+
+                <textarea
+                  name="description"
+                  placeholder="Description"
+                  value={formData.description}
+                  onChange={handleFormChange}
+                  className="composer-textarea"
+                  rows={4}
+                />
+                {formErrors.description && <p className="composer-feedback is-error">{formErrors.description}</p>}
+
+                {formErrors.image && <p className="composer-feedback is-error">{formErrors.image}</p>}
               </div>
-            )}
-            <input
-              ref={imageInputRef}
-              className="composer-file-input"
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
+
+              {(uploadMessage || uploadError) && (
+                <p className={`composer-feedback ${uploadError ? 'is-error' : 'is-success'}`} aria-live="polite">
+                  {uploadError || uploadMessage}
+                </p>
+              )}
+
+              {uploadPreviewUrl && (
+                <div className="composer-preview">
+                  <img src={uploadPreviewUrl} alt="Selected upload preview" />
+                </div>
+              )}
+
+              {(submitMessage || submitError) && (
+                <p className={`composer-feedback ${submitError ? 'is-error' : 'is-success'}`} aria-live="polite">
+                  {submitError || submitMessage}
+                </p>
+              )}
+
+              <button className="composer-submit" type="submit" disabled={isSubmitting || isUploading}>
+                {isSubmitting ? 'Posting...' : 'Post Item'}
+              </button>
+
+              <input
+                ref={imageInputRef}
+                className="composer-file-input"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+            </form>
           </section>
 
           <section className="stories-row" aria-label="Stories">
@@ -206,10 +353,12 @@ export default function Dashboard() {
               items.map((item) => (
                 <article className="feed-panel post-card" key={item._id}>
                   <header className="post-header">
-                    <div className="avatar-badge" aria-hidden="true">{item.sellerName.slice(0, 1)}</div>
+                    <div className="avatar-badge" aria-hidden="true">
+                      {(item.sellerName || 'S').slice(0, 1)}
+                    </div>
                     <div>
-                      <strong>{item.sellerName}</strong>
-                      <p>{item.location}</p>
+                      <strong>{item.sellerName || 'Seller'}</strong>
+                      <p>{item.location || 'Campus'}</p>
                     </div>
                   </header>
                   <div className="post-image" aria-hidden="true" />
@@ -227,7 +376,6 @@ export default function Dashboard() {
               ))
             )}
           </section>
-
         </section>
       </section>
     </main>
