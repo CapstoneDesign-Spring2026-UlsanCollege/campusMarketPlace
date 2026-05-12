@@ -16,8 +16,13 @@ const API_BASE_URL = resolveApiBaseUrl()
 
 export async function apiRequest(path, options = {}) {
   const headers = {
-    'Content-Type': 'application/json',
     ...(options.headers || {}),
+  }
+
+  const isFormDataBody = typeof FormData !== 'undefined' && options.body instanceof FormData
+
+  if (!isFormDataBody && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json'
   }
 
   if (typeof window !== 'undefined') {
