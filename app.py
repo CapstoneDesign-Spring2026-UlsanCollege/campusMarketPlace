@@ -427,14 +427,19 @@ def get_items():
     """Fetch all marketplace items with pagination and filtering."""
     try:
         page = request.args.get('page', 1, type=int)
+        skip = request.args.get('skip', None, type=int)
         limit = request.args.get('limit', 20, type=int)
         category = request.args.get('category', None)
         # Validate pagination
+        if skip is not None and skip < 0:
+            skip = 0
         if page < 1:
             page = 1
         if limit < 1 or limit > 100:
             limit = 20
-        skip = (page - 1) * limit
+        if skip is None:
+            skip = (page - 1) * limit
+        page = (skip // limit) + 1
         # Build query filter
         query_filter = {}
         if category:
@@ -454,6 +459,7 @@ def get_items():
             'pagination': {
                 'page': page,
                 'limit': limit,
+                'skip': skip,
                 'total': total,
                 'pages': (total + limit - 1) // limit,
             },
