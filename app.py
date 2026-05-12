@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from pymongo import MongoClient
-from pymongo.errors import DuplicateKeyError
+from pymongo.errors import DuplicateKeyError, OperationFailure
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
@@ -60,10 +60,114 @@ client = MongoClient(
 db = client[MONGODB_DB_NAME]
 users = db.users
 items = db.items
+ITEM_STATUSES = {'available', 'sold', 'pending'}
+
+
+def ensure_items_collection_schema():
+    """Ensure the items collection has JSON schema validation."""
+    items_validator = {
+        '$jsonSchema': {
+            'bsonType': 'object',
+            'required': [
+                'title',
+                'description',
+                'price',
+                'category',
+                'images',
+                'seller_id',
+                'status',
+                'createdAt',
+                'updatedAt',
+            ],
+            'properties': {
+                'title': {'bsonType': 'string', 'minLength': 1},
+                'description': {'bsonType': 'string', 'minLength': 1},
+                'price': {
+                    'bsonType': ['double', 'int', 'long', 'decimal'],
+                    'minimum': 0,
+                },
+                'category': {'bsonType': 'string', 'minLength': 1},
+                'images': {
+                    'bsonType': 'array',
+                    'minItems': 1,
+                    'items': {'bsonType': 'string', 'minLength': 1},
+                },
+                'seller_id': {'bsonType': 'objectId'},
+                'seller_verified': {'bsonType': 'bool'},
+                'status': {'enum': list(ITEM_STATUSES)},
+                'createdAt': {'bsonType': 'date'},
+                'updatedAt': {'bsonType': 'date'},
+                'soldAt': {'bsonType': ['date', 'null']},
+                'location': {'bsonType': ['string', 'null']},
+                'meeting_notes': {'bsonType': ['string', 'null']},
+                'rating_count': {'bsonType': ['int', 'long'], 'minimum': 0},
+                'rating_avg': {
+                    'bsonType': ['double', 'int', 'long', 'decimal'],
+                    'minimum': 0,
+                    'maximum': 5,
+                },
+                'expiresAt': {'bsonType': ['date', 'null']},
+                'requests_count': {'bsonType': ['int', 'long'], 'minimum': 0},
+            },
+        }
+    }
+
+    collection_names = db.list_collection_names()
+    if 'items' in collection_names:
+        try:
+            db.command({
+                'collMod': 'items',
+                'validator': items_validator,
+                'validationLevel': 'moderate',
+            })
+        except OperationFailure:
+            # If schema update is not permitted, continue with existing
+            # collection settings.
+            pass
+    else:
+        db.create_collection(
+            'items',
+            validator=items_validator,
+            validationLevel='moderate',
+        )
+
+
+def serialize_item_document(item_doc):
+    """Normalize item docs for JSON and legacy frontend fields."""
+    item_doc['_id'] = str(item_doc['_id'])
+
+    seller_obj = item_doc.get('seller_id') or item_doc.get('sellerId')
+    if isinstance(seller_obj, ObjectId):
+        seller_obj = str(seller_obj)
+    elif seller_obj is not None:
+        seller_obj = str(seller_obj)
+    item_doc['seller_id'] = seller_obj
+    item_doc['sellerId'] = seller_obj
+
+    images = item_doc.get('images')
+    if isinstance(images, list) and images:
+        item_doc['image'] = images[0]
+    elif item_doc.get('image'):
+        item_doc['images'] = [item_doc['image']]
+    else:
+        item_doc['images'] = []
+        item_doc['image'] = None
+
+    for dt_field in ('createdAt', 'updatedAt', 'soldAt', 'expiresAt'):
+        if dt_field in item_doc and hasattr(item_doc[dt_field], 'isoformat'):
+            item_doc[dt_field] = item_doc[dt_field].isoformat()
+
+    return item_doc
+
 
 try:
     client.admin.command('ping')
     users.create_index('email', unique=True)
+    ensure_items_collection_schema()
+    items = db.items
+    items.create_index([('seller_id', 1), ('createdAt', -1)])
+    items.create_index([('status', 1), ('createdAt', -1)])
+    items.create_index([('category', 1), ('status', 1), ('createdAt', -1)])
     items.create_index([('createdAt', -1)])
 except Exception as exc:
     raise RuntimeError(
@@ -342,10 +446,8 @@ def get_items():
             .skip(skip)
             .limit(limit)
         )
-        # Convert ObjectIds to strings
-        for item in items_list:
-            item['_id'] = str(item['_id'])
-            item['sellerId'] = str(item['sellerId'])
+        # Convert ObjectIds/dates and preserve legacy response fields.
+        items_list = [serialize_item_document(item) for item in items_list]
         total = items.count_documents(query_filter)
         return jsonify({
             'items': items_list,
@@ -375,13 +477,8 @@ def get_item(item_id):
     if not item_doc:
         return json_error('Item not found.', 404)
 
-    # Normalize for JSON consumption
-    item_doc['_id'] = str(item_doc['_id'])
-    if 'sellerId' in item_doc and isinstance(item_doc['sellerId'], ObjectId):
-        item_doc['sellerId'] = str(item_doc['sellerId'])
-    for dt_field in ('createdAt', 'updatedAt'):
-        if dt_field in item_doc and hasattr(item_doc[dt_field], 'isoformat'):
-            item_doc[dt_field] = item_doc[dt_field].isoformat()
+    # Normalize for JSON consumption.
+    item_doc = serialize_item_document(item_doc)
 
     return jsonify({'item': item_doc})
 
@@ -408,7 +505,7 @@ def create_item():
         return json_error('Invalid or expired token.', 401)
 
     data = request.get_json(silent=True) or {}
-    required_fields = ['title', 'description', 'price', 'category', 'location']
+    required_fields = ['title', 'description', 'price', 'category']
 
     missing_fields = [
         field
@@ -426,24 +523,60 @@ def create_item():
     except (ValueError, TypeError):
         return json_error('Price must be a valid number.', 400)
 
+    status = (
+        str(data.get('status', 'available')).strip().lower() or 'available'
+    )
+    if status not in ITEM_STATUSES:
+        return json_error(
+            'Status must be one of: available, sold, pending.',
+            400,
+        )
+
+    raw_images = data.get('images')
+    images = []
+    if isinstance(raw_images, list):
+        images = [str(url).strip() for url in raw_images if str(url).strip()]
+    elif isinstance(raw_images, str) and raw_images.strip():
+        images = [raw_images.strip()]
+
+    primary_image = str(data.get('image', '')).strip()
+    if primary_image and primary_image not in images:
+        images.insert(0, primary_image)
+
+    if not images:
+        return json_error('At least one image URL is required.', 400)
+
+    now = datetime.now(timezone.utc)
+    location = str(data.get('location', '')).strip() or None
+    meeting_notes = str(data.get('meeting_notes', '')).strip() or None
+
     item_doc = {
+        'seller_id': seller_id,
         'sellerId': seller_id,
         'sellerName': f"{user_doc['firstName']} {user_doc['lastName']}",
+        'seller_verified': bool(user_doc.get('isVerified', False)),
         'title': str(data['title']).strip(),
         'description': str(data['description']).strip(),
         'price': price,
         'category': str(data['category']).strip(),
-        'location': str(data['location']).strip(),
-        'image': str(data.get('image', '')).strip() or None,
-        'status': 'available',
-        'createdAt': datetime.now(timezone.utc),
-        'updatedAt': datetime.now(timezone.utc),
+        'images': images,
+        'image': images[0],
+        'location': location,
+        'meeting_notes': meeting_notes,
+        'status': status,
+        'rating_count': 0,
+        'rating_avg': 0.0,
+        'requests_count': 0,
+        'soldAt': now if status == 'sold' else None,
+        'expiresAt': None,
+        'createdAt': now,
+        'updatedAt': now,
     }
 
     try:
         result = items.insert_one(item_doc)
-        item_doc['_id'] = str(result.inserted_id)
-        item_doc['sellerId'] = str(item_doc['sellerId'])
+        item_doc['_id'] = result.inserted_id
+        item_doc = serialize_item_document(item_doc)
         return jsonify({
             'message': 'Item created successfully.',
             'item': item_doc,
