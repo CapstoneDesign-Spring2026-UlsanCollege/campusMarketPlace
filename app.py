@@ -21,7 +21,9 @@ load_dotenv()
 MONGODB_URI = os.getenv('MONGODB_URI')
 MONGODB_DB_NAME = os.getenv('MONGODB_DB_NAME', 'campus_marketplace')
 jwt_secret_from_env = os.getenv('JWT_SECRET')
-app_env = os.getenv('APP_ENV', os.getenv('FLASK_ENV', 'development')).strip().lower()
+app_env = os.getenv(
+    'APP_ENV', os.getenv('FLASK_ENV', 'development')
+).strip().lower()
 is_production = app_env == 'production'
 
 if not jwt_secret_from_env:
