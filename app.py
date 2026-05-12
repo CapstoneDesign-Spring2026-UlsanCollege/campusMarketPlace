@@ -360,6 +360,32 @@ def get_items():
         return json_error(f'Failed to fetch items: {str(exc)}', 500)
 
 
+@app.get('/api/items/<item_id>')
+def get_item(item_id):
+    """Fetch a single marketplace item by id."""
+    oid = parse_object_id(item_id)
+    if not oid:
+        return json_error('Invalid item id.', 400)
+
+    try:
+        item_doc = items.find_one({'_id': oid})
+    except Exception as exc:
+        return json_error(f'Failed to fetch item: {str(exc)}', 500)
+
+    if not item_doc:
+        return json_error('Item not found.', 404)
+
+    # Normalize for JSON consumption
+    item_doc['_id'] = str(item_doc['_id'])
+    if 'sellerId' in item_doc and isinstance(item_doc['sellerId'], ObjectId):
+        item_doc['sellerId'] = str(item_doc['sellerId'])
+    for dt_field in ('createdAt', 'updatedAt'):
+        if dt_field in item_doc and hasattr(item_doc[dt_field], 'isoformat'):
+            item_doc[dt_field] = item_doc[dt_field].isoformat()
+
+    return jsonify({'item': item_doc})
+
+
 @app.post('/api/items')
 def create_item():
     """Create a new marketplace item."""
