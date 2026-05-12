@@ -47,3 +47,18 @@ export async function apiRequest(path, options = {}) {
 
   return payload
 }
+
+export async function fetchItems(page = 1, limit = 20, category = null) {
+  let path = `/items?page=${page}&limit=${limit}`
+  if (category) {
+    path += `&category=${encodeURIComponent(category)}`
+  }
+  return apiRequest(path)
+}
+
+export async function createItem(itemData) {
+  return apiRequest('/items', {
+    method: 'POST',
+    body: JSON.stringify(itemData),
+  })
+}
