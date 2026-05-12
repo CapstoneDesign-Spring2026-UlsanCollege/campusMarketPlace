@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiRequest } from '../services/api'
+
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
+const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 
 const STORIES = [
   'Engineering',
@@ -42,7 +46,12 @@ const FEED_POSTS = [
 export default function Dashboard() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
+  const [uploadPreviewUrl, setUploadPreviewUrl] = useState('')
+  const [uploadMessage, setUploadMessage] = useState('')
+  const [uploadError, setUploadError] = useState('')
+  const [isUploading, setIsUploading] = useState(false)
   const imageInputRef = useRef(null)
+  const previewObjectUrlRef = useRef('')
 
   useEffect(() => {
     const token = localStorage.getItem('campusMarketplaceToken')
@@ -68,19 +77,82 @@ export default function Dashboard() {
     }
   }, [navigate])
 
+  useEffect(() => {
+    return () => {
+      if (previewObjectUrlRef.current.startsWith('blob:')) {
+        URL.revokeObjectURL(previewObjectUrlRef.current)
+      }
+    }
+  }, [])
+
   const firstName = user?.firstName || 'Student'
+
+  function updatePreviewUrl(nextUrl) {
+    if (
+      previewObjectUrlRef.current &&
+      previewObjectUrlRef.current !== nextUrl &&
+      previewObjectUrlRef.current.startsWith('blob:')
+    ) {
+      URL.revokeObjectURL(previewObjectUrlRef.current)
+    }
+
+    previewObjectUrlRef.current = nextUrl
+    setUploadPreviewUrl(nextUrl)
+  }
 
   function handleImageUpload() {
     imageInputRef.current?.click()
   }
 
-  function handleFileChange(event) {
+  async function handleFileChange(event) {
+    const fileInput = event.target
     const selectedFile = event.target.files?.[0]
     if (!selectedFile) {
       return
     }
 
-    event.target.value = ''
+    if (!ALLOWED_IMAGE_TYPES.has(selectedFile.type)) {
+      setUploadError('Please choose a JPG, PNG, GIF, or WebP image.')
+      setUploadMessage('')
+      fileInput.value = ''
+      return
+    }
+
+    if (selectedFile.size > MAX_IMAGE_SIZE_BYTES) {
+      setUploadError('Please choose an image smaller than 5 MB.')
+      setUploadMessage('')
+      fileInput.value = ''
+      return
+    }
+
+    const previewUrl = URL.createObjectURL(selectedFile)
+    updatePreviewUrl(previewUrl)
+    setUploadError('')
+    setUploadMessage('Uploading image...')
+    setIsUploading(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('image', selectedFile)
+
+      const result = await apiRequest('/uploads/image', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (result?.url) {
+        updatePreviewUrl(result.url)
+      }
+
+      setUploadMessage(result?.message || 'Image uploaded successfully.')
+      setUploadError('')
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : 'Image upload failed.')
+      setUploadMessage('Preview ready locally, but upload failed.')
+    } finally {
+      setIsUploading(false)
+      fileInput.value = ''
+    }
   }
 
   return (
@@ -95,10 +167,20 @@ export default function Dashboard() {
               <button className="composer-input" type="button">
                 Do you want to sell anything?
               </button>
-              <button className="composer-icon-button composer-camera-right" type="button" onClick={handleImageUpload} aria-label="Camera upload">
+              <button className="composer-icon-button composer-camera-right" type="button" onClick={handleImageUpload} aria-label="Camera upload" disabled={isUploading}>
                 📷
               </button>
             </div>
+            {(uploadMessage || uploadError) && (
+              <p className={`composer-feedback ${uploadError ? 'is-error' : 'is-success'}`} aria-live="polite">
+                {uploadError || uploadMessage}
+              </p>
+            )}
+            {uploadPreviewUrl && (
+              <div className="composer-preview">
+                <img src={uploadPreviewUrl} alt="Selected upload preview" />
+              </div>
+            )}
             <input
               ref={imageInputRef}
               className="composer-file-input"

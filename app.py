@@ -1,15 +1,19 @@
 import os
+from pathlib import Path
+from uuid import uuid4
 from datetime import datetime, timedelta, timezone
 
 import certifi
 import jwt
 from bson import ObjectId
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.exceptions import RequestEntityTooLarge
+from werkzeug.utils import secure_filename
 
 load_dotenv()
 
@@ -64,6 +68,15 @@ except Exception as exc:
     ) from exc
 
 app = Flask(__name__)
+UPLOAD_FOLDER = Path(__file__).resolve().parent / 'uploads'
+UPLOAD_FOLDER.mkdir(exist_ok=True)
+MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024
+ALLOWED_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+ALLOWED_IMAGE_MIMETYPES = {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}
+
+app.config['MAX_CONTENT_LENGTH'] = MAX_IMAGE_UPLOAD_BYTES
+app.config['UPLOAD_FOLDER'] = str(UPLOAD_FOLDER)
+
 allowed_origins = [FRONTEND_ORIGIN]
 allowed_origins.extend(
     [
@@ -77,6 +90,11 @@ CORS(app, resources={r'/api/*': {'origins': allowed_origins}})
 
 def json_error(message, status_code):
     return jsonify({'error': message}), status_code
+
+
+@app.errorhandler(RequestEntityTooLarge)
+def handle_request_too_large(_error):
+    return json_error('Image must be smaller than 5 MB.', 413)
 
 
 def normalize_email(email):
@@ -131,6 +149,44 @@ def health_check():
         return jsonify({'ok': True, 'database': MONGODB_DB_NAME})
     except Exception as exc:  # pragma: no cover - simple connection diagnostic
         return json_error(f'Database connection failed: {exc}', 500)
+
+
+@app.get('/api/uploads/<path:filename>')
+def serve_uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+
+@app.post('/api/uploads/image')
+def upload_image():
+    uploaded_file = request.files.get('image') or request.files.get('file')
+    if not uploaded_file or not uploaded_file.filename:
+        return json_error('An image file is required.', 400)
+
+    safe_filename = secure_filename(uploaded_file.filename)
+    if not safe_filename:
+        return json_error('The uploaded filename is not valid.', 400)
+
+    file_extension = os.path.splitext(safe_filename)[1].lower()
+    if file_extension not in ALLOWED_IMAGE_EXTENSIONS:
+        return json_error('Only JPG, PNG, GIF, and WebP images are allowed.', 400)
+
+    if uploaded_file.mimetype not in ALLOWED_IMAGE_MIMETYPES:
+        return json_error('Only image uploads are allowed.', 400)
+
+    if request.content_length and request.content_length > MAX_IMAGE_UPLOAD_BYTES:
+        return json_error('Image must be smaller than 5 MB.', 413)
+
+    stored_filename = f"{uuid4().hex}-{safe_filename}"
+    stored_path = UPLOAD_FOLDER / stored_filename
+    uploaded_file.save(stored_path)
+
+    file_url = f"{request.host_url.rstrip('/')}/api/uploads/{stored_filename}"
+
+    return jsonify({
+        'message': 'Image uploaded successfully.',
+        'filename': stored_filename,
+        'url': file_url,
+    }), 201
 
 
 @app.post('/api/auth/signup')
