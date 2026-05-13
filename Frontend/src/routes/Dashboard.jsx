@@ -3,7 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import { apiRequest, createItem, fetchItems } from '../services/api'
 
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
-const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+const MAX_IMAGE_COUNT = 5
+const ALLOWED_IMAGE_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'image/avif',
+  'image/bmp',
+  'image/tiff',
+  'image/heic',
+  'image/heif',
+  'image/x-icon',
+])
 const DEFAULT_ITEM_LOCATION = 'Campus'
 
 const STORIES = [
@@ -22,7 +34,7 @@ export default function Dashboard() {
   const [uploadMessage, setUploadMessage] = useState('')
   const [uploadError, setUploadError] = useState('')
   const [isUploading, setIsUploading] = useState(false)
-  const [uploadedImageUrl, setUploadedImageUrl] = useState('')
+  const [uploadedImages, setUploadedImages] = useState([])
 
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -118,54 +130,81 @@ export default function Dashboard() {
     setIsComposerOpen(true)
   }
 
+  function removeUploadedImage(indexToRemove) {
+    setUploadedImages((current) => {
+      const nextImages = current.filter((_, index) => index !== indexToRemove)
+      updatePreviewUrl(nextImages[0] || '')
+      return nextImages
+    })
+    setFormErrors((prev) => ({ ...prev, image: '' }))
+  }
+
+  function clearUploadedImages() {
+    setUploadedImages([])
+    updatePreviewUrl('')
+    setFormErrors((prev) => ({ ...prev, image: '' }))
+  }
+
   async function handleFileChange(event) {
     const fileInput = event.target
-    const selectedFile = event.target.files?.[0]
-    if (!selectedFile) {
+    const selectedFiles = Array.from(event.target.files || [])
+    if (selectedFiles.length === 0) {
       return
     }
 
-    if (!ALLOWED_IMAGE_TYPES.has(selectedFile.type)) {
-      setUploadError('Please choose a JPG, PNG, GIF, or WebP image.')
+    if (selectedFiles.length + uploadedImages.length > MAX_IMAGE_COUNT) {
+      setUploadError(`Please choose up to ${MAX_IMAGE_COUNT} images total.`)
       setUploadMessage('')
       fileInput.value = ''
       return
     }
 
-    if (selectedFile.size > MAX_IMAGE_SIZE_BYTES) {
-      setUploadError('Please choose an image smaller than 5 MB.')
+    const unsupportedFile = selectedFiles.find((selectedFile) => !ALLOWED_IMAGE_TYPES.has(selectedFile.type))
+    if (unsupportedFile) {
+      setUploadError('Please choose a supported image type (JPG, PNG, GIF, WebP, AVIF, BMP, TIFF, HEIC, or ICO).')
       setUploadMessage('')
       fileInput.value = ''
       return
     }
 
-    const previewUrl = URL.createObjectURL(selectedFile)
-    updatePreviewUrl(previewUrl)
     setUploadError('')
-    setUploadMessage('Uploading image...')
+    setUploadMessage(`Uploading ${selectedFiles.length} image${selectedFiles.length > 1 ? 's' : ''}...`)
     setIsUploading(true)
 
     try {
-      const formData = new FormData()
-      formData.append('image', selectedFile)
+      const uploadedUrls = []
 
-      const result = await apiRequest('/uploads/image', {
-        method: 'POST',
-        body: formData,
-      })
+      for (const selectedFile of selectedFiles) {
+        if (selectedFile.size > MAX_IMAGE_SIZE_BYTES) {
+          throw new Error('Please choose images smaller than 5 MB each.')
+        }
 
-      if (result?.url) {
-        updatePreviewUrl(result.url)
-        setUploadedImageUrl(result.url)
+        const formData = new FormData()
+        formData.append('image', selectedFile)
+
+        const result = await apiRequest('/uploads/image', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (result?.url) {
+          uploadedUrls.push(result.url)
+        }
       }
 
-      setUploadMessage(result?.message || 'Image uploaded successfully.')
+      const nextImages = [...uploadedImages, ...uploadedUrls]
+      setUploadedImages(nextImages)
+      updatePreviewUrl(nextImages[0] || '')
+      setUploadMessage(
+        uploadedUrls.length > 1
+          ? `${uploadedUrls.length} images uploaded successfully.`
+          : 'Image uploaded successfully.',
+      )
       setUploadError('')
       setFormErrors((prev) => ({ ...prev, image: '' }))
     } catch (uploadErr) {
       setUploadError(uploadErr instanceof Error ? uploadErr.message : 'Image upload failed.')
-      setUploadMessage('Preview ready locally, but upload failed.')
-      setUploadedImageUrl('')
+        setUploadMessage('')
     } finally {
       setIsUploading(false)
       fileInput.value = ''
@@ -191,7 +230,7 @@ export default function Dashboard() {
     if (!formData.description.trim()) nextErrors.description = 'Description is required.'
     if (!formData.category.trim()) nextErrors.category = 'Category is required.'
     if (!formData.status.trim()) nextErrors.status = 'Status is required.'
-    if (!uploadedImageUrl) nextErrors.image = 'Please upload at least one image.'
+    if (uploadedImages.length === 0) nextErrors.image = 'Please upload at least one image.'
 
     setFormErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
@@ -213,7 +252,8 @@ export default function Dashboard() {
         category: formData.category.trim(),
         status: formData.status.trim(),
         location: DEFAULT_ITEM_LOCATION,
-        image: uploadedImageUrl,
+        image: uploadedImages[0],
+        images: uploadedImages,
       }
 
       await createItem(payload)
@@ -227,7 +267,7 @@ export default function Dashboard() {
         status: 'active',
       })
       setFormErrors({})
-      setUploadedImageUrl('')
+      setUploadedImages([])
       updatePreviewUrl('')
       setUploadMessage('')
       setUploadError('')
@@ -337,6 +377,28 @@ export default function Dashboard() {
               {isComposerOpen && uploadPreviewUrl && (
                 <div className="composer-preview">
                   <img src={uploadPreviewUrl} alt="Selected upload preview" />
+                  {uploadedImages.length > 1 && (
+                    <div className="composer-preview-strip" aria-label="Selected image thumbnails">
+                      {uploadedImages.map((imageUrl, index) => (
+                        <div className="composer-thumb" key={`${imageUrl}-${index}`}>
+                          <img src={imageUrl} alt={`Selected image ${index + 1}`} />
+                          <button
+                            type="button"
+                            className="composer-thumb-remove"
+                            onClick={() => removeUploadedImage(index)}
+                            aria-label={`Remove image ${index + 1}`}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {uploadedImages.length > 0 && (
+                    <button type="button" className="composer-clear-images" onClick={clearUploadedImages}>
+                      Clear images
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -357,6 +419,7 @@ export default function Dashboard() {
                 className="composer-file-input"
                 type="file"
                 accept="image/*"
+                multiple
                 onChange={handleFileChange}
               />
             </form>
