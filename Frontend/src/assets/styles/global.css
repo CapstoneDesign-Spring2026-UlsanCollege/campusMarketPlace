@@ -89,6 +89,28 @@ input {
   flex-wrap: wrap;
 }
 
+.currency-select-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.currency-select {
+  padding: 0.45rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+}
+
+.currency-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(77, 195, 255, 0.16);
+}
+
 .nav-links a {
   padding: 0.55rem 0.9rem;
   border-radius: 999px;
