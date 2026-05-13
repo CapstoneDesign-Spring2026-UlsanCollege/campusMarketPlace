@@ -1,0 +1,6 @@
+Frontend/dist/
+Frontend/node_modules/
+__pycache__/
+*.pyc
+uploads/
+.venv/
