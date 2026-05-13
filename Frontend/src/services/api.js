@@ -67,3 +67,7 @@ export async function createItem(itemData) {
     body: JSON.stringify(itemData),
   })
 }
+
+export async function fetchProfile() {
+  return apiRequest('/profile')
+}
