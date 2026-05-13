@@ -10,6 +10,7 @@ import Dashboard from './routes/Dashboard'
 import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from './services/currency'
 
 const CURRENCY_STORAGE_KEY = 'campusMarketplaceCurrency'
+const LANGUAGE_STORAGE_KEY = 'campusMarketplaceLanguage'
 
 export default function App() {
   const [currency, setCurrency] = useState(() => {
@@ -20,13 +21,22 @@ export default function App() {
     return DEFAULT_CURRENCY
   })
 
+  const [language, setLanguage] = useState(() => {
+    const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY)
+    return saved || 'en'
+  })
+
   useEffect(() => {
     localStorage.setItem(CURRENCY_STORAGE_KEY, currency)
   }, [currency])
 
+  useEffect(() => {
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, language)
+  }, [language])
+
   return (
     <div className="app-shell">
-      <Navbar currency={currency} onCurrencyChange={setCurrency} />
+      <Navbar currency={currency} onCurrencyChange={setCurrency} language={language} onLanguageChange={setLanguage} />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/browse" element={<Browse currency={currency} />} />
