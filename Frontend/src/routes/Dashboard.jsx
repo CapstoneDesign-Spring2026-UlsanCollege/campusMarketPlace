@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { apiRequest, createItem, fetchItems } from '../services/api'
 import { convertDisplayPriceToUsd, formatPriceFromUsd, getPriceInputMeta } from '../services/currency'
 
@@ -29,7 +29,9 @@ const STORIES = [
 
 export default function Dashboard({ currency }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [user, setUser] = useState(null)
+  const [mode, setMode] = useState(location.state?.mode || 'sell') // Default to 'sell' mode
 
   const [uploadPreviewUrl, setUploadPreviewUrl] = useState('')
   const [uploadMessage, setUploadMessage] = useState('')
@@ -94,7 +96,19 @@ export default function Dashboard({ currency }) {
       setLoading(true)
       setError(null)
       const data = await fetchItems(1, 20)
-      setItems(data.items || [])
+      
+      // Filter items based on mode
+      let filteredItems = data.items || []
+      
+      if (mode === 'sell') {
+        // Show only items posted by the current user
+        filteredItems = filteredItems.filter(item => item.sellerName === user?.firstName)
+      } else if (mode === 'buy') {
+        // Show only items posted by other users (exclude current user's items)
+        filteredItems = filteredItems.filter(item => item.sellerName !== user?.firstName)
+      }
+      
+      setItems(filteredItems)
     } catch (err) {
       setError(err.message || 'Failed to load items')
       console.error('Error fetching items:', err)
@@ -105,7 +119,7 @@ export default function Dashboard({ currency }) {
 
   useEffect(() => {
     loadItems()
-  }, [])
+  }, [mode, user])
 
   const firstName = user?.firstName || 'Student'
   const priceInputMeta = getPriceInputMeta(currency)
@@ -285,7 +299,9 @@ export default function Dashboard({ currency }) {
     <main className="page-shell marketplace-shell">
       <section className="feed-layout">
         <section className="feed-main-col">
-          <section className="feed-panel composer" aria-label="Post composer">
+          {mode === 'sell' && (
+            <>
+              <section className="feed-panel composer" aria-label="Post composer">
             <form className="composer-form" onSubmit={handlePostItemSubmit} noValidate>
               <div className="composer-row">
                 <div className="avatar-badge" aria-hidden="true">
@@ -425,17 +441,22 @@ export default function Dashboard({ currency }) {
                 onChange={handleFileChange}
               />
             </form>
-          </section>
+              </section>
 
-          <section className="stories-row" aria-label="Stories">
-            {STORIES.map((story) => (
-              <article className="story-card" key={story}>
-                <span>{story}</span>
-              </article>
-            ))}
-          </section>
+              <section className="stories-row" aria-label="Stories">
+                {STORIES.map((story) => (
+                  <article className="story-card" key={story}>
+                    <span>{story}</span>
+                  </article>
+                ))}
+              </section>
+            </>
+          )}
 
           <section className="feed-post-list" aria-label="Marketplace feed posts">
+            <div className="feed-header">
+              <h2>{mode === 'buy' ? '🛍️ Browse Items to Buy' : '📤 Your Listed Items'}</h2>
+            </div>
             {loading ? (
               <div className="loading-state">
                 <p>Loading marketplace items...</p>
@@ -446,7 +467,7 @@ export default function Dashboard({ currency }) {
               </div>
             ) : items.length === 0 ? (
               <div className="empty-state">
-                <p>No items available yet.</p>
+                <p>{mode === 'buy' ? 'No items available to buy right now.' : 'You haven\'t posted any items yet. Start selling!'}</p>
               </div>
             ) : (
               items.map((item) => (
@@ -467,9 +488,18 @@ export default function Dashboard({ currency }) {
                     <p>{item.description}</p>
                   </div>
                   <footer className="post-actions" aria-label="Post actions">
-                    <button type="button">Like</button>
-                    <button type="button">Comment</button>
-                    <button type="button">Send Message</button>
+                    {mode === 'buy' ? (
+                      <>
+                        <button type="button">🛒 Buy</button>
+                        <button type="button">💬 Contact Seller</button>
+                        <button type="button">❤️ Save</button>
+                      </>
+                    ) : (
+                      <>
+                        <button type="button">✏️ Edit</button>
+                        <button type="button">🗑️ Delete</button>
+                      </>
+                    )}
                   </footer>
                 </article>
               ))
