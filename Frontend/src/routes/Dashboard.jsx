@@ -33,11 +33,13 @@ export default function Dashboard() {
     price: '',
     description: '',
     category: '',
+    status: 'active',
   })
   const [formErrors, setFormErrors] = useState({})
   const [submitMessage, setSubmitMessage] = useState('')
   const [submitError, setSubmitError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isComposerOpen, setIsComposerOpen] = useState(false)
 
   const imageInputRef = useRef(null)
   const previewObjectUrlRef = useRef('')
@@ -108,7 +110,12 @@ export default function Dashboard() {
   }
 
   function handleImageUpload() {
+    setIsComposerOpen(true)
     imageInputRef.current?.click()
+  }
+
+  function openComposer() {
+    setIsComposerOpen(true)
   }
 
   async function handleFileChange(event) {
@@ -183,6 +190,7 @@ export default function Dashboard() {
     }
     if (!formData.description.trim()) nextErrors.description = 'Description is required.'
     if (!formData.category.trim()) nextErrors.category = 'Category is required.'
+    if (!formData.status.trim()) nextErrors.status = 'Status is required.'
     if (!uploadedImageUrl) nextErrors.image = 'Please upload at least one image.'
 
     setFormErrors(nextErrors)
@@ -203,6 +211,7 @@ export default function Dashboard() {
         price: Number(formData.price),
         description: formData.description.trim(),
         category: formData.category.trim(),
+        status: formData.status.trim(),
         location: DEFAULT_ITEM_LOCATION,
         image: uploadedImageUrl,
       }
@@ -215,6 +224,7 @@ export default function Dashboard() {
         price: '',
         description: '',
         category: '',
+        status: 'active',
       })
       setFormErrors({})
       setUploadedImageUrl('')
@@ -240,6 +250,15 @@ export default function Dashboard() {
                   {firstName.slice(0, 1)}
                 </div>
                 <button
+                  className="composer-input"
+                  type="button"
+                  onClick={openComposer}
+                  aria-label="Open post composer"
+                  disabled={isSubmitting || isUploading}
+                >
+                  What's on your mind?
+                </button>
+                <button
                   className="composer-icon-button composer-camera-right"
                   type="button"
                   onClick={handleImageUpload}
@@ -250,7 +269,8 @@ export default function Dashboard() {
                 </button>
               </div>
 
-              <div className="composer-fields">
+              {isComposerOpen && (
+                <div className="composer-fields">
                 <input
                   name="title"
                   type="text"
@@ -283,6 +303,17 @@ export default function Dashboard() {
                 />
                 {formErrors.category && <p className="composer-feedback is-error">{formErrors.category}</p>}
 
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleFormChange}
+                  className="composer-text-input"
+                >
+                  <option value="active">Active</option>
+                  <option value="draft">Draft</option>
+                </select>
+                {formErrors.status && <p className="composer-feedback is-error">{formErrors.status}</p>}
+
                 <textarea
                   name="description"
                   placeholder="Description"
@@ -294,29 +325,32 @@ export default function Dashboard() {
                 {formErrors.description && <p className="composer-feedback is-error">{formErrors.description}</p>}
 
                 {formErrors.image && <p className="composer-feedback is-error">{formErrors.image}</p>}
-              </div>
+                </div>
+              )}
 
-              {(uploadMessage || uploadError) && (
+              {isComposerOpen && (uploadMessage || uploadError) && (
                 <p className={`composer-feedback ${uploadError ? 'is-error' : 'is-success'}`} aria-live="polite">
                   {uploadError || uploadMessage}
                 </p>
               )}
 
-              {uploadPreviewUrl && (
+              {isComposerOpen && uploadPreviewUrl && (
                 <div className="composer-preview">
                   <img src={uploadPreviewUrl} alt="Selected upload preview" />
                 </div>
               )}
 
-              {(submitMessage || submitError) && (
+              {isComposerOpen && (submitMessage || submitError) && (
                 <p className={`composer-feedback ${submitError ? 'is-error' : 'is-success'}`} aria-live="polite">
                   {submitError || submitMessage}
                 </p>
               )}
 
-              <button className="composer-submit" type="submit" disabled={isSubmitting || isUploading}>
-                {isSubmitting ? 'Posting...' : 'Post Item'}
-              </button>
+              {isComposerOpen && (
+                <button className="composer-submit" type="submit" disabled={isSubmitting || isUploading}>
+                  {isSubmitting ? 'Posting...' : 'Post Item'}
+                </button>
+              )}
 
               <input
                 ref={imageInputRef}
