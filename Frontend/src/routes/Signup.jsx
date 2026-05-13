@@ -89,7 +89,7 @@ function validateAll(values) {
   }, {})
 }
 
-export default function Signup() {
+export default function Signup({ onAuthChange }) {
   const navigate = useNavigate()
   const [formValues, setFormValues] = useState(initialValues)
   const [errors, setErrors] = useState({})
@@ -174,6 +174,9 @@ export default function Signup() {
 
       localStorage.setItem('campusMarketplaceToken', response.token)
       localStorage.setItem('campusMarketplaceUser', JSON.stringify(response.user))
+      if (typeof onAuthChange === 'function') {
+        onAuthChange()
+      }
 
       setSubmitStatus({ type: '', message: '' })
       navigate('/dashboard', { replace: true })

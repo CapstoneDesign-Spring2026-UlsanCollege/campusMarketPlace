@@ -315,6 +315,10 @@ def normalize_email(email):
 
 
 def build_user_payload(user_doc):
+    payment_methods = user_doc.get('paymentMethods', [])
+    if not isinstance(payment_methods, list):
+        payment_methods = []
+
     return {
         'id': str(user_doc['_id']),
         'firstName': user_doc['firstName'],
@@ -322,6 +326,51 @@ def build_user_payload(user_doc):
         'lastName': user_doc['lastName'],
         'email': user_doc['email'],
         'isVerified': user_doc.get('isVerified', False),
+        'location': user_doc.get('location', ''),
+        'paymentMethods': payment_methods,
+    }
+
+
+def get_safe_payment_methods(user_doc):
+    methods = user_doc.get('paymentMethods', [])
+    if not isinstance(methods, list):
+        return []
+
+    safe_methods = []
+    allowed_keys = {'id', 'label', 'type', 'provider', 'last4', 'isDefault'}
+    for method in methods:
+        if isinstance(method, dict):
+            safe_methods.append({key: method[key] for key in allowed_keys if key in method and method[key] is not None})
+        elif isinstance(method, str) and method.strip():
+            safe_methods.append({'label': method.strip()})
+
+    return safe_methods
+
+
+def fetch_user_activity(user_id):
+    sell_history = list(
+        items.find({'seller_id': user_id})
+        .sort('createdAt', -1)
+        .limit(20)
+    )
+
+    buy_query = {
+        '$or': [
+            {'buyer_id': user_id},
+            {'buyerId': user_id},
+            {'purchasedBy': user_id},
+            {'purchased_by': user_id},
+        ]
+    }
+    buy_history = list(
+        items.find(buy_query)
+        .sort('createdAt', -1)
+        .limit(20)
+    )
+
+    return {
+        'buyHistory': [serialize_item_document(item) for item in buy_history],
+        'sellHistory': [serialize_item_document(item) for item in sell_history],
     }
 
 
@@ -521,6 +570,43 @@ def me():
         return json_error('Invalid or expired token.', 401)
 
     return jsonify({'user': build_user_payload(user_doc)})
+
+
+@app.get('/api/profile')
+def profile_summary():
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return json_error('Missing bearer token.', 401)
+
+    token = auth_header.removeprefix('Bearer ').strip()
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.PyJWTError:
+        return json_error('Invalid or expired token.', 401)
+
+    user_id = parse_object_id(payload.get('sub'))
+    if not user_id:
+        return json_error('Invalid or expired token.', 401)
+
+    user_doc = users.find_one({'_id': user_id})
+    if not user_doc:
+        return json_error('Invalid or expired token.', 401)
+
+    activity = fetch_user_activity(user_id)
+    user_payload = build_user_payload(user_doc)
+    user_payload['paymentMethods'] = get_safe_payment_methods(user_doc)
+
+    return jsonify({
+        'user': user_payload,
+        'profile': {
+            'location': user_doc.get('location', ''),
+            'paymentMethods': get_safe_payment_methods(user_doc),
+            'sellCount': len(activity['sellHistory']),
+            'buyCount': len(activity['buyHistory']),
+        },
+        'buyHistory': activity['buyHistory'],
+        'sellHistory': activity['sellHistory'],
+    })
 
 
 @app.get('/api/items')
