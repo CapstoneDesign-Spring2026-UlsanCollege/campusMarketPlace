@@ -38,8 +38,13 @@ export default function Dashboard({ currency }) {
   const [uploadedImages, setUploadedImages] = useState([])
 
   const [items, setItems] = useState([])
+  const [userItems, setUserItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  const [activeSection, setActiveSection] = useState('browse')
+  const [editingItemId, setEditingItemId] = useState(null)
+  const [editFormData, setEditFormData] = useState({})
 
   const [formData, setFormData] = useState({
     title: '',
@@ -95,6 +100,12 @@ export default function Dashboard({ currency }) {
       setError(null)
       const data = await fetchItems(1, 20)
       setItems(data.items || [])
+      
+      // Filter user's items from all items
+      if (user) {
+        const filtered = (data.items || []).filter((item) => item.sellerId === user._id)
+        setUserItems(filtered)
+      }
     } catch (err) {
       setError(err.message || 'Failed to load items')
       console.error('Error fetching items:', err)
@@ -221,6 +232,44 @@ export default function Dashboard({ currency }) {
     setSubmitMessage('')
   }
 
+  function startEditingItem(item) {
+    setEditingItemId(item._id)
+    setEditFormData({
+      price: formatPriceFromUsd(item.price, currency),
+      itemStatus: item.itemStatus || 'sell',
+    })
+  }
+
+  function cancelEditingItem() {
+    setEditingItemId(null)
+    setEditFormData({})
+  }
+
+  function handleEditFormChange(event) {
+    const { name, value } = event.target
+    setEditFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  async function saveItemChanges(itemId) {
+    try {
+      const payload = {
+        price: convertDisplayPriceToUsd(editFormData.price, currency),
+        itemStatus: editFormData.itemStatus,
+      }
+
+      await apiRequest(`/items/${itemId}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      })
+
+      await loadItems()
+      setEditingItemId(null)
+      setEditFormData({})
+    } catch (err) {
+      console.error('Error updating item:', err)
+    }
+  }
+
   function validateForm() {
     const nextErrors = {}
     const priceValue = Number(formData.price)
@@ -285,196 +334,325 @@ export default function Dashboard({ currency }) {
     <main className="page-shell marketplace-shell">
       <section className="feed-layout">
         <section className="feed-main-col">
-          <section className="feed-panel composer" aria-label="Post composer">
-            <form className="composer-form" onSubmit={handlePostItemSubmit} noValidate>
-              <div className="composer-row">
-                <div className="avatar-badge" aria-hidden="true">
-                  {firstName.slice(0, 1)}
-                </div>
-                <button
-                  className="composer-input"
-                  type="button"
-                  onClick={openComposer}
-                  aria-label="Open post composer"
-                  disabled={isSubmitting || isUploading}
-                >
-                  What's on your mind?
-                </button>
-                <button
-                  className="composer-icon-button composer-camera-right"
-                  type="button"
-                  onClick={handleImageUpload}
-                  aria-label="Upload image"
-                  disabled={isUploading || isSubmitting}
-                >
-                  📷
-                </button>
-              </div>
-
-              {isComposerOpen && (
-                <div className="composer-fields">
-                <input
-                  name="title"
-                  type="text"
-                  placeholder="Title"
-                  value={formData.title}
-                  onChange={handleFormChange}
-                  className="composer-text-input"
-                />
-                {formErrors.title && <p className="composer-feedback is-error">{formErrors.title}</p>}
-
-                <input
-                  name="price"
-                  type="number"
-                  min={priceInputMeta.min}
-                  step={priceInputMeta.step}
-                  placeholder={priceInputMeta.placeholder}
-                  value={formData.price}
-                  onChange={handleFormChange}
-                  className="composer-text-input"
-                />
-                {formErrors.price && <p className="composer-feedback is-error">{formErrors.price}</p>}
-
-                <input
-                  name="category"
-                  type="text"
-                  placeholder="Category"
-                  value={formData.category}
-                  onChange={handleFormChange}
-                  className="composer-text-input"
-                />
-                {formErrors.category && <p className="composer-feedback is-error">{formErrors.category}</p>}
-
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleFormChange}
-                  className="composer-text-input"
-                >
-                  <option value="active">Active</option>
-                  <option value="draft">Draft</option>
-                </select>
-                {formErrors.status && <p className="composer-feedback is-error">{formErrors.status}</p>}
-
-                <textarea
-                  name="description"
-                  placeholder="Description"
-                  value={formData.description}
-                  onChange={handleFormChange}
-                  className="composer-textarea"
-                  rows={4}
-                />
-                {formErrors.description && <p className="composer-feedback is-error">{formErrors.description}</p>}
-
-                {formErrors.image && <p className="composer-feedback is-error">{formErrors.image}</p>}
-                </div>
-              )}
-
-              {isComposerOpen && (uploadMessage || uploadError) && (
-                <p className={`composer-feedback ${uploadError ? 'is-error' : 'is-success'}`} aria-live="polite">
-                  {uploadError || uploadMessage}
-                </p>
-              )}
-
-              {isComposerOpen && uploadPreviewUrl && (
-                <div className="composer-preview">
-                  <img src={uploadPreviewUrl} alt="Selected upload preview" />
-                  {uploadedImages.length > 1 && (
-                    <div className="composer-preview-strip" aria-label="Selected image thumbnails">
-                      {uploadedImages.map((imageUrl, index) => (
-                        <div className="composer-thumb" key={`${imageUrl}-${index}`}>
-                          <img src={imageUrl} alt={`Selected image ${index + 1}`} />
-                          <button
-                            type="button"
-                            className="composer-thumb-remove"
-                            onClick={() => removeUploadedImage(index)}
-                            aria-label={`Remove image ${index + 1}`}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {uploadedImages.length > 0 && (
-                    <button type="button" className="composer-clear-images" onClick={clearUploadedImages}>
-                      Clear images
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {isComposerOpen && (submitMessage || submitError) && (
-                <p className={`composer-feedback ${submitError ? 'is-error' : 'is-success'}`} aria-live="polite">
-                  {submitError || submitMessage}
-                </p>
-              )}
-
-              {isComposerOpen && (
-                <button className="composer-submit" type="submit" disabled={isSubmitting || isUploading}>
-                  {isSubmitting ? 'Posting...' : 'Post Item'}
-                </button>
-              )}
-
-              <input
-                ref={imageInputRef}
-                className="composer-file-input"
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleFileChange}
-              />
-            </form>
+          {/* Add Item Button */}
+          <section className="add-item-section">
+            <button
+              className="button button-primary"
+              onClick={() => {
+                setActiveSection('myItems')
+                setIsComposerOpen(true)
+              }}
+            >
+              + Add Item
+            </button>
           </section>
 
-          <section className="stories-row" aria-label="Stories">
-            {STORIES.map((story) => (
-              <article className="story-card" key={story}>
-                <span>{story}</span>
-              </article>
-            ))}
+          {/* Section Tabs */}
+          <section className="dashboard-tabs">
+            <button
+              className={`tab-button ${activeSection === 'browse' ? 'active' : ''}`}
+              onClick={() => setActiveSection('browse')}
+            >
+              Browse All Items
+            </button>
+            <button
+              className={`tab-button ${activeSection === 'myItems' ? 'active' : ''}`}
+              onClick={() => setActiveSection('myItems')}
+            >
+              My Items
+            </button>
           </section>
 
-          <section className="feed-post-list" aria-label="Marketplace feed posts">
-            {loading ? (
-              <div className="loading-state">
-                <p>Loading marketplace items...</p>
-              </div>
-            ) : error ? (
-              <div className="error-state">
-                <p>Error: {error}</p>
-              </div>
-            ) : items.length === 0 ? (
-              <div className="empty-state">
-                <p>No items available yet.</p>
-              </div>
-            ) : (
-              items.map((item) => (
-                <article className="feed-panel post-card" key={item._id}>
-                  <header className="post-header">
-                    <div className="avatar-badge" aria-hidden="true">
-                      {(item.sellerName || 'S').slice(0, 1)}
-                    </div>
-                    <div>
-                      <strong>{item.sellerName || 'Seller'}</strong>
-                      <p>{item.location || 'Campus'}</p>
-                    </div>
-                  </header>
-                  <div className="post-image" aria-hidden="true" />
-                  <div className="post-body">
-                    <div className="post-price">{formatPriceFromUsd(item.price, currency)}</div>
-                    <h2>{item.title}</h2>
-                    <p>{item.description}</p>
+          {/* Composer - Only shown in My Items section */}
+          {activeSection === 'myItems' && (
+            <section className="feed-panel composer" aria-label="Post composer">
+              <form className="composer-form" onSubmit={handlePostItemSubmit} noValidate>
+                <div className="composer-row">
+                  <div className="avatar-badge" aria-hidden="true">
+                    {firstName.slice(0, 1)}
                   </div>
-                  <footer className="post-actions" aria-label="Post actions">
-                    <button type="button">Like</button>
-                    <button type="button">Comment</button>
-                    <button type="button">Send Message</button>
-                  </footer>
+                  <button
+                    className="composer-input"
+                    type="button"
+                    onClick={openComposer}
+                    aria-label="Open post composer"
+                    disabled={isSubmitting || isUploading}
+                  >
+                    What's on your mind?
+                  </button>
+                  <button
+                    className="composer-icon-button composer-camera-right"
+                    type="button"
+                    onClick={handleImageUpload}
+                    aria-label="Upload image"
+                    disabled={isUploading || isSubmitting}
+                  >
+                    📷
+                  </button>
+                </div>
+
+                {isComposerOpen && (
+                  <div className="composer-fields">
+                    <input
+                      name="title"
+                      type="text"
+                      placeholder="Title"
+                      value={formData.title}
+                      onChange={handleFormChange}
+                      className="composer-text-input"
+                    />
+                    {formErrors.title && <p className="composer-feedback is-error">{formErrors.title}</p>}
+
+                    <input
+                      name="price"
+                      type="number"
+                      min={priceInputMeta.min}
+                      step={priceInputMeta.step}
+                      placeholder={priceInputMeta.placeholder}
+                      value={formData.price}
+                      onChange={handleFormChange}
+                      className="composer-text-input"
+                    />
+                    {formErrors.price && <p className="composer-feedback is-error">{formErrors.price}</p>}
+
+                    <input
+                      name="category"
+                      type="text"
+                      placeholder="Category"
+                      value={formData.category}
+                      onChange={handleFormChange}
+                      className="composer-text-input"
+                    />
+                    {formErrors.category && <p className="composer-feedback is-error">{formErrors.category}</p>}
+
+                    <select
+                      name="status"
+                      value={formData.status}
+                      onChange={handleFormChange}
+                      className="composer-text-input"
+                    >
+                      <option value="active">Active</option>
+                      <option value="draft">Draft</option>
+                    </select>
+                    {formErrors.status && <p className="composer-feedback is-error">{formErrors.status}</p>}
+
+                    <textarea
+                      name="description"
+                      placeholder="Description"
+                      value={formData.description}
+                      onChange={handleFormChange}
+                      className="composer-textarea"
+                      rows={4}
+                    />
+                    {formErrors.description && <p className="composer-feedback is-error">{formErrors.description}</p>}
+
+                    {formErrors.image && <p className="composer-feedback is-error">{formErrors.image}</p>}
+                  </div>
+                )}
+
+                {isComposerOpen && (uploadMessage || uploadError) && (
+                  <p className={`composer-feedback ${uploadError ? 'is-error' : 'is-success'}`} aria-live="polite">
+                    {uploadError || uploadMessage}
+                  </p>
+                )}
+
+                {isComposerOpen && uploadPreviewUrl && (
+                  <div className="composer-preview">
+                    <img src={uploadPreviewUrl} alt="Selected upload preview" />
+                    {uploadedImages.length > 1 && (
+                      <div className="composer-preview-strip" aria-label="Selected image thumbnails">
+                        {uploadedImages.map((imageUrl, index) => (
+                          <div className="composer-thumb" key={`${imageUrl}-${index}`}>
+                            <img src={imageUrl} alt={`Selected image ${index + 1}`} />
+                            <button
+                              type="button"
+                              className="composer-thumb-remove"
+                              onClick={() => removeUploadedImage(index)}
+                              aria-label={`Remove image ${index + 1}`}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {uploadedImages.length > 0 && (
+                      <button type="button" className="composer-clear-images" onClick={clearUploadedImages}>
+                        Clear images
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {isComposerOpen && (submitMessage || submitError) && (
+                  <p className={`composer-feedback ${submitError ? 'is-error' : 'is-success'}`} aria-live="polite">
+                    {submitError || submitMessage}
+                  </p>
+                )}
+
+                {isComposerOpen && (
+                  <button className="composer-submit" type="submit" disabled={isSubmitting || isUploading}>
+                    {isSubmitting ? 'Posting...' : 'Post Item'}
+                  </button>
+                )}
+
+                <input
+                  ref={imageInputRef}
+                  className="composer-file-input"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileChange}
+                />
+              </form>
+            </section>
+          )}
+
+          {/* Stories Row - Only shown in Browse section */}
+          {activeSection === 'browse' && (
+            <section className="stories-row" aria-label="Stories">
+              {STORIES.map((story) => (
+                <article className="story-card" key={story}>
+                  <span>{story}</span>
                 </article>
-              ))
-            )}
-          </section>
+              ))}
+            </section>
+          )}
+
+          {/* Content based on active section */}
+          {activeSection === 'browse' && (
+            <section className="feed-post-list" aria-label="Marketplace feed posts">
+              {loading ? (
+                <div className="loading-state">
+                  <p>Loading marketplace items...</p>
+                </div>
+              ) : error ? (
+                <div className="error-state">
+                  <p>Error: {error}</p>
+                </div>
+              ) : items.length === 0 ? (
+                <div className="empty-state">
+                  <p>No items available yet.</p>
+                </div>
+              ) : (
+                items.map((item) => (
+                  <article className="feed-panel post-card" key={item._id}>
+                    <header className="post-header">
+                      <div className="avatar-badge" aria-hidden="true">
+                        {(item.sellerName || 'S').slice(0, 1)}
+                      </div>
+                      <div>
+                        <strong>{item.sellerName || 'Seller'}</strong>
+                        <p>{item.location || 'Campus'}</p>
+                      </div>
+                    </header>
+                    <div className="post-image" aria-hidden="true" />
+                    <div className="post-body">
+                      <div className="post-price">{formatPriceFromUsd(item.price, currency)}</div>
+                      <h2>{item.title}</h2>
+                      <p>{item.description}</p>
+                    </div>
+                    <footer className="post-actions" aria-label="Post actions">
+                      <button type="button">Like</button>
+                      <button type="button">Comment</button>
+                      <button type="button">Send Message</button>
+                    </footer>
+                  </article>
+                ))
+              )}
+            </section>
+          )}
+
+          {/* My Items Section */}
+          {activeSection === 'myItems' && (
+            <section className="my-items-list" aria-label="My uploaded items">
+              {loading ? (
+                <div className="loading-state">
+                  <p>Loading your items...</p>
+                </div>
+              ) : userItems.length === 0 ? (
+                <div className="empty-state">
+                  <p>You haven't uploaded any items yet. Click "Add Item" to get started!</p>
+                </div>
+              ) : (
+                userItems.map((item) => (
+                  <article className="feed-panel my-item-card" key={item._id}>
+                    <header className="post-header">
+                      <div className="avatar-badge" aria-hidden="true">
+                        {firstName.slice(0, 1)}
+                      </div>
+                      <div>
+                        <strong>{firstName}</strong>
+                        <p>{item.location || 'Campus'}</p>
+                      </div>
+                    </header>
+                    <div className="post-image" aria-hidden="true" />
+                    <div className="post-body">
+                      {editingItemId === item._id ? (
+                        <div className="item-edit-form">
+                          <div className="edit-field">
+                            <label>Price</label>
+                            <input
+                              type="number"
+                              name="price"
+                              value={editFormData.price}
+                              onChange={handleEditFormChange}
+                              min={priceInputMeta.min}
+                              step={priceInputMeta.step}
+                              className="edit-input"
+                            />
+                          </div>
+                          <div className="edit-field">
+                            <label>Status</label>
+                            <select
+                              name="itemStatus"
+                              value={editFormData.itemStatus}
+                              onChange={handleEditFormChange}
+                              className="edit-input"
+                            >
+                              <option value="sell">For Sale</option>
+                              <option value="reserved">Reserved</option>
+                              <option value="sold">Sold</option>
+                              <option value="sold out">Sold Out</option>
+                            </select>
+                          </div>
+                          <div className="edit-actions">
+                            <button
+                              className="button button-primary button-sm"
+                              onClick={() => saveItemChanges(item._id)}
+                            >
+                              Save
+                            </button>
+                            <button
+                              className="button button-secondary button-sm"
+                              onClick={cancelEditingItem}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="post-price">{formatPriceFromUsd(item.price, currency)}</div>
+                          <h2>{item.title}</h2>
+                          <p>{item.description}</p>
+                          <div className="item-status-badge">
+                            Status: <span className="status-value">{item.itemStatus || 'sell'}</span>
+                          </div>
+                          <button
+                            className="button button-secondary button-sm"
+                            onClick={() => startEditingItem(item)}
+                          >
+                            Edit Price & Status
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </article>
+                ))
+              )}
+            </section>
+          )}
         </section>
       </section>
     </main>
