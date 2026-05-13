@@ -7,7 +7,8 @@ import certifi
 import jwt
 from bson import ObjectId
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, has_request_context
+import re
 from flask_cors import CORS
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError, OperationFailure
@@ -45,7 +46,7 @@ JWT_EXPIRES_HOURS = int(os.getenv('JWT_EXPIRES_HOURS', '24'))
 FRONTEND_ORIGIN = os.getenv('FRONTEND_ORIGIN', 'http://localhost:5173')
 ADDITIONAL_FRONTEND_ORIGINS = os.getenv(
     'ADDITIONAL_FRONTEND_ORIGINS',
-    'http://localhost:5176',
+    'http://localhost:5176,https://capstonedesign-spring2026-ulsancollege.github.io',
 )
 
 if not MONGODB_URI:
@@ -186,6 +187,26 @@ def serialize_item_document(item_doc):
         item_doc['images'] = []
         item_doc['image'] = None
 
+    # Normalize image URLs to absolute so the frontend can reliably load them.
+    image_val = item_doc.get('image')
+    if isinstance(image_val, str) and image_val:
+        # If it's not already an absolute URL, and we're in a request context,
+        # prefix with the current host URL so clients receive a stable absolute URL.
+        if not re.match(r'^https?://', image_val) and has_request_context():
+            base = request.host_url.rstrip('/')
+            item_doc['image'] = f"{base}/{image_val.lstrip('/')}"
+
+    # Also normalize any images entries that are plain strings to absolute URLs.
+    if isinstance(item_doc.get('images'), list) and has_request_context():
+        normalized = []
+        base = request.host_url.rstrip('/')
+        for v in item_doc.get('images'):
+            if isinstance(v, str) and v and not re.match(r'^https?://', v) and not v.startswith('data:') and not v.startswith('blob:'):
+                normalized.append(f"{base}/{v.lstrip('/')}")
+            else:
+                normalized.append(v)
+        item_doc['images'] = normalized
+
     # Normalize price: keep numeric `price` for frontend compatibility,
     # expose `price_currency` if a richer price object exists.
     raw_price = item_doc.get('price')
@@ -239,12 +260,31 @@ app = Flask(__name__)
 UPLOAD_FOLDER = Path(__file__).resolve().parent / 'uploads'
 UPLOAD_FOLDER.mkdir(exist_ok=True)
 MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024
-ALLOWED_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+ALLOWED_IMAGE_EXTENSIONS = {
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.gif',
+    '.webp',
+    '.avif',
+    '.bmp',
+    '.tif',
+    '.tiff',
+    '.heic',
+    '.heif',
+    '.ico',
+}
 ALLOWED_IMAGE_MIMETYPES = {
     'image/jpeg',
     'image/png',
     'image/gif',
     'image/webp',
+    'image/avif',
+    'image/bmp',
+    'image/tiff',
+    'image/heic',
+    'image/heif',
+    'image/x-icon',
 }
 
 app.config['MAX_CONTENT_LENGTH'] = MAX_IMAGE_UPLOAD_BYTES
@@ -275,6 +315,10 @@ def normalize_email(email):
 
 
 def build_user_payload(user_doc):
+    payment_methods = user_doc.get('paymentMethods', [])
+    if not isinstance(payment_methods, list):
+        payment_methods = []
+
     return {
         'id': str(user_doc['_id']),
         'firstName': user_doc['firstName'],
@@ -282,6 +326,51 @@ def build_user_payload(user_doc):
         'lastName': user_doc['lastName'],
         'email': user_doc['email'],
         'isVerified': user_doc.get('isVerified', False),
+        'location': user_doc.get('location', ''),
+        'paymentMethods': payment_methods,
+    }
+
+
+def get_safe_payment_methods(user_doc):
+    methods = user_doc.get('paymentMethods', [])
+    if not isinstance(methods, list):
+        return []
+
+    safe_methods = []
+    allowed_keys = {'id', 'label', 'type', 'provider', 'last4', 'isDefault'}
+    for method in methods:
+        if isinstance(method, dict):
+            safe_methods.append({key: method[key] for key in allowed_keys if key in method and method[key] is not None})
+        elif isinstance(method, str) and method.strip():
+            safe_methods.append({'label': method.strip()})
+
+    return safe_methods
+
+
+def fetch_user_activity(user_id):
+    sell_history = list(
+        items.find({'seller_id': user_id})
+        .sort('createdAt', -1)
+        .limit(20)
+    )
+
+    buy_query = {
+        '$or': [
+            {'buyer_id': user_id},
+            {'buyerId': user_id},
+            {'purchasedBy': user_id},
+            {'purchased_by': user_id},
+        ]
+    }
+    buy_history = list(
+        items.find(buy_query)
+        .sort('createdAt', -1)
+        .limit(20)
+    )
+
+    return {
+        'buyHistory': [serialize_item_document(item) for item in buy_history],
+        'sellHistory': [serialize_item_document(item) for item in sell_history],
     }
 
 
@@ -349,7 +438,7 @@ def upload_image():
     file_extension = os.path.splitext(safe_filename)[1].lower()
     if file_extension not in ALLOWED_IMAGE_EXTENSIONS:
         return json_error(
-            'Only JPG, PNG, GIF, and WebP images are allowed.',
+            'Only supported image formats are allowed (JPG, PNG, GIF, WebP, AVIF, BMP, TIFF, HEIC, HEIF, ICO).',
             400,
         )
 
@@ -483,6 +572,43 @@ def me():
     return jsonify({'user': build_user_payload(user_doc)})
 
 
+@app.get('/api/profile')
+def profile_summary():
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return json_error('Missing bearer token.', 401)
+
+    token = auth_header.removeprefix('Bearer ').strip()
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.PyJWTError:
+        return json_error('Invalid or expired token.', 401)
+
+    user_id = parse_object_id(payload.get('sub'))
+    if not user_id:
+        return json_error('Invalid or expired token.', 401)
+
+    user_doc = users.find_one({'_id': user_id})
+    if not user_doc:
+        return json_error('Invalid or expired token.', 401)
+
+    activity = fetch_user_activity(user_id)
+    user_payload = build_user_payload(user_doc)
+    user_payload['paymentMethods'] = get_safe_payment_methods(user_doc)
+
+    return jsonify({
+        'user': user_payload,
+        'profile': {
+            'location': user_doc.get('location', ''),
+            'paymentMethods': get_safe_payment_methods(user_doc),
+            'sellCount': len(activity['sellHistory']),
+            'buyCount': len(activity['buyHistory']),
+        },
+        'buyHistory': activity['buyHistory'],
+        'sellHistory': activity['sellHistory'],
+    })
+
+
 @app.get('/api/items')
 def get_items():
     """Fetch all marketplace items with pagination and filtering."""
@@ -491,6 +617,7 @@ def get_items():
         skip = request.args.get('skip', None, type=int)
         limit = request.args.get('limit', 20, type=int)
         category = request.args.get('category', None)
+        status = request.args.get('status', None)
         # Validate pagination
         if skip is not None and skip < 0:
             skip = 0
@@ -505,6 +632,11 @@ def get_items():
         query_filter = {}
         if category:
             query_filter['category'] = category
+        if status:
+            # only accept known status values
+            status_val = str(status).strip().lower()
+            if status_val in ITEM_STATUSES:
+                query_filter['status'] = status_val
         # Fetch items
         items_list = list(
             items.find(query_filter)

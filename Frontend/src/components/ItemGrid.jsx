@@ -33,6 +33,7 @@ function EmptyState() {
 
 export default function ItemGrid({
   items,
+  currency,
   isLoading,
   error,
   pagination,
@@ -69,7 +70,7 @@ export default function ItemGrid({
             disabled={isLoading}
             aria-label="Filter by category"
           >
-            <option value="">All Categories</option>
+            <option value="">Select category</option>
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>
                 {cat}
@@ -112,7 +113,7 @@ export default function ItemGrid({
       ) : (
         <div className="item-grid" aria-busy={isLoading ? 'true' : 'false'}>
           {items.map((item) => (
-            <ItemCard key={item._id} item={item} />
+            <ItemCard key={item._id} item={item} currency={currency} />
           ))}
         </div>
       )}

@@ -1,11 +1,20 @@
 import { useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { CURRENCY_OPTIONS } from '../services/currency'
 
-export default function Navbar() {
+export default function Navbar({
+  currency,
+  onCurrencyChange,
+  language,
+  onLanguageChange,
+  isAuthenticated,
+  onAuthChange,
+}) {
   const location = useLocation()
   const navigate = useNavigate()
   const isDashboard = location.pathname === '/dashboard'
   const [showSignOutModal, setShowSignOutModal] = useState(false)
+  const [currencyMenuOpen, setCurrencyMenuOpen] = useState(false)
 
   function handleHome() {
     if (isDashboard) {
@@ -17,10 +26,7 @@ export default function Navbar() {
   }
 
   function handleProfile() {
-    const profileElement = document.getElementById('profile')
-    if (profileElement) {
-      profileElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    navigate('/profile')
   }
 
   function handleSearch() {
@@ -40,6 +46,9 @@ export default function Navbar() {
 
     localStorage.removeItem('campusMarketplaceToken')
     localStorage.removeItem('campusMarketplaceUser')
+    if (typeof onAuthChange === 'function') {
+      onAuthChange()
+    }
     navigate('/', { replace: true })
   }
 
@@ -47,25 +56,83 @@ export default function Navbar() {
     setShowSignOutModal(false)
   }
 
+  function toggleCurrencyMenu() {
+    setCurrencyMenuOpen((s) => !s)
+  }
+
+  function handleCurrencySelect(value) {
+    onCurrencyChange(value)
+    setCurrencyMenuOpen(false)
+  }
+
+  function handleLanguageSelect(value) {
+    if (typeof onLanguageChange === 'function') {
+      onLanguageChange(value)
+    }
+    setCurrencyMenuOpen(false)
+  }
+
   return (
     <>
       <header className="topbar">
-        <div className="brand-row">
+        <div className="brand-row" style={{ position: 'relative' }}>
           <Link className="brand" to="/">
             UC Marketplace
           </Link>
           <nav className="nav-links" aria-label="Primary">
+              <div className="currency-hamburger-wrapper" style={{position: 'absolute', right: 12, top: 12}}>
+                <button
+                  className="currency-hamburger"
+                  aria-label="Open account preferences menu"
+                  type="button"
+                  onClick={toggleCurrencyMenu}
+                >
+                  <span aria-hidden style={{display: 'block', width: 18, height: 2, background: 'currentColor', margin: '3px 0'}} />
+                  <span aria-hidden style={{display: 'block', width: 18, height: 2, background: 'currentColor', margin: '3px 0'}} />
+                  <span aria-hidden style={{display: 'block', width: 18, height: 2, background: 'currentColor', margin: '3px 0'}} />
+                </button>
+
+                  {currencyMenuOpen && (
+                  <div
+                    className="currency-menu"
+                    role="menu"
+                    aria-label="Currency and language options"
+                  >
+                    <div className="menu-section">
+                      <div className="menu-section-title">Currency</div>
+                      <button className="currency-menu-item" type="button" onClick={() => handleCurrencySelect(CURRENCY_OPTIONS.KRW)} aria-pressed={currency === CURRENCY_OPTIONS.KRW}>
+                        KRW (₩)
+                      </button>
+                      <button className="currency-menu-item" type="button" onClick={() => handleCurrencySelect(CURRENCY_OPTIONS.USD)} aria-pressed={currency === CURRENCY_OPTIONS.USD}>
+                        USD ($)
+                      </button>
+                    </div>
+
+                    <div className="menu-section" style={{borderTop: '1px solid rgba(255,255,255,0.04)', marginTop: 6, paddingTop: 6}}>
+                      <div className="menu-section-title">Language</div>
+                      <button className="currency-menu-item" type="button" onClick={() => handleLanguageSelect('en')} aria-pressed={language === 'en'}>
+                        English
+                      </button>
+                      <button className="currency-menu-item" type="button" onClick={() => handleLanguageSelect('ko')} aria-pressed={language === 'ko'}>
+                        한국어
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             {isDashboard ? (
               <>
                 <button className="nav-pill" type="button" onClick={handleHome}>
                   Home
                 </button>
-                <button className="nav-pill" type="button" onClick={handleProfile}>
-                  Profile
-                </button>
                 <button className="nav-pill" type="button" onClick={handleSearch}>
                   Search
                 </button>
+                {isAuthenticated && (
+                  <button className="nav-pill" type="button" onClick={handleProfile}>
+                    Profile
+                  </button>
+                )}
                 <button className="nav-pill" type="button" onClick={() => navigate('/dashboard')}>
                   Buy
                 </button>
@@ -82,8 +149,13 @@ export default function Navbar() {
                   Home
                 </NavLink>
                 <NavLink to="/browse">Browse</NavLink>
-                <NavLink to="/login">Login</NavLink>
-                <NavLink to="/signup">Sign Up</NavLink>
+                {isAuthenticated ? <NavLink to="/profile">Profile</NavLink> : <NavLink to="/login">Login</NavLink>}
+                {!isAuthenticated ? <NavLink to="/signup">Sign Up</NavLink> : null}
+                {isAuthenticated ? (
+                  <button className="nav-signout" type="button" onClick={handleSignOut}>
+                    Sign Out
+                  </button>
+                ) : null}
               </>
             )}
           </nav>
