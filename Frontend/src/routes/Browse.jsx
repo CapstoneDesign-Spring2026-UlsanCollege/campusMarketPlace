@@ -5,7 +5,7 @@ import { fetchItems } from '../services/api'
 
 const ITEMS_PER_PAGE = 20
 
-export default function Browse() {
+export default function Browse({ currency }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const [items, setItems] = useState([])
   const [pagination, setPagination] = useState({ page: 1, limit: ITEMS_PER_PAGE, total: 0, pages: 1 })
@@ -95,6 +95,7 @@ export default function Browse() {
 
       <ItemGrid
         items={items}
+        currency={currency}
         isLoading={isLoading}
         error={error}
         pagination={pagination}

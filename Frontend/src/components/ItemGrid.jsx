@@ -33,6 +33,7 @@ function EmptyState() {
 
 export default function ItemGrid({
   items,
+  currency,
   isLoading,
   error,
   pagination,
@@ -112,7 +113,7 @@ export default function ItemGrid({
       ) : (
         <div className="item-grid" aria-busy={isLoading ? 'true' : 'false'}>
           {items.map((item) => (
-            <ItemCard key={item._id} item={item} />
+            <ItemCard key={item._id} item={item} currency={currency} />
           ))}
         </div>
       )}
