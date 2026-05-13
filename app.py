@@ -7,7 +7,8 @@ import certifi
 import jwt
 from bson import ObjectId
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, has_request_context
+import re
 from flask_cors import CORS
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError, OperationFailure
@@ -185,6 +186,26 @@ def serialize_item_document(item_doc):
     else:
         item_doc['images'] = []
         item_doc['image'] = None
+
+    # Normalize image URLs to absolute so the frontend can reliably load them.
+    image_val = item_doc.get('image')
+    if isinstance(image_val, str) and image_val:
+        # If it's not already an absolute URL, and we're in a request context,
+        # prefix with the current host URL so clients receive a stable absolute URL.
+        if not re.match(r'^https?://', image_val) and has_request_context():
+            base = request.host_url.rstrip('/')
+            item_doc['image'] = f"{base}/{image_val.lstrip('/')}"
+
+    # Also normalize any images entries that are plain strings to absolute URLs.
+    if isinstance(item_doc.get('images'), list) and has_request_context():
+        normalized = []
+        base = request.host_url.rstrip('/')
+        for v in item_doc.get('images'):
+            if isinstance(v, str) and v and not re.match(r'^https?://', v) and not v.startswith('data:') and not v.startswith('blob:'):
+                normalized.append(f"{base}/{v.lstrip('/')}")
+            else:
+                normalized.append(v)
+        item_doc['images'] = normalized
 
     # Normalize price: keep numeric `price` for frontend compatibility,
     # expose `price_currency` if a richer price object exists.
@@ -510,6 +531,7 @@ def get_items():
         skip = request.args.get('skip', None, type=int)
         limit = request.args.get('limit', 20, type=int)
         category = request.args.get('category', None)
+        status = request.args.get('status', None)
         # Validate pagination
         if skip is not None and skip < 0:
             skip = 0
@@ -524,6 +546,11 @@ def get_items():
         query_filter = {}
         if category:
             query_filter['category'] = category
+        if status:
+            # only accept known status values
+            status_val = str(status).strip().lower()
+            if status_val in ITEM_STATUSES:
+                query_filter['status'] = status_val
         # Fetch items
         items_list = list(
             items.find(query_filter)

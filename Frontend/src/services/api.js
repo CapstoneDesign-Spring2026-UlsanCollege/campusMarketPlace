@@ -49,11 +49,14 @@ export async function apiRequest(path, options = {}) {
   return payload
 }
 
-export async function fetchItems(page = 1, limit = 20, category = null) {
+export async function fetchItems(page = 1, limit = 20, category = null, status = null) {
   const skip = Math.max(0, (page - 1) * limit)
   let path = `/items?limit=${limit}&skip=${skip}`
   if (category) {
     path += `&category=${encodeURIComponent(category)}`
+  }
+  if (status) {
+    path += `&status=${encodeURIComponent(status)}`
   }
   return apiRequest(path)
 }

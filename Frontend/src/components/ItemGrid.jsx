@@ -70,7 +70,7 @@ export default function ItemGrid({
             disabled={isLoading}
             aria-label="Filter by category"
           >
-            <option value="">All Categories</option>
+            <option value="">Select category</option>
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>
                 {cat}
