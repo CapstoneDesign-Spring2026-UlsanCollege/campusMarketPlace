@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiRequest, createItem, fetchItems } from '../services/api'
+import { convertDisplayPriceToUsd, formatPriceFromUsd, getPriceInputMeta } from '../services/currency'
 
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
@@ -14,7 +15,7 @@ const STORIES = [
   'Furniture',
 ]
 
-export default function Dashboard() {
+export default function Dashboard({ currency }) {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
 
@@ -95,6 +96,7 @@ export default function Dashboard() {
   }, [])
 
   const firstName = user?.firstName || 'Student'
+  const priceInputMeta = getPriceInputMeta(currency)
 
   function updatePreviewUrl(nextUrl) {
     if (
@@ -186,7 +188,7 @@ export default function Dashboard() {
 
     if (!formData.title.trim()) nextErrors.title = 'Title is required.'
     if (!formData.price.trim() || !Number.isFinite(priceValue) || priceValue <= 0) {
-      nextErrors.price = 'Price is required and must be a positive number.'
+      nextErrors.price = `Price is required and must be a positive ${currency === 'KRW' ? 'KRW amount' : 'USD amount'}.`
     }
     if (!formData.description.trim()) nextErrors.description = 'Description is required.'
     if (!formData.category.trim()) nextErrors.category = 'Category is required.'
@@ -208,7 +210,7 @@ export default function Dashboard() {
     try {
       const payload = {
         title: formData.title.trim(),
-        price: Number(formData.price),
+        price: convertDisplayPriceToUsd(formData.price, currency),
         description: formData.description.trim(),
         category: formData.category.trim(),
         status: formData.status.trim(),
@@ -284,9 +286,9 @@ export default function Dashboard() {
                 <input
                   name="price"
                   type="number"
-                  min="0.01"
-                  step="0.01"
-                  placeholder="Price"
+                  min={priceInputMeta.min}
+                  step={priceInputMeta.step}
+                  placeholder={priceInputMeta.placeholder}
                   value={formData.price}
                   onChange={handleFormChange}
                   className="composer-text-input"
@@ -397,7 +399,7 @@ export default function Dashboard() {
                   </header>
                   <div className="post-image" aria-hidden="true" />
                   <div className="post-body">
-                    <div className="post-price">${item.price}</div>
+                    <div className="post-price">{formatPriceFromUsd(item.price, currency)}</div>
                     <h2>{item.title}</h2>
                     <p>{item.description}</p>
                   </div>

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { CURRENCY_OPTIONS } from '../services/currency'
 
-export default function Navbar() {
+export default function Navbar({ currency, onCurrencyChange }) {
   const location = useLocation()
   const navigate = useNavigate()
   const isDashboard = location.pathname === '/dashboard'
@@ -55,6 +56,17 @@ export default function Navbar() {
             UC Marketplace
           </Link>
           <nav className="nav-links" aria-label="Primary">
+            <label className="currency-select-wrapper" aria-label="Select currency">
+              <span>Currency</span>
+              <select
+                className="currency-select"
+                value={currency}
+                onChange={(event) => onCurrencyChange(event.target.value)}
+              >
+                <option value={CURRENCY_OPTIONS.USD}>USD ($)</option>
+                <option value={CURRENCY_OPTIONS.KRW}>KRW (₩)</option>
+              </select>
+            </label>
             {isDashboard ? (
               <>
                 <button className="nav-pill" type="button" onClick={handleHome}>

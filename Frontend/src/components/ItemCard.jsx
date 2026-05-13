@@ -1,4 +1,5 @@
 import { API_ORIGIN } from '../services/api'
+import { formatPriceFromUsd } from '../services/currency'
 
 function getPrimaryImageValue(item) {
   if (item?.image) {
@@ -35,12 +36,9 @@ function resolveImageUrl(image) {
   return new URL(image.replace(/^\/+/, ''), `${API_ORIGIN}/`).href
 }
 
-export default function ItemCard({ item }) {
+export default function ItemCard({ item, currency }) {
   const imageSrc = resolveImageUrl(getPrimaryImageValue(item))
-  const price = typeof item.price === 'number' ? item.price : Number(item.price)
-  const formattedPrice = Number.isFinite(price)
-    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price)
-    : item.price
+  const formattedPrice = formatPriceFromUsd(item.price, currency)
 
   return (
     <article className="item-card">
