@@ -14,7 +14,7 @@ export default function Browse() {
   const [reloadToken, setReloadToken] = useState(0)
 
   const currentPage = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
-  const currentCategory = searchParams.get('category') || null
+  const currentCategory = searchParams.get('category') || ''
 
   useEffect(() => {
     let isActive = true
@@ -24,7 +24,14 @@ export default function Browse() {
         setIsLoading(true)
         setError('')
 
-        const data = await fetchItems(currentPage, ITEMS_PER_PAGE, currentCategory)
+        // Require a category selection before fetching; browse shows sold items only.
+        if (!currentCategory) {
+          setItems([])
+          setPagination({ page: 1, limit: ITEMS_PER_PAGE, total: 0, pages: 1 })
+          return
+        }
+
+        const data = await fetchItems(currentPage, ITEMS_PER_PAGE, currentCategory, 'sold')
 
         if (!isActive) {
           return
