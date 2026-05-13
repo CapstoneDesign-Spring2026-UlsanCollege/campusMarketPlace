@@ -590,11 +590,11 @@ def create_item():
         return json_error('Price must be a valid number.', 400)
 
     status = (
-        str(data.get('status', 'available')).strip().lower() or 'available'
+        str(data.get('status', 'active')).strip().lower() or 'active'
     )
     if status not in ITEM_STATUSES:
         return json_error(
-            'Status must be one of: available, sold, pending.',
+            'Status must be one of: draft, active, sold, removed.',
             400,
         )
 
