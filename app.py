@@ -1,5 +1,8 @@
 import os
+from collections import defaultdict, deque
 from pathlib import Path
+from threading import Lock
+from time import time
 from uuid import uuid4
 from datetime import datetime, timedelta, timezone
 
@@ -46,6 +49,10 @@ FRONTEND_ORIGIN = os.getenv('FRONTEND_ORIGIN', 'http://localhost:5173')
 ADDITIONAL_FRONTEND_ORIGINS = os.getenv(
     'ADDITIONAL_FRONTEND_ORIGINS',
     'http://localhost:5176',
+)
+AUTH_RATE_LIMIT_REQUESTS = int(os.getenv('AUTH_RATE_LIMIT_REQUESTS', '5'))
+AUTH_RATE_LIMIT_WINDOW_SECONDS = int(
+    os.getenv('AUTH_RATE_LIMIT_WINDOW_SECONDS', '60')
 )
 
 if not MONGODB_URI:
@@ -278,10 +285,50 @@ allowed_origins.extend(
     ]
 )
 CORS(app, resources={r'/api/*': {'origins': allowed_origins}})
+auth_rate_limit_attempts = defaultdict(deque)
+auth_rate_limit_lock = Lock()
 
 
 def json_error(message, status_code):
     return jsonify({'error': message}), status_code
+
+
+def get_client_ip():
+    forwarded_for = request.headers.get('X-Forwarded-For', '')
+    if forwarded_for:
+        first_forwarded_ip = forwarded_for.split(',')[0].strip()
+        if first_forwarded_ip:
+            return first_forwarded_ip
+    return request.remote_addr or 'unknown'
+
+
+def enforce_auth_rate_limit(endpoint_key):
+    if AUTH_RATE_LIMIT_REQUESTS <= 0 or AUTH_RATE_LIMIT_WINDOW_SECONDS <= 0:
+        return None
+
+    now = time()
+    cutoff = now - AUTH_RATE_LIMIT_WINDOW_SECONDS
+    client_ip = get_client_ip()
+    key = (endpoint_key, client_ip)
+
+    with auth_rate_limit_lock:
+        attempts = auth_rate_limit_attempts[key]
+        while attempts and attempts[0] <= cutoff:
+            attempts.popleft()
+
+        if len(attempts) >= AUTH_RATE_LIMIT_REQUESTS:
+            response = jsonify(
+                {'error': 'Too many requests. Please try again later.'}
+            )
+            response.status_code = 429
+            response.headers['Retry-After'] = str(
+                AUTH_RATE_LIMIT_WINDOW_SECONDS
+            )
+            return response
+
+        attempts.append(now)
+
+    return None
 
 
 @app.errorhandler(RequestEntityTooLarge)
@@ -396,6 +443,10 @@ def upload_image():
 
 @app.post('/api/auth/signup')
 def signup():
+    rate_limit_response = enforce_auth_rate_limit('signup')
+    if rate_limit_response:
+        return rate_limit_response
+
     data = request.get_json(silent=True) or {}
     required_fields = ['firstName', 'lastName', 'email', 'password']
 
@@ -456,6 +507,10 @@ def signup():
 
 @app.post('/api/auth/login')
 def login():
+    rate_limit_response = enforce_auth_rate_limit('login')
+    if rate_limit_response:
+        return rate_limit_response
+
     data = request.get_json(silent=True) or {}
     email = normalize_email(str(data.get('email', '')))
     password = str(data.get('password', ''))
