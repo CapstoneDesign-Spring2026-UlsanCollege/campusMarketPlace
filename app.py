@@ -239,12 +239,31 @@ app = Flask(__name__)
 UPLOAD_FOLDER = Path(__file__).resolve().parent / 'uploads'
 UPLOAD_FOLDER.mkdir(exist_ok=True)
 MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024
-ALLOWED_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+ALLOWED_IMAGE_EXTENSIONS = {
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.gif',
+    '.webp',
+    '.avif',
+    '.bmp',
+    '.tif',
+    '.tiff',
+    '.heic',
+    '.heif',
+    '.ico',
+}
 ALLOWED_IMAGE_MIMETYPES = {
     'image/jpeg',
     'image/png',
     'image/gif',
     'image/webp',
+    'image/avif',
+    'image/bmp',
+    'image/tiff',
+    'image/heic',
+    'image/heif',
+    'image/x-icon',
 }
 
 app.config['MAX_CONTENT_LENGTH'] = MAX_IMAGE_UPLOAD_BYTES
@@ -349,7 +368,7 @@ def upload_image():
     file_extension = os.path.splitext(safe_filename)[1].lower()
     if file_extension not in ALLOWED_IMAGE_EXTENSIONS:
         return json_error(
-            'Only JPG, PNG, GIF, and WebP images are allowed.',
+            'Only supported image formats are allowed (JPG, PNG, GIF, WebP, AVIF, BMP, TIFF, HEIC, HEIF, ICO).',
             400,
         )
 
