@@ -1,5 +1,6 @@
 import os
 from collections import defaultdict, deque
+from math import ceil
 from pathlib import Path
 from threading import Lock
 from time import time
@@ -54,6 +55,19 @@ AUTH_RATE_LIMIT_REQUESTS = int(os.getenv('AUTH_RATE_LIMIT_REQUESTS', '5'))
 AUTH_RATE_LIMIT_WINDOW_SECONDS = int(
     os.getenv('AUTH_RATE_LIMIT_WINDOW_SECONDS', '60')
 )
+AUTH_RATE_LIMIT_CLEANUP_INTERVAL_SECONDS = max(
+    1,
+    int(
+        os.getenv(
+            'AUTH_RATE_LIMIT_CLEANUP_INTERVAL_SECONDS',
+            str(AUTH_RATE_LIMIT_WINDOW_SECONDS),
+        )
+    ),
+)
+TRUST_PROXY_HEADERS = os.getenv(
+    'TRUST_PROXY_HEADERS',
+    'false',
+).strip().lower() in {'1', 'true', 'yes'}
 
 if not MONGODB_URI:
     raise RuntimeError('MONGODB_URI is required')
@@ -285,8 +299,11 @@ allowed_origins.extend(
     ]
 )
 CORS(app, resources={r'/api/*': {'origins': allowed_origins}})
+# In-memory limiter storage is process-local. For multi-worker deployments,
+# replace this with a shared store (for example Redis).
 auth_rate_limit_attempts = defaultdict(deque)
 auth_rate_limit_lock = Lock()
+auth_rate_limit_next_cleanup_at = 0.0
 
 
 def json_error(message, status_code):
@@ -294,36 +311,66 @@ def json_error(message, status_code):
 
 
 def get_client_ip():
-    forwarded_for = request.headers.get('X-Forwarded-For', '')
-    if forwarded_for:
-        first_forwarded_ip = forwarded_for.split(',')[0].strip()
-        if first_forwarded_ip:
-            return first_forwarded_ip
-    return request.remote_addr or 'unknown'
+    if TRUST_PROXY_HEADERS:
+        forwarded_for = request.headers.get('X-Forwarded-For', '')
+        if forwarded_for:
+            first_forwarded_ip = forwarded_for.split(',')[0].strip()
+            if first_forwarded_ip:
+                return first_forwarded_ip
+        real_ip = request.headers.get('X-Real-IP', '').strip()
+        if real_ip:
+            return real_ip
+    return request.remote_addr
 
 
 def enforce_auth_rate_limit(endpoint_key):
+    global auth_rate_limit_next_cleanup_at
+
     if AUTH_RATE_LIMIT_REQUESTS <= 0 or AUTH_RATE_LIMIT_WINDOW_SECONDS <= 0:
         return None
 
     now = time()
     cutoff = now - AUTH_RATE_LIMIT_WINDOW_SECONDS
     client_ip = get_client_ip()
+    if not client_ip:
+        return json_error(
+            'Request rejected: could not identify client IP address.',
+            400,
+        )
     key = (endpoint_key, client_ip)
 
     with auth_rate_limit_lock:
+        if now >= auth_rate_limit_next_cleanup_at:
+            for stale_key, stale_attempts in list(
+                auth_rate_limit_attempts.items()
+            ):
+                while stale_attempts and stale_attempts[0] < cutoff:
+                    stale_attempts.popleft()
+                if not stale_attempts:
+                    del auth_rate_limit_attempts[stale_key]
+            auth_rate_limit_next_cleanup_at = (
+                now + AUTH_RATE_LIMIT_CLEANUP_INTERVAL_SECONDS
+            )
+
         attempts = auth_rate_limit_attempts[key]
-        while attempts and attempts[0] <= cutoff:
+        while attempts and attempts[0] < cutoff:
             attempts.popleft()
 
         if len(attempts) >= AUTH_RATE_LIMIT_REQUESTS:
+            retry_after_seconds = max(
+                1,
+                ceil(attempts[0] + AUTH_RATE_LIMIT_WINDOW_SECONDS - now),
+            )
             response = jsonify(
-                {'error': 'Too many requests. Please try again later.'}
+                {
+                    'error': (
+                        f'Rate limit exceeded. Please wait '
+                        f'{retry_after_seconds} seconds before trying again.'
+                    )
+                }
             )
             response.status_code = 429
-            response.headers['Retry-After'] = str(
-                AUTH_RATE_LIMIT_WINDOW_SECONDS
-            )
+            response.headers['Retry-After'] = str(retry_after_seconds)
             return response
 
         attempts.append(now)
