@@ -3,7 +3,7 @@ export const CURRENCY_OPTIONS = {
   KRW: 'KRW',
 }
 
-export const DEFAULT_CURRENCY = CURRENCY_OPTIONS.USD
+export const DEFAULT_CURRENCY = CURRENCY_OPTIONS.KRW
 export const USD_TO_KRW_RATE = 1300
 
 function toNumber(value) {
