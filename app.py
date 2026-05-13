@@ -425,11 +425,9 @@ def signup():
         return json_error('An account with this email already exists.', 409)
 
     saved_user = users.find_one({'_id': result.inserted_id})
-    token = issue_token(saved_user)
 
     return jsonify({
-        'message': 'Account created successfully.',
-        'token': token,
+        'message': 'Account created successfully. Please verify your email before logging in.',
         'user': build_user_payload(saved_user),
     }), 201
 
@@ -449,6 +447,9 @@ def login():
 
     if not check_password_hash(user_doc['passwordHash'], password):
         return json_error('Invalid email or password.', 401)
+
+    if not user_doc.get('isVerified', False):
+        return json_error('Please verify your email address before logging in.', 403)
 
     token = issue_token(user_doc)
 
