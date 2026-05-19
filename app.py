@@ -609,6 +609,59 @@ def profile_summary():
     })
 
 
+@app.put('/api/profile')
+def update_profile():
+    """Update basic profile fields for the current authenticated user.
+
+    Accepts JSON body with optional keys: firstName, lastName, location
+    Returns the updated user payload on success.
+    """
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return json_error('Missing bearer token.', 401)
+
+    token = auth_header.removeprefix('Bearer ').strip()
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.PyJWTError:
+        return json_error('Invalid or expired token.', 401)
+
+    user_id = parse_object_id(payload.get('sub'))
+    if not user_id:
+        return json_error('Invalid or expired token.', 401)
+
+    user_doc = users.find_one({'_id': user_id})
+    if not user_doc:
+        return json_error('Invalid or expired token.', 401)
+
+    data = request.get_json(silent=True) or {}
+    updates = {}
+    if 'firstName' in data:
+        fn = str(data.get('firstName', '')).strip()
+        if fn:
+            updates['firstName'] = fn
+    if 'lastName' in data:
+        ln = str(data.get('lastName', '')).strip()
+        if ln:
+            updates['lastName'] = ln
+    if 'location' in data:
+        loc = str(data.get('location', '')).strip()
+        updates['location'] = loc
+
+    if not updates:
+        return json_error('No profile fields provided to update.', 400)
+
+    updates['updatedAt'] = datetime.now(timezone.utc)
+
+    try:
+        users.update_one({'_id': user_id}, {'$set': updates})
+    except Exception as exc:
+        return json_error(f'Failed to update profile: {str(exc)}', 500)
+
+    updated_user_doc = users.find_one({'_id': user_id})
+    return jsonify({'user': build_user_payload(updated_user_doc)})
+
+
 @app.get('/api/items')
 def get_items():
     """Fetch all marketplace items with pagination and filtering."""
