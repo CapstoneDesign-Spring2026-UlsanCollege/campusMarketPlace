@@ -13,12 +13,22 @@ export default function Navbar({
   const location = useLocation()
   const navigate = useNavigate()
   const isDashboard = location.pathname === '/dashboard'
+  // Show the authenticated (dashboard-style) nav when user is signed in
+  const showAuthNav = isDashboard || isAuthenticated
   const [showSignOutModal, setShowSignOutModal] = useState(false)
   const [currencyMenuOpen, setCurrencyMenuOpen] = useState(false)
 
   function handleHome() {
     if (isDashboard) {
       window.location.reload()
+      return
+    }
+
+    // If the user is authenticated, keep them inside the authenticated
+    // dashboard experience instead of sending them back to the public home
+    // page. Only unauthenticated users are routed to the public `/` home.
+    if (isAuthenticated) {
+      navigate('/dashboard')
       return
     }
 
@@ -120,7 +130,7 @@ export default function Navbar({
                   </div>
                 )}
               </div>
-            {isDashboard ? (
+            {showAuthNav ? (
               <>
                 <button className="nav-pill" type="button" onClick={handleHome}>
                   Home
@@ -148,7 +158,6 @@ export default function Navbar({
                 <NavLink to="/" end>
                   Home
                 </NavLink>
-                <NavLink to="/browse">Browse</NavLink>
                 {isAuthenticated ? <NavLink to="/profile">Profile</NavLink> : <NavLink to="/login">Login</NavLink>}
                 {!isAuthenticated ? <NavLink to="/signup">Sign Up</NavLink> : null}
                 {isAuthenticated ? (

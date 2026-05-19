@@ -71,3 +71,19 @@ export async function createItem(itemData) {
 export async function fetchProfile() {
   return apiRequest('/profile')
 }
+
+export async function updateProfile(data) {
+  return apiRequest('/profile', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function uploadProfileAvatar(file) {
+  const fd = new FormData()
+  fd.append('image', file)
+  return apiRequest('/profile/avatar', {
+    method: 'POST',
+    body: fd,
+  })
+}

@@ -327,6 +327,7 @@ def build_user_payload(user_doc):
         'email': user_doc['email'],
         'isVerified': user_doc.get('isVerified', False),
         'location': user_doc.get('location', ''),
+        'avatar': user_doc.get('avatar', ''),
         'paymentMethods': payment_methods,
     }
 
@@ -464,6 +465,104 @@ def upload_image():
     }), 201
 
 
+@app.post('/api/profile/avatar')
+def upload_profile_avatar():
+    """Upload and attach an avatar image to the authenticated user's profile."""
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return json_error('Missing bearer token.', 401)
+
+    token = auth_header.removeprefix('Bearer ').strip()
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.PyJWTError:
+        return json_error('Invalid or expired token.', 401)
+
+    user_id = parse_object_id(payload.get('sub'))
+    if not user_id:
+        return json_error('Invalid or expired token.', 401)
+
+    user_doc = users.find_one({'_id': user_id})
+    if not user_doc:
+        return json_error('Invalid or expired token.', 401)
+
+    uploaded_file = request.files.get('image') or request.files.get('avatar')
+    if not uploaded_file or not uploaded_file.filename:
+        return json_error('An image file is required.', 400)
+
+    safe_filename = secure_filename(uploaded_file.filename)
+    if not safe_filename:
+        return json_error('The uploaded filename is not valid.', 400)
+
+    file_extension = os.path.splitext(safe_filename)[1].lower()
+    if file_extension not in ALLOWED_IMAGE_EXTENSIONS:
+        return json_error('Unsupported image format.', 400)
+
+    if uploaded_file.mimetype not in ALLOWED_IMAGE_MIMETYPES:
+        return json_error('Only image uploads are allowed.', 400)
+
+    if (
+        request.content_length
+        and request.content_length > MAX_IMAGE_UPLOAD_BYTES
+    ):
+        return json_error('Image must be smaller than 5 MB.', 413)
+
+    stored_filename = f"{uuid4().hex}-{safe_filename}"
+    stored_path = UPLOAD_FOLDER / stored_filename
+    uploaded_file.save(stored_path)
+
+    file_url = f"{request.host_url.rstrip('/')}/api/uploads/{stored_filename}"
+
+    try:
+        users.update_one({'_id': user_id}, {'$set': {'avatar': stored_filename, 'updatedAt': datetime.now(timezone.utc)}})
+    except Exception as exc:
+        return json_error(f'Failed to attach avatar to profile: {str(exc)}', 500)
+
+    return jsonify({'message': 'Avatar uploaded successfully.', 'filename': stored_filename, 'url': file_url}), 201
+
+
+@app.delete('/api/profile/avatar')
+def delete_profile_avatar():
+    """Remove a user's avatar file and clear the avatar field from their profile."""
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return json_error('Missing bearer token.', 401)
+
+    token = auth_header.removeprefix('Bearer ').strip()
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.PyJWTError:
+        return json_error('Invalid or expired token.', 401)
+
+    user_id = parse_object_id(payload.get('sub'))
+    if not user_id:
+        return json_error('Invalid or expired token.', 401)
+
+    user_doc = users.find_one({'_id': user_id})
+    if not user_doc:
+        return json_error('Invalid or expired token.', 401)
+
+    avatar_val = user_doc.get('avatar')
+    if not avatar_val:
+        return json_error('No avatar to delete.', 400)
+
+    # Attempt to delete the file from disk but don't fail if it does not exist.
+    try:
+        file_path = UPLOAD_FOLDER / str(avatar_val)
+        if file_path.exists():
+            file_path.unlink()
+    except Exception:
+        # Log and continue — we'll still clear the DB reference.
+        pass
+
+    try:
+        users.update_one({'_id': user_id}, {'$unset': {'avatar': ''}, '$set': {'updatedAt': datetime.now(timezone.utc)}})
+    except Exception as exc:
+        return json_error(f'Failed to clear avatar from profile: {str(exc)}', 500)
+
+    return jsonify({'message': 'Avatar removed.'})
+
+
 @app.post('/api/auth/signup')
 def signup():
     data = request.get_json(silent=True) or {}
@@ -596,6 +695,17 @@ def profile_summary():
     user_payload = build_user_payload(user_doc)
     user_payload['paymentMethods'] = get_safe_payment_methods(user_doc)
 
+    # Expose avatarUrl as an absolute URL when available so frontend can load it.
+    avatar_val = user_doc.get('avatar') or user_doc.get('avatarUrl')
+    if avatar_val:
+        if isinstance(avatar_val, str) and avatar_val.strip():
+            if re.match(r'^https?://', avatar_val):
+                user_payload['avatarUrl'] = avatar_val
+            else:
+                user_payload['avatarUrl'] = f"{request.host_url.rstrip('/')}/api/uploads/{str(avatar_val).lstrip('/')}"
+    else:
+        user_payload['avatarUrl'] = ''
+
     return jsonify({
         'user': user_payload,
         'profile': {
@@ -607,6 +717,59 @@ def profile_summary():
         'buyHistory': activity['buyHistory'],
         'sellHistory': activity['sellHistory'],
     })
+
+
+@app.put('/api/profile')
+def update_profile():
+    """Update basic profile fields for the current authenticated user.
+
+    Accepts JSON body with optional keys: firstName, lastName, location
+    Returns the updated user payload on success.
+    """
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return json_error('Missing bearer token.', 401)
+
+    token = auth_header.removeprefix('Bearer ').strip()
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.PyJWTError:
+        return json_error('Invalid or expired token.', 401)
+
+    user_id = parse_object_id(payload.get('sub'))
+    if not user_id:
+        return json_error('Invalid or expired token.', 401)
+
+    user_doc = users.find_one({'_id': user_id})
+    if not user_doc:
+        return json_error('Invalid or expired token.', 401)
+
+    data = request.get_json(silent=True) or {}
+    updates = {}
+    if 'firstName' in data:
+        fn = str(data.get('firstName', '')).strip()
+        if fn:
+            updates['firstName'] = fn
+    if 'lastName' in data:
+        ln = str(data.get('lastName', '')).strip()
+        if ln:
+            updates['lastName'] = ln
+    if 'location' in data:
+        loc = str(data.get('location', '')).strip()
+        updates['location'] = loc
+
+    if not updates:
+        return json_error('No profile fields provided to update.', 400)
+
+    updates['updatedAt'] = datetime.now(timezone.utc)
+
+    try:
+        users.update_one({'_id': user_id}, {'$set': updates})
+    except Exception as exc:
+        return json_error(f'Failed to update profile: {str(exc)}', 500)
+
+    updated_user_doc = users.find_one({'_id': user_id})
+    return jsonify({'user': build_user_payload(updated_user_doc)})
 
 
 @app.get('/api/items')
