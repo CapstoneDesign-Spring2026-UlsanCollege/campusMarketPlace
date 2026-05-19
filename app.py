@@ -575,6 +575,37 @@ def build_message_thread_payload(thread_doc, current_user_id=None):
     payload['itemImage'] = thread_doc.get('item_image', '')
     payload['latestMessage'] = thread_doc.get('latest_message', '')
     payload['latestMessageAt'] = payload.pop('latest_message_at', None)
+    # Compute unread count for the current user (messages with createdAt > last_read)
+    try:
+        thread_oid = thread_doc.get('_id')
+        # thread_doc may have stringified _id after serialize; attempt to parse
+        if isinstance(thread_oid, str):
+            thread_oid = parse_object_id(thread_oid)
+    except Exception:
+        thread_oid = None
+
+    unread_count = 0
+    if current_user_id and thread_oid:
+        try:
+            last_read_map = thread_doc.get('last_read', {}) or {}
+            last_read_str = last_read_map.get(str(current_user_id))
+            if last_read_str:
+                try:
+                    last_read_dt = datetime.fromisoformat(last_read_str.replace('Z', '+00:00'))
+                except Exception:
+                    last_read_dt = None
+            else:
+                last_read_dt = None
+
+            query = {'thread_id': thread_oid}
+            if last_read_dt:
+                query['createdAt'] = {'$gt': last_read_dt}
+
+            unread_count = message_messages.count_documents(query)
+        except Exception:
+            unread_count = 0
+
+    payload['unreadCount'] = int(unread_count)
     return payload
 
 
@@ -1008,9 +1039,17 @@ def open_message_thread():
             'latest_message_at': None,
             'createdAt': now,
             'updatedAt': now,
+            'last_read': {},
         }
         inserted = message_threads.insert_one(thread_doc)
         thread_doc['_id'] = inserted.inserted_id
+    # Mark the opener as having last-read at this moment so messages prior are not treated as unread for them
+    try:
+        message_threads.update_one({'_id': thread_doc['_id']}, {'$set': {f'last_read.{str(user_id)}': datetime.now(timezone.utc).isoformat(), 'updatedAt': datetime.now(timezone.utc)}})
+        # refresh thread_doc
+        thread_doc = message_threads.find_one({'_id': thread_doc['_id']})
+    except Exception:
+        pass
 
     return jsonify({
         'thread': build_message_thread_payload(thread_doc, current_user_id=user_id),
@@ -1037,6 +1076,34 @@ def get_message_thread(thread_id):
     return jsonify({
         'thread': build_message_thread_payload(thread_doc, current_user_id=user_id),
     })
+
+
+@app.post('/api/messages/threads/<thread_id>/read')
+def mark_thread_read(thread_id):
+    """Mark the current user as having read the conversation up to now."""
+    user_id, _user_doc, auth_error = get_current_user_from_request()
+    if auth_error:
+        return auth_error
+
+    thread_oid = parse_object_id(thread_id)
+    if not thread_oid:
+        return json_error('Invalid thread id.', 400)
+
+    thread_doc = message_threads.find_one({'_id': thread_oid})
+    if not thread_doc:
+        return json_error('Conversation not found.', 404)
+
+    if user_id not in thread_doc.get('participants', []):
+        return json_error('You do not have access to this conversation.', 403)
+
+    now = datetime.now(timezone.utc)
+    try:
+        message_threads.update_one({'_id': thread_oid}, {'$set': {f'last_read.{str(user_id)}': now.isoformat(), 'updatedAt': now}})
+    except Exception as exc:
+        return json_error(f'Failed to mark thread read: {str(exc)}', 500)
+
+    thread_doc = message_threads.find_one({'_id': thread_oid})
+    return jsonify({'thread': build_message_thread_payload(thread_doc, current_user_id=user_id)})
 
 
 @app.get('/api/messages/threads/<thread_id>/messages')
@@ -1118,6 +1185,8 @@ def send_message(thread_id):
             }
         },
     )
+
+    # Do not modify recipient last_read here; recipient will see this message as unread until they mark as read or open the thread.
 
     return jsonify({
         'message': serialize_message_document(message_doc),
