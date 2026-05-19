@@ -438,13 +438,7 @@ export default function Dashboard({ currency }) {
             </form>
           </section>
 
-          <section className="stories-row" aria-label="Stories">
-            {STORIES.map((story) => (
-              <article className="story-card" key={story}>
-                <span>{story}</span>
-              </article>
-            ))}
-          </section>
+          {/* Stories moved into the Search menu in the navbar */}
 
           <section className="feed-post-list" aria-label="Marketplace feed posts">
             {loading ? (

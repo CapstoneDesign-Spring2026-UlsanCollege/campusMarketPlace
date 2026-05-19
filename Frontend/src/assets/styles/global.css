@@ -141,6 +141,22 @@ input {
   box-shadow: var(--shadow);
 }
 
+.search-menu {
+  min-width: 160px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(3,11,19,0.98);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 56px;
+  z-index: 45;
+  box-shadow: var(--shadow);
+}
+
 .menu-section {
   display: flex;
   flex-direction: column;

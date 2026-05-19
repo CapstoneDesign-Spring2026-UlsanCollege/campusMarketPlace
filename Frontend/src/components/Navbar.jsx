@@ -17,6 +17,9 @@ export default function Navbar({
   const showAuthNav = isDashboard || isAuthenticated
   const [showSignOutModal, setShowSignOutModal] = useState(false)
   const [currencyMenuOpen, setCurrencyMenuOpen] = useState(false)
+  const [searchMenuOpen, setSearchMenuOpen] = useState(false)
+
+  const STORIES = ['Engineering', 'Dorm Deals', 'Books']
 
   function handleHome() {
     if (isDashboard) {
@@ -40,11 +43,8 @@ export default function Navbar({
   }
 
   function handleSearch() {
-    const composerButton = document.querySelector('.composer-input')
-    if (composerButton instanceof HTMLElement) {
-      composerButton.focus()
-      composerButton.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
+    // Toggle the search/story menu instead of focusing the composer directly
+    setSearchMenuOpen((s) => !s)
   }
 
   function handleSignOut() {
@@ -138,6 +138,23 @@ export default function Navbar({
                 <button className="nav-pill" type="button" onClick={handleSearch}>
                   Search
                 </button>
+                {searchMenuOpen && (
+                  <div className="search-menu" role="menu" aria-label="Quick categories">
+                    {STORIES.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        className="currency-menu-item"
+                        onClick={() => {
+                          setSearchMenuOpen(false)
+                          navigate(`/browse?category=${encodeURIComponent(s)}`)
+                        }}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 {isAuthenticated && (
                   <button className="nav-pill" type="button" onClick={handleProfile}>
                     Profile
