@@ -521,6 +521,48 @@ def upload_profile_avatar():
     return jsonify({'message': 'Avatar uploaded successfully.', 'filename': stored_filename, 'url': file_url}), 201
 
 
+@app.delete('/api/profile/avatar')
+def delete_profile_avatar():
+    """Remove a user's avatar file and clear the avatar field from their profile."""
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return json_error('Missing bearer token.', 401)
+
+    token = auth_header.removeprefix('Bearer ').strip()
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.PyJWTError:
+        return json_error('Invalid or expired token.', 401)
+
+    user_id = parse_object_id(payload.get('sub'))
+    if not user_id:
+        return json_error('Invalid or expired token.', 401)
+
+    user_doc = users.find_one({'_id': user_id})
+    if not user_doc:
+        return json_error('Invalid or expired token.', 401)
+
+    avatar_val = user_doc.get('avatar')
+    if not avatar_val:
+        return json_error('No avatar to delete.', 400)
+
+    # Attempt to delete the file from disk but don't fail if it does not exist.
+    try:
+        file_path = UPLOAD_FOLDER / str(avatar_val)
+        if file_path.exists():
+            file_path.unlink()
+    except Exception:
+        # Log and continue — we'll still clear the DB reference.
+        pass
+
+    try:
+        users.update_one({'_id': user_id}, {'$unset': {'avatar': ''}, '$set': {'updatedAt': datetime.now(timezone.utc)}})
+    except Exception as exc:
+        return json_error(f'Failed to clear avatar from profile: {str(exc)}', 500)
+
+    return jsonify({'message': 'Avatar removed.'})
+
+
 @app.post('/api/auth/signup')
 def signup():
     data = request.get_json(silent=True) or {}
