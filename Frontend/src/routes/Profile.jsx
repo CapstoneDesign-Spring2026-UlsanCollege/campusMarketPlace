@@ -149,6 +149,11 @@ export default function Profile({ currency }) {
             Your profile is powered by the backend and keeps your listings, location, and saved payment methods in one place.
           </p>
         </div>
+        <div style={{ marginLeft: 'auto' }}>
+          <button className="button button-secondary" type="button" onClick={() => navigate('/profile/edit')}>
+            Edit profile
+          </button>
+        </div>
         <div className="profile-hero-meta">
           <div>
             <span className="profile-meta-label">Email</span>

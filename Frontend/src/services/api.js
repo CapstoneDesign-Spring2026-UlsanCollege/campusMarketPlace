@@ -71,3 +71,10 @@ export async function createItem(itemData) {
 export async function fetchProfile() {
   return apiRequest('/profile')
 }
+
+export async function updateProfile(data) {
+  return apiRequest('/profile', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
