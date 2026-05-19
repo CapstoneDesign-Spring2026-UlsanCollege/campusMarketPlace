@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { apiRequest, createItem, fetchItems } from '../services/api'
 import { convertDisplayPriceToUsd, formatPriceFromUsd, getPriceInputMeta } from '../services/currency'
 
@@ -29,7 +29,9 @@ const STORIES = [
 
 export default function Dashboard({ currency }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [user, setUser] = useState(null)
+  const [mode, setMode] = useState(location.state?.mode || 'sell')
 
   const [uploadPreviewUrl, setUploadPreviewUrl] = useState('')
   const [uploadMessage, setUploadMessage] = useState('')
@@ -89,12 +91,29 @@ export default function Dashboard({ currency }) {
     }
   }, [])
 
+  useEffect(() => {
+    if (location.state?.mode) {
+      setMode(location.state.mode)
+    }
+  }, [location.state])
+
   async function loadItems() {
     try {
       setLoading(true)
       setError(null)
       const data = await fetchItems(1, 20)
-      setItems(data.items || [])
+      let filteredItems = data.items || []
+      
+      // Filter items based on mode
+      if (mode === 'sell') {
+        // Show only items posted by current user
+        filteredItems = filteredItems.filter(item => 
+          item.sellerName === `${user?.firstName} ${user?.lastName}`
+        )
+      }
+      // In 'buy' mode, show all items from other sellers
+      
+      setItems(filteredItems)
     } catch (err) {
       setError(err.message || 'Failed to load items')
       console.error('Error fetching items:', err)
@@ -104,8 +123,10 @@ export default function Dashboard({ currency }) {
   }
 
   useEffect(() => {
-    loadItems()
-  }, [])
+    if (user) {
+      loadItems()
+    }
+  }, [mode, user])
 
   const firstName = user?.firstName || 'Student'
   const priceInputMeta = getPriceInputMeta(currency)
@@ -285,8 +306,9 @@ export default function Dashboard({ currency }) {
     <main className="page-shell marketplace-shell">
       <section className="feed-layout">
         <section className="feed-main-col">
-          <section className="feed-panel composer" aria-label="Post composer">
-            <form className="composer-form" onSubmit={handlePostItemSubmit} noValidate>
+          {mode !== 'buy' && (
+            <section className="feed-panel composer" aria-label="Post composer">
+              <form className="composer-form" onSubmit={handlePostItemSubmit} noValidate>
               <div className="composer-row">
                 <div className="avatar-badge" aria-hidden="true">
                   {firstName.slice(0, 1)}
@@ -425,7 +447,8 @@ export default function Dashboard({ currency }) {
                 onChange={handleFileChange}
               />
             </form>
-          </section>
+            </section>
+          )}
 
           <section className="stories-row" aria-label="Stories">
             {STORIES.map((story) => (
