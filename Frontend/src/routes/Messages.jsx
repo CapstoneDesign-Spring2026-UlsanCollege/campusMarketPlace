@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { fetchMessageThreads, fetchThreadMessages, openMessageThread, sendThreadMessage } from '../services/api'
+import { fetchMessageThreads, fetchThreadMessages, openMessageThread, sendThreadMessage, markThreadRead } from '../services/api'
 
 const POLL_INTERVAL_MS = 4000
 
@@ -88,6 +88,16 @@ export default function Messages() {
             return
           }
           setMessages(Array.isArray(threadMessages?.messages) ? threadMessages.messages : [])
+          // mark as read for the current user so unread count updates
+          try {
+            await markThreadRead(nextThread._id)
+            const updatedList = await fetchMessageThreads()
+            if (isActive) {
+              setThreads(Array.isArray(updatedList?.threads) ? updatedList.threads : [])
+            }
+          } catch (e) {
+            // non-fatal
+          }
         }
       } catch (err) {
         if (isActive) {
@@ -157,6 +167,17 @@ export default function Messages() {
       const threadData = await fetchThreadMessages(threadId)
       setActiveThread(threadData?.thread || null)
       setMessages(Array.isArray(threadData?.messages) ? threadData.messages : [])
+      // mark this thread read now that the user actively opened it
+      try {
+        const readResp = await markThreadRead(threadId)
+        if (readResp?.thread) {
+          setActiveThread(readResp.thread)
+        }
+        const threadList = await fetchMessageThreads()
+        setThreads(Array.isArray(threadList?.threads) ? threadList.threads : [])
+      } catch (e) {
+        // ignore read-mark failures
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to open the conversation.')
     }
@@ -213,7 +234,12 @@ export default function Messages() {
                 >
                   <div className="thread-item-top">
                     <strong>{thread.other_user_name || 'Conversation'}</strong>
-                    <span>{formatTime(thread.latestMessageAt || thread.updatedAt)}</span>
+                    <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                      <span>{formatTime(thread.latestMessageAt || thread.updatedAt)}</span>
+                      {thread.unreadCount > 0 ? (
+                        <span className="thread-unread-badge" aria-label={`${thread.unreadCount} unread messages`}>{thread.unreadCount}</span>
+                      ) : null}
+                    </div>
                   </div>
                   <p>{thread.itemTitle || 'Listing conversation'}</p>
                   <small>{thread.latestMessage || 'Tap to open this chat.'}</small>
