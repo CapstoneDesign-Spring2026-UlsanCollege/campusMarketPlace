@@ -42,9 +42,58 @@ export default function EditProfile() {
   function onAvatarSelect(e) {
     const f = e.target.files && e.target.files[0]
     if (f) {
-      setAvatarFile(f)
-      setAvatarPreview(URL.createObjectURL(f))
+      // Resize image client-side for consistent avatar size and smaller upload
+      resizeImageFile(f, 512, 0.85)
+        .then((resized) => {
+          // Keep original file name if possible
+          const fileWithMeta = new File([resized], f.name, { type: resized.type })
+          setAvatarFile(fileWithMeta)
+          setAvatarPreview(URL.createObjectURL(fileWithMeta))
+        })
+        .catch(() => {
+          // Fallback to original file if resizing fails
+          setAvatarFile(f)
+          setAvatarPreview(URL.createObjectURL(f))
+        })
     }
+  }
+
+  function resizeImageFile(file, maxDim = 512, quality = 0.85) {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        let { width, height } = img
+        if (width > maxDim || height > maxDim) {
+          const ratio = width / height
+          if (ratio > 1) {
+            width = maxDim
+            height = Math.round(maxDim / ratio)
+          } else {
+            height = maxDim
+            width = Math.round(maxDim * ratio)
+          }
+        }
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, width, height)
+        // Use webp if supported for smaller size, otherwise keep original type
+        const preferredType = 'image/webp'
+        const mime = file.type === 'image/png' ? 'image/png' : preferredType
+        canvas.toBlob(
+          (blob) => {
+            if (blob) resolve(blob)
+            else reject(new Error('Canvas toBlob produced no data'))
+          },
+          mime,
+          quality,
+        )
+      }
+      img.onerror = reject
+      // Support object URLs and DataURL
+      img.src = URL.createObjectURL(file)
+    })
   }
 
   async function onSave(e) {
