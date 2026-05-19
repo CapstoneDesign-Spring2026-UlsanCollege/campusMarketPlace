@@ -24,6 +24,14 @@ export default function Navbar({
       return
     }
 
+    // If the user is authenticated, keep them inside the authenticated
+    // dashboard experience instead of sending them back to the public home
+    // page. Only unauthenticated users are routed to the public `/` home.
+    if (isAuthenticated) {
+      navigate('/dashboard')
+      return
+    }
+
     navigate('/')
   }
 
