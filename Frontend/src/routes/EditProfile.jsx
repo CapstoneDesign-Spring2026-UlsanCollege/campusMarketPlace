@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchProfile, updateProfile } from '../services/api'
+import { fetchProfile, updateProfile, uploadProfileAvatar } from '../services/api'
 
 export default function EditProfile() {
   const navigate = useNavigate()
   const [form, setForm] = useState({ firstName: '', lastName: '', location: '' })
+  const [avatarFile, setAvatarFile] = useState(null)
+  const [avatarPreview, setAvatarPreview] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -20,6 +22,7 @@ export default function EditProfile() {
           lastName: user.lastName || '',
           location: user.location || '',
         })
+        setAvatarPreview(user.avatarUrl || '')
       } catch (err) {
         if (!isActive) return
         setError(err?.message || 'Unable to load profile')
@@ -36,11 +39,23 @@ export default function EditProfile() {
     setForm((s) => ({ ...s, [name]: value }))
   }
 
+  function onAvatarSelect(e) {
+    const f = e.target.files && e.target.files[0]
+    if (f) {
+      setAvatarFile(f)
+      setAvatarPreview(URL.createObjectURL(f))
+    }
+  }
+
   async function onSave(e) {
     e.preventDefault()
     setIsSaving(true)
     setError('')
     try {
+      // If an avatar file was selected, upload it first and update avatarUrl
+      if (avatarFile) {
+        await uploadProfileAvatar(avatarFile)
+      }
       await updateProfile(form)
       navigate('/profile', { replace: true })
     } catch (err) {
@@ -63,6 +78,15 @@ export default function EditProfile() {
       <section className="profile-grid" aria-label="Edit profile form">
         <article className="profile-card panel">
           <form onSubmit={onSave}>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: 'block', marginBottom: 6 }}>Avatar</label>
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="avatar preview" style={{ width: 72, height: 72, borderRadius: 8, objectFit: 'cover', display: 'block', marginBottom: 6 }} />
+              ) : (
+                <div style={{ width: 72, height: 72, borderRadius: 8, background: '#eee', display: 'inline-block', marginBottom: 6 }} />
+              )}
+              <input type="file" accept="image/*" onChange={onAvatarSelect} />
+            </div>
             <label>
               First name
               <input name="firstName" value={form.firstName} onChange={onChange} />

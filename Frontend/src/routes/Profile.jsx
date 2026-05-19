@@ -139,9 +139,11 @@ export default function Profile({ currency }) {
   return (
     <main className="page-shell profile-shell">
       <section className="profile-hero panel">
-        <div className="profile-avatar" aria-hidden="true">
-          {getInitial(displayName)}
-        </div>
+        {profile?.avatarUrl ? (
+          <img src={profile.avatarUrl} alt={`${displayName} avatar`} className="profile-avatar-img" />
+        ) : (
+          <div className="profile-avatar" aria-hidden="true">{getInitial(displayName)}</div>
+        )}
         <div className="profile-hero-copy">
           <p className="eyebrow">Your account</p>
           <h1>{displayName}</h1>

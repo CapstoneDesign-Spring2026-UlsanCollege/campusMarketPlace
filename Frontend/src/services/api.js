@@ -78,3 +78,12 @@ export async function updateProfile(data) {
     body: JSON.stringify(data),
   })
 }
+
+export async function uploadProfileAvatar(file) {
+  const fd = new FormData()
+  fd.append('image', file)
+  return apiRequest('/profile/avatar', {
+    method: 'POST',
+    body: fd,
+  })
+}
