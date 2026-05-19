@@ -102,6 +102,12 @@ export async function sendThreadMessage(threadId, body) {
   })
 }
 
+export async function markThreadRead(threadId) {
+  return apiRequest(`/messages/threads/${threadId}/read`, {
+    method: 'POST',
+  })
+}
+
 export async function uploadProfileAvatar(file) {
   const fd = new FormData()
   fd.append('image', file)

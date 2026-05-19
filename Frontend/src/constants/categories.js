@@ -1,12 +1,12 @@
 export const CATEGORIES = [
-  'Textbooks',
-  'Electronics',
-  'Furniture',
-  'Clothing',
-  'Sports',
   'Books',
+  'Furniture',
+  'Tools',
+  'Notes',
+  'Clothing',
+  'Dorm Deals',
+  'Electronics',
   'Supplies',
-  'Services',
   'Other',
 ]
 

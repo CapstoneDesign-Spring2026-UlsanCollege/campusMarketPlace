@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiRequest, createItem, fetchItems } from '../services/api'
+import { CATEGORIES } from '../constants/categories'
 import { convertDisplayPriceToUsd, formatPriceFromUsd, getPriceInputMeta } from '../services/currency'
 
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
@@ -340,14 +341,19 @@ export default function Dashboard({ currency }) {
                 />
                 {formErrors.price && <p className="composer-feedback is-error">{formErrors.price}</p>}
 
-                <input
+                <select
                   name="category"
-                  type="text"
-                  placeholder="Category"
                   value={formData.category}
                   onChange={handleFormChange}
                   className="composer-text-input"
-                />
+                >
+                  <option value="">Select a category</option>
+                  {CATEGORIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
                 {formErrors.category && <p className="composer-feedback is-error">{formErrors.category}</p>}
 
                 <select
@@ -432,13 +438,7 @@ export default function Dashboard({ currency }) {
             </form>
           </section>
 
-          <section className="stories-row" aria-label="Stories">
-            {STORIES.map((story) => (
-              <article className="story-card" key={story}>
-                <span>{story}</span>
-              </article>
-            ))}
-          </section>
+          {/* Stories moved into the Search menu in the navbar */}
 
           <section className="feed-post-list" aria-label="Marketplace feed posts">
             {loading ? (
