@@ -7,6 +7,7 @@ import Browse from './routes/Browse'
 import Login from './routes/Login'
 import Signup from './routes/Signup'
 import Dashboard from './routes/Dashboard'
+import Messages from './routes/Messages'
 import Profile from './routes/Profile'
 import EditProfile from './routes/EditProfile'
 import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from './services/currency'
@@ -73,6 +74,10 @@ export default function App() {
         <Route path="/login" element={<Login onAuthChange={refreshAuthSession} />} />
         <Route path="/signup" element={<Signup onAuthChange={refreshAuthSession} />} />
         <Route path="/dashboard" element={<Dashboard currency={currency} />} />
+        <Route
+          path="/messages"
+          element={authSession.token ? <Messages /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />}
+        />
         <Route
           path="/profile"
           element={
