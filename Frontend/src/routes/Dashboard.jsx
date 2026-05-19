@@ -40,6 +40,7 @@ export default function Dashboard({ currency }) {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const currentUserId = user?.id || ''
 
   const [formData, setFormData] = useState({
     title: '',
@@ -130,6 +131,10 @@ export default function Dashboard({ currency }) {
 
   function openComposer() {
     setIsComposerOpen(true)
+  }
+
+  function openMessageThread(itemId) {
+    navigate(`/messages?item=${encodeURIComponent(itemId)}`)
   }
 
   function removeUploadedImage(indexToRemove) {
@@ -469,7 +474,17 @@ export default function Dashboard({ currency }) {
                   <footer className="post-actions" aria-label="Post actions">
                     <button type="button">Like</button>
                     <button type="button">Comment</button>
-                    <button type="button">Send Message</button>
+                    {currentUserId && item.status === 'active' && item.seller_id && item.seller_id !== currentUserId ? (
+                      <button type="button" onClick={() => openMessageThread(item._id)}>
+                        Message seller
+                      </button>
+                    ) : (
+                      <button type="button" disabled>
+                        {currentUserId
+                          ? (item.status === 'active' ? 'Your listing' : 'Messaging unavailable')
+                          : 'Loading account...'}
+                      </button>
+                    )}
                   </footer>
                 </article>
               ))

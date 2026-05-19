@@ -143,6 +143,11 @@ export default function Navbar({
                     Profile
                   </button>
                 )}
+                {isAuthenticated && (
+                  <button className="nav-pill" type="button" onClick={() => navigate('/messages')}>
+                    Messages
+                  </button>
+                )}
                 <button className="nav-pill" type="button" onClick={() => navigate('/dashboard')}>
                   Buy
                 </button>
