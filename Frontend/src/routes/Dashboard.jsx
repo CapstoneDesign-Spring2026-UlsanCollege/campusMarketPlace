@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { apiRequest, createItem, fetchItems } from '../services/api'
 import { CATEGORIES, getCategoryLabel } from '../constants/categories'
+import { getAuthUser, getAuthToken } from '../services/auth'
 import { convertDisplayPriceToUsd, formatPriceFromUsd, getPriceInputMeta } from '../services/currency'
 import { API_ORIGIN } from '../services/api'
 
@@ -98,10 +99,10 @@ export default function Dashboard({ currency }) {
   const previewObjectUrlRef = useRef('')
 
   useEffect(() => {
-    const token = localStorage.getItem('campusMarketplaceToken')
-    const userRaw = localStorage.getItem('campusMarketplaceUser')
+    const token = getAuthToken()
+    const sessionUser = getAuthUser()
 
-    if (!token || !userRaw) {
+    if (!token || !sessionUser) {
       navigate('/login', {
         replace: true,
         state: { message: 'Please log in first.' },
@@ -109,16 +110,7 @@ export default function Dashboard({ currency }) {
       return
     }
 
-    try {
-      setUser(JSON.parse(userRaw))
-    } catch {
-      localStorage.removeItem('campusMarketplaceToken')
-      localStorage.removeItem('campusMarketplaceUser')
-      navigate('/login', {
-        replace: true,
-        state: { message: 'Please log in again.' },
-      })
-    }
+    setUser(sessionUser)
   }, [navigate])
 
   useEffect(() => {
@@ -188,6 +180,16 @@ export default function Dashboard({ currency }) {
 
     previewObjectUrlRef.current = nextUrl
     setUploadPreviewUrl(nextUrl)
+  }
+
+  function renderAvatarForUser(userObj, altText) {
+    const avatar = userObj?.avatarUrl || userObj?.avatar || ''
+    if (avatar) {
+      // If relative path, resolve to absolute using API_ORIGIN
+      const src = /^https?:\/\//i.test(avatar) ? avatar : new URL(String(avatar).replace(/^\/+/, ''), `${API_ORIGIN}/`).href
+      return <img src={src} alt={altText || 'avatar'} style={{width: 40, height: 40, borderRadius: '50%', objectFit: 'cover'}} />
+    }
+    return null
   }
 
   function handleImageUpload() {
@@ -365,7 +367,7 @@ export default function Dashboard({ currency }) {
               <form className="composer-form" onSubmit={handlePostItemSubmit} noValidate>
               <div className="composer-row">
                 <div className="avatar-badge" aria-hidden="true">
-                  {firstName.slice(0, 1)}
+                  {renderAvatarForUser(user) || firstName.slice(0, 1)}
                 </div>
                 <button
                   className="composer-input"
@@ -529,7 +531,18 @@ export default function Dashboard({ currency }) {
                 <article className="feed-panel post-card" key={item._id}>
                   <header className="post-header">
                     <div className="avatar-badge" aria-hidden="true">
-                      {(item.sellerName || 'S').slice(0, 1)}
+                      {(
+                        // Prefer seller avatar if available on the item document
+                        (item.sellerAvatarUrl || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url)
+                          ? (
+                            <img
+                              src={(item.sellerAvatarUrl || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url)}
+                              alt={(item.sellerName || 'Seller')}
+                              style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }}
+                            />
+                          )
+                          : (item.sellerName || 'S').slice(0, 1)
+                      )}
                     </div>
                     <div>
                       <strong>{item.sellerName || 'Seller'}</strong>
