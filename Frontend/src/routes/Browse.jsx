@@ -3,10 +3,11 @@ import { useSearchParams } from 'react-router-dom'
 import ItemGrid from '../components/ItemGrid'
 import { fetchItems } from '../services/api'
 import { CATEGORIES } from '../constants/categories'
+import { t } from '../services/i18n'
 
 const ITEMS_PER_PAGE = 20
 
-export default function Browse({ currency }) {
+export default function Browse({ currency, language = 'en' }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const [items, setItems] = useState([])
   const [pagination, setPagination] = useState({ page: 1, limit: ITEMS_PER_PAGE, total: 0, pages: 1 })
@@ -82,16 +83,16 @@ export default function Browse({ currency }) {
   return (
     <main className="page-shell browse-shell">
       <section className="browse-hero panel">
-        <p className="eyebrow">Campus marketplace</p>
-        <h1>Browse items</h1>
-        <p className="subcopy">Find books, tech, furniture, and everyday essentials in a clean grid view.</p>
+        <p className="eyebrow">{t(language, 'browse.eyebrow')}</p>
+        <h1>{t(language, 'browse.title')}</h1>
+        <p className="subcopy">{t(language, 'browse.subcopy')}</p>
         <div className="category-chip-row" aria-label="Quick category filters">
           <button
             type="button"
             className={`category-chip ${!currentCategory ? 'is-active' : ''}`}
             onClick={() => handleCategoryChange('')}
           >
-            All
+            {t(language, 'browse.all')}
           </button>
           {CATEGORIES.map((category) => (
             <button

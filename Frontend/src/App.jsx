@@ -58,7 +58,7 @@ export default function App() {
         <Route path="/" element={authSession.token ? <Navigate to="/dashboard" replace /> : <Home language={language} />} />
         <Route
           path="/browse"
-          element={authSession.token ? <Browse currency={currency} /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />}
+          element={authSession.token ? <Browse currency={currency} language={language} /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />}
         />
         <Route path="/login" element={<Login language={language} onAuthChange={refreshAuthSession} />} />
         <Route path="/signup" element={<Signup language={language} onAuthChange={refreshAuthSession} />} />
@@ -68,13 +68,13 @@ export default function App() {
         />
         <Route
           path="/messages"
-          element={authSession.token ? <Messages /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />}
+          element={authSession.token ? <Messages language={language} /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />}
         />
         <Route
           path="/profile"
           element={
             authSession.token ? (
-              <Profile currency={currency} />
+              <Profile currency={currency} language={language} />
             ) : (
               <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />
             )
@@ -84,7 +84,7 @@ export default function App() {
           path="/profile/edit"
           element={
             authSession.token ? (
-              <EditProfile />
+              <EditProfile language={language} />
             ) : (
               <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />
             )
@@ -94,7 +94,7 @@ export default function App() {
           path="/profile/change-password"
           element={
             authSession.token ? (
-              <ChangePassword />
+              <ChangePassword language={language} />
             ) : (
               <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />
             )

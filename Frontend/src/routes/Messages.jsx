@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { fetchMessageThreads, fetchThreadMessages, openMessageThread, sendThreadMessage, markThreadRead } from '../services/api'
 import { getAuthToken, getAuthUser } from '../services/auth'
+import { t } from '../services/i18n'
 
 const POLL_INTERVAL_MS = 4000
 
@@ -23,7 +24,7 @@ function formatTime(value) {
   }).format(date)
 }
 
-export default function Messages() {
+export default function Messages({ language = 'en' }) {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [threads, setThreads] = useState([])
@@ -46,7 +47,7 @@ export default function Messages() {
   useEffect(() => {
     const token = getAuthToken()
     if (!token) {
-      navigate('/login', { replace: true, state: { message: 'Please log in first.' } })
+      navigate('/login', { replace: true, state: { message: t(language, 'navbar.signOutBody') } })
       return
     }
 
@@ -205,16 +206,16 @@ export default function Messages() {
     <main className="page-shell messages-shell">
       <section className="messages-layout panel">
         <aside className="messages-sidebar">
-          <div className="messages-sidebar-head">
-            <p className="eyebrow">Messages</p>
-            <h1>Inbox</h1>
-            <p className="subcopy">Live conversations for listings stay here and update automatically while you keep the page open.</p>
+                  <div className="messages-sidebar-head">
+            <p className="eyebrow">{t(language, 'messages.messages')}</p>
+            <h1>{t(language, 'messages.inbox')}</h1>
+            <p className="subcopy">{t(language, 'messages.subcopy')}</p>
           </div>
 
           {isLoading ? (
-            <div className="message-empty-state">Loading conversations...</div>
+            <div className="message-empty-state">{t(language, 'messages.loadingConversations')}</div>
           ) : threads.length === 0 ? (
-            <div className="message-empty-state">No conversations yet. Open a listing and tap Message seller.</div>
+            <div className="message-empty-state">{t(language, 'messages.noConversations')}</div>
           ) : (
             <div className="thread-list" role="list">
               {threads.map((thread) => (
@@ -227,7 +228,7 @@ export default function Messages() {
                   <div className="thread-item-top" style={{display: 'flex', gap: 8, alignItems: 'center'}}>
                     <img src={thread.other_user_avatar || thread.other_user_avatar_url || thread.otherUserAvatar || ''} alt={thread.other_user_name || 'User'} style={{width:36, height:36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0}} />
                     <div style={{flex: 1}}>
-                      <strong>{thread.other_user_name || 'Conversation'}</strong>
+                      <strong>{thread.other_user_name || t(language, 'messages.chat')}</strong>
                       <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
                         <span>{formatTime(thread.latestMessageAt || thread.updatedAt)}</span>
                         {thread.unreadCount > 0 ? (
@@ -236,8 +237,8 @@ export default function Messages() {
                       </div>
                     </div>
                   </div>
-                  <p>{thread.itemTitle || 'Listing conversation'}</p>
-                  <small>{thread.latestMessage || 'Tap to open this chat.'}</small>
+                  <p>{thread.itemTitle || t(language, 'messages.listingConversation')}</p>
+                  <small>{thread.latestMessage || t(language, 'messages.noMessagesYet')}</small>
                 </button>
               ))}
             </div>
@@ -249,23 +250,23 @@ export default function Messages() {
             <>
               <header className="messages-panel-head">
                 <div>
-                  <p className="eyebrow">Conversation</p>
-                  <h2>{activeThread.other_user_name || 'Chat'}</h2>
-                  <p className="subcopy">{activeThread.itemTitle || 'Listing conversation'} {activeThread.itemStatus ? `• ${activeThread.itemStatus}` : ''}</p>
+                  <p className="eyebrow">{t(language, 'messages.conversation')}</p>
+                  <h2>{activeThread.other_user_name || t(language, 'messages.chat')}</h2>
+                  <p className="subcopy">{activeThread.itemTitle || t(language, 'messages.listingConversation')} {activeThread.itemStatus ? `• ${activeThread.itemStatus}` : ''}</p>
                 </div>
                 {activeThread.itemImage ? <img src={activeThread.itemImage} alt={activeThread.itemTitle || 'Listing'} className="messages-listing-thumb" /> : null}
               </header>
 
               <div className="messages-stream" aria-live="polite">
                 {messages.length === 0 ? (
-                  <div className="message-empty-state">No messages yet. Start the conversation below.</div>
+                  <div className="message-empty-state">{t(language, 'messages.noMessagesYet')}</div>
                 ) : (
                   messages.map((message) => {
                     const isOwnMessage = message.sender_id === user?.id
                     return (
                       <article key={message._id} className={`message-bubble ${isOwnMessage ? 'is-own' : 'is-other'}`}>
                         <div className="message-bubble-meta">
-                          <strong>{isOwnMessage ? 'You' : message.sender_name || 'Student'}</strong>
+                          <strong>{isOwnMessage ? t(language, 'messages.you') : message.sender_name || t(language, 'messages.student')}</strong>
                           <span>{formatTime(message.createdAt)}</span>
                         </div>
                         <p>{message.body}</p>
@@ -280,20 +281,20 @@ export default function Messages() {
                 <textarea
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
-                  placeholder="Write a message..."
+                  placeholder={t(language, 'messages.writeMessage')}
                   rows={4}
                 />
                 <div className="message-compose-actions">
                   <span className="message-status" aria-live="polite">{error || statusMessage}</span>
                   <button type="submit" className="button button-primary" disabled={isSending || !draft.trim()}>
-                    {isSending ? 'Sending...' : 'Send'}
+                    {isSending ? t(language, 'messages.sending') : t(language, 'messages.send')}
                   </button>
                 </div>
               </form>
             </>
           ) : (
             <div className="message-empty-state message-empty-centered">
-              {error ? error : 'Select a conversation to start chatting.'}
+              {error ? error : t(language, 'messages.selectConversation')}
             </div>
           )}
         </section>
