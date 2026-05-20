@@ -1,5 +1,6 @@
 import { API_ORIGIN } from '../services/api'
 import Avatar from './Avatar'
+import { t } from '../services/i18n'
 import { formatPriceFromUsd } from '../services/currency'
 
 function getPrimaryImageValue(item) {
@@ -37,7 +38,7 @@ function resolveImageUrl(image) {
   return new URL(image.replace(/^\/+/, ''), `${API_ORIGIN}/`).href
 }
 
-export default function ItemCard({ item, currency }) {
+export default function ItemCard({ item, currency, language = 'en' }) {
   const imageSrc = resolveImageUrl(getPrimaryImageValue(item))
   const formattedPrice = formatPriceFromUsd(item.price, currency)
 
@@ -65,7 +66,7 @@ export default function ItemCard({ item, currency }) {
         <h2 className="item-title">{item.title}</h2>
         <div className="item-seller-row" style={{display: 'flex', gap: 8, alignItems: 'center'}}>
           <Avatar src={item.sellerAvatarUrl || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url} alt={item.sellerName || 'Seller'} size={36} />
-          <p className="item-seller" style={{margin: 0}}>Sold by {item.sellerName}</p>
+          <p className="item-seller" style={{margin: 0}}>{t(language, 'browse.soldBy')} {item.sellerName}</p>
         </div>
       </div>
     </article>

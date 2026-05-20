@@ -117,6 +117,7 @@ export default function Browse({ currency, language = 'en' }) {
         onCategoryChange={handleCategoryChange}
         onPageChange={handlePageChange}
         onRetry={handleRetry}
+        language={language}
       />
     </main>
   )

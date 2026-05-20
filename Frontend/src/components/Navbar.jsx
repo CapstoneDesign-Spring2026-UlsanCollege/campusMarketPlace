@@ -27,6 +27,7 @@ export default function Navbar({
   const [showSignOutModal, setShowSignOutModal] = useState(false)
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false)
   const [searchMenuOpen, setSearchMenuOpen] = useState(false)
+  const currentLangLabel = LANGUAGE_OPTIONS.find((o) => o.value === language)?.label || language
 
   function handleHome() {
     if (isDashboard) {
@@ -90,7 +91,7 @@ export default function Navbar({
             UC Marketplace
           </Link>
           <nav className="nav-links" aria-label="Primary">
-              <div className="currency-hamburger-wrapper" style={{position: 'absolute', right: 12, top: 12}}>
+              <div className="currency-hamburger-wrapper" style={{position: 'absolute', right: 12, top: 12, display: 'flex', alignItems: 'center', gap: 8}}>
                 <button
                   className="currency-hamburger"
                   aria-label={t(language, 'navbar.language')}
@@ -104,6 +105,7 @@ export default function Navbar({
                     <span style={{display: 'block', width: 14, height: 2, background: 'currentColor'}} />
                   </span>
                 </button>
+                <div className="language-indicator" aria-hidden style={{fontSize: '0.82rem', fontWeight: 600}}>{currentLangLabel}</div>
 
                   {languageMenuOpen && (
                   <div
