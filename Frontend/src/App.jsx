@@ -56,7 +56,7 @@ export default function App() {
         onAuthChange={refreshAuthSession}
       />
       <Routes>
-        <Route path="/" element={authSession.token ? <Home /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />} />
+        <Route path="/" element={<Home />} />
         <Route
           path="/browse"
           element={authSession.token ? <Browse currency={currency} /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />}
