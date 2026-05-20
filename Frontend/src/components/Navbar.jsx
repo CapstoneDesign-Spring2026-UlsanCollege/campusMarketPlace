@@ -1,13 +1,27 @@
 import { useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { CURRENCY_OPTIONS } from '../services/currency'
+import Avatar from './Avatar'
+import { CATEGORIES } from '../constants/categories'
+import { clearAuthSession } from '../services/auth'
 
-export default function Navbar({ currency, onCurrencyChange, language, onLanguageChange }) {
+export default function Navbar({
+  currency,
+  onCurrencyChange,
+  language,
+  onLanguageChange,
+  isAuthenticated,
+  authUser,
+  onAuthChange,
+}) {
   const location = useLocation()
   const navigate = useNavigate()
   const isDashboard = location.pathname === '/dashboard'
+  // Show the authenticated (dashboard-style) nav when user is signed in
+  const showAuthNav = isDashboard || isAuthenticated
   const [showSignOutModal, setShowSignOutModal] = useState(false)
   const [currencyMenuOpen, setCurrencyMenuOpen] = useState(false)
+  const [searchMenuOpen, setSearchMenuOpen] = useState(false)
 
   function handleHome() {
     if (isDashboard) {
@@ -15,22 +29,23 @@ export default function Navbar({ currency, onCurrencyChange, language, onLanguag
       return
     }
 
+    // If the user is authenticated, keep them inside the authenticated
+    // dashboard experience and show the full marketplace (home mode).
+    if (isAuthenticated) {
+      navigate('/dashboard', { state: { mode: 'home' } })
+      return
+    }
+
     navigate('/')
   }
 
   function handleProfile() {
-    const profileElement = document.getElementById('profile')
-    if (profileElement) {
-      profileElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    navigate('/profile')
   }
 
   function handleSearch() {
-    const composerButton = document.querySelector('.composer-input')
-    if (composerButton instanceof HTMLElement) {
-      composerButton.focus()
-      composerButton.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
+    // Toggle the search/story menu instead of focusing the composer directly
+    setSearchMenuOpen((s) => !s)
   }
 
   function handleSignOut() {
@@ -40,8 +55,10 @@ export default function Navbar({ currency, onCurrencyChange, language, onLanguag
   function confirmSignOut() {
     setShowSignOutModal(false)
 
-    localStorage.removeItem('campusMarketplaceToken')
-    localStorage.removeItem('campusMarketplaceUser')
+    clearAuthSession()
+    if (typeof onAuthChange === 'function') {
+      onAuthChange()
+    }
     navigate('/', { replace: true })
   }
 
@@ -76,7 +93,7 @@ export default function Navbar({ currency, onCurrencyChange, language, onLanguag
               <div className="currency-hamburger-wrapper" style={{position: 'absolute', right: 12, top: 12}}>
                 <button
                   className="currency-hamburger"
-                  aria-label="Open currency menu"
+                  aria-label="Open account preferences menu"
                   type="button"
                   onClick={toggleCurrencyMenu}
                 >
@@ -85,12 +102,11 @@ export default function Navbar({ currency, onCurrencyChange, language, onLanguag
                   <span aria-hidden style={{display: 'block', width: 18, height: 2, background: 'currentColor', margin: '3px 0'}} />
                 </button>
 
-                {currencyMenuOpen && (
+                  {currencyMenuOpen && (
                   <div
                     className="currency-menu"
                     role="menu"
                     aria-label="Currency and language options"
-                    style={{position: 'absolute', right: 0, top: '36px'}}
                   >
                     <div className="menu-section">
                       <div className="menu-section-title">Currency</div>
@@ -114,21 +130,46 @@ export default function Navbar({ currency, onCurrencyChange, language, onLanguag
                   </div>
                 )}
               </div>
-            {isDashboard ? (
+            {showAuthNav ? (
               <>
                 <button className="nav-pill" type="button" onClick={handleHome}>
                   Home
                 </button>
-                <button className="nav-pill" type="button" onClick={handleProfile}>
-                  Profile
-                </button>
                 <button className="nav-pill" type="button" onClick={handleSearch}>
                   Search
                 </button>
-                <button className="nav-pill" type="button" onClick={() => navigate('/dashboard')}>
+                {searchMenuOpen && (
+                  <div className="search-menu" role="menu" aria-label="Quick categories">
+                    {CATEGORIES.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        className="currency-menu-item"
+                        onClick={() => {
+                          setSearchMenuOpen(false)
+                          navigate(`/browse?category=${encodeURIComponent(s)}`)
+                        }}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {isAuthenticated && (
+                  <button className="nav-pill" type="button" onClick={handleProfile} style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                    <Avatar src={authUser?.avatarUrl || authUser?.avatar} alt={authUser?.firstName || 'You'} size={28} />
+                    Profile
+                  </button>
+                )}
+                {isAuthenticated && (
+                  <button className="nav-pill" type="button" onClick={() => navigate('/messages')}>
+                    Messages
+                  </button>
+                )}
+                <button className="nav-pill" type="button" onClick={() => navigate('/dashboard', { state: { mode: 'buy' } })}>
                   Buy
                 </button>
-                <button className="nav-pill" type="button" onClick={() => navigate('/dashboard')}>
+                <button className="nav-pill" type="button" onClick={() => navigate('/dashboard', { state: { mode: 'sell' } })}>
                   Sell
                 </button>
                 <button className="nav-signout" type="button" onClick={handleSignOut}>
@@ -140,9 +181,13 @@ export default function Navbar({ currency, onCurrencyChange, language, onLanguag
                 <NavLink to="/" end>
                   Home
                 </NavLink>
-                <NavLink to="/browse">Browse</NavLink>
-                <NavLink to="/login">Login</NavLink>
-                <NavLink to="/signup">Sign Up</NavLink>
+                {isAuthenticated ? <NavLink to="/profile">Profile</NavLink> : <NavLink to="/login">Login</NavLink>}
+                {!isAuthenticated ? <NavLink to="/signup">Sign Up</NavLink> : null}
+                {isAuthenticated ? (
+                  <button className="nav-signout" type="button" onClick={handleSignOut}>
+                    Sign Out
+                  </button>
+                ) : null}
               </>
             )}
           </nav>

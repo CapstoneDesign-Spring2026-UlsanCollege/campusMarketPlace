@@ -63,9 +63,9 @@ Complete the full marketplace loop and prepare for final submission including:
 
 ### Demo Script
 
-Step 1: Register with campus email (@office.uc.ac.kr) — receive real OTP email  
-Step 2: Verify OTP and log in with JWT  
-Step 3: Browse homepage grid of real listings fetched from API  
+Step 1: Register with campus email (@office.uc.ac.kr) — receive real OTP email
+Step 2: Verify OTP and log in with JWT
+Step 3: Browse homepage grid of real listings fetched from API
 Step 4: Post a new listing using the composer form (image + details)
 
 ### Backup Plan
@@ -86,9 +86,9 @@ Step 4: Post a new listing using the composer form (image + details)
 
 ### Demo Script
 
-Step 1: Login and land on homepage with real listings grid  
-Step 2: Use search bar and category filter to find an item  
-Step 3: Open user dashboard — view own listings, mark one as sold  
+Step 1: Login and land on homepage with real listings grid
+Step 2: Use search bar and category filter to find an item
+Step 3: Open user dashboard — view own listings, mark one as sold
 Step 4: Upload an item with an image — confirm Cloudinary URL stored in MongoDB
 
 ### Backup Plan
@@ -109,9 +109,9 @@ Step 4: Upload an item with an image — confirm Cloudinary URL stored in MongoD
 
 ### Demo Script
 
-Step 1: Full user journey — register, verify email, post item with image  
-Step 2: Another user browses, searches, and finds the item  
-Step 3: Dashboard shows seller's listing management and sold status  
+Step 1: Full user journey — register, verify email, post item with image
+Step 2: Another user browses, searches, and finds the item
+Step 3: Dashboard shows seller's listing management and sold status
 Step 4: Technical architecture walkthrough + roadmap for post-capstone features
 
 ### Backup Plan
@@ -250,16 +250,16 @@ Link to your **GitHub Project board**.
 
 ## Risks or Blockers
 
-- **Risk:** SendGrid account setup / domain verification takes time  
+- **Risk:** SendGrid account setup / domain verification takes time
   - **Mitigation:** Start Week 12 Day 1; use manual account verification as fallback for demos
 
-- **Risk:** Cloudinary API integration unfamiliar to team  
+- **Risk:** Cloudinary API integration unfamiliar to team
   - **Mitigation:** Sagar spikes a minimal working upload in Week 12; team builds on top
 
-- **Risk:** Search feature scope creep (full-text vs. simple filter)  
+- **Risk:** Search feature scope creep (full-text vs. simple filter)
   - **Mitigation:** Start with simple `?category=` and `?q=` query params; no Elasticsearch
 
-- **Risk:** Final demo environment instability on Render  
+- **Risk:** Final demo environment instability on Render
   - **Mitigation:** Keep GitHub Pages as stable fallback; test Render deploy daily in Week 14
 
 ---

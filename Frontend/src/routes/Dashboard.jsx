@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { apiRequest, createItem, fetchItems } from '../services/api'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { apiRequest, createItem, fetchItems, fetchUser } from '../services/api'
+import { CATEGORIES, getCategoryLabel } from '../constants/categories'
+import { getAuthUser, getAuthToken } from '../services/auth'
 import { convertDisplayPriceToUsd, formatPriceFromUsd, getPriceInputMeta } from '../services/currency'
+import { API_ORIGIN } from '../services/api'
 
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
 const MAX_IMAGE_COUNT = 5
@@ -27,9 +30,46 @@ const STORIES = [
   'Furniture',
 ]
 
+function getPrimaryImageValue(item) {
+  if (item?.image) {
+    if (typeof item.image === 'string') {
+      return item.image
+    }
+    if (typeof item.image === 'object' && item.image.url) {
+      return item.image.url
+    }
+  }
+
+  if (Array.isArray(item?.images) && item.images.length > 0) {
+    const first = item.images[0]
+    if (typeof first === 'string') {
+      return first
+    }
+    if (first && typeof first === 'object' && first.url) {
+      return first.url
+    }
+  }
+
+  return ''
+}
+
+function resolveImageUrl(imageUrl) {
+  if (!imageUrl) {
+    return ''
+  }
+
+  if (/^https?:\/\//i.test(imageUrl) || imageUrl.startsWith('data:') || imageUrl.startsWith('blob:')) {
+    return imageUrl
+  }
+
+  return new URL(imageUrl.replace(/^\/+/, ''), `${API_ORIGIN}/`).href
+}
+
 export default function Dashboard({ currency }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [user, setUser] = useState(null)
+  const [mode, setMode] = useState(location.state?.mode || 'home')
 
   const [uploadPreviewUrl, setUploadPreviewUrl] = useState('')
   const [uploadMessage, setUploadMessage] = useState('')
@@ -38,8 +78,10 @@ export default function Dashboard({ currency }) {
   const [uploadedImages, setUploadedImages] = useState([])
 
   const [items, setItems] = useState([])
+  const [sellerAvatars, setSellerAvatars] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const currentUserId = user?.id || ''
 
   const [formData, setFormData] = useState({
     title: '',
@@ -58,10 +100,10 @@ export default function Dashboard({ currency }) {
   const previewObjectUrlRef = useRef('')
 
   useEffect(() => {
-    const token = localStorage.getItem('campusMarketplaceToken')
-    const userRaw = localStorage.getItem('campusMarketplaceUser')
+    const token = getAuthToken()
+    const sessionUser = getAuthUser()
 
-    if (!token || !userRaw) {
+    if (!token || !sessionUser) {
       navigate('/login', {
         replace: true,
         state: { message: 'Please log in first.' },
@@ -69,16 +111,7 @@ export default function Dashboard({ currency }) {
       return
     }
 
-    try {
-      setUser(JSON.parse(userRaw))
-    } catch {
-      localStorage.removeItem('campusMarketplaceToken')
-      localStorage.removeItem('campusMarketplaceUser')
-      navigate('/login', {
-        replace: true,
-        state: { message: 'Please log in again.' },
-      })
-    }
+    setUser(sessionUser)
   }, [navigate])
 
   useEffect(() => {
@@ -89,12 +122,37 @@ export default function Dashboard({ currency }) {
     }
   }, [])
 
+  useEffect(() => {
+    if (location.state?.mode) {
+      setMode(location.state.mode)
+    }
+  }, [location.state])
+
   async function loadItems() {
     try {
       setLoading(true)
       setError(null)
       const data = await fetchItems(1, 20)
-      setItems(data.items || [])
+      let filteredItems = data.items || []
+
+      // Filter items based on mode
+      if (mode === 'sell') {
+        // Show only items posted by current user
+        filteredItems = filteredItems.filter((item) => {
+          const sellerId = item.seller_id || item.sellerId || ''
+          return sellerId === currentUserId
+        })
+      } else if (mode === 'buy') {
+        // Show only items posted by other users
+        filteredItems = filteredItems.filter((item) => {
+          const sellerId = item.seller_id || item.sellerId || ''
+          return sellerId && sellerId !== currentUserId
+        })
+      } else {
+        // 'home' mode: show all items
+      }
+
+      setItems(filteredItems)
     } catch (err) {
       setError(err.message || 'Failed to load items')
       console.error('Error fetching items:', err)
@@ -104,8 +162,35 @@ export default function Dashboard({ currency }) {
   }
 
   useEffect(() => {
-    loadItems()
-  }, [])
+    if (user) {
+      loadItems()
+    }
+  }, [mode, user])
+
+  useEffect(() => {
+    // For any items missing a sellerAvatarUrl, fetch the public user profile
+    // and cache the avatar so we can display it without changing server data.
+    if (!items || items.length === 0) return
+
+    items.forEach((item) => {
+      const sellerId = item.seller_id || item.sellerId || ''
+      if (!sellerId) return
+      if (item.sellerAvatarUrl) return
+      if (sellerAvatars[sellerId]) return
+
+      fetchUser(sellerId)
+        .then((res) => {
+          const userObj = res.user || {}
+          const avatar = userObj.avatarUrl || userObj.avatar || ''
+          if (avatar) {
+            setSellerAvatars((prev) => ({ ...prev, [sellerId]: avatar }))
+          }
+        })
+        .catch(() => {
+          // ignore fetch failures
+        })
+    })
+  }, [items])
 
   const firstName = user?.firstName || 'Student'
   const priceInputMeta = getPriceInputMeta(currency)
@@ -123,6 +208,16 @@ export default function Dashboard({ currency }) {
     setUploadPreviewUrl(nextUrl)
   }
 
+  function renderAvatarForUser(userObj, altText) {
+    const avatar = userObj?.avatarUrl || userObj?.avatar || ''
+    if (avatar) {
+      // If relative path, resolve to absolute using API_ORIGIN
+      const src = /^https?:\/\//i.test(avatar) ? avatar : new URL(String(avatar).replace(/^\/+/, ''), `${API_ORIGIN}/`).href
+      return <img src={src} alt={altText || 'avatar'} style={{width: 40, height: 40, borderRadius: '50%', objectFit: 'cover'}} />
+    }
+    return null
+  }
+
   function handleImageUpload() {
     setIsComposerOpen(true)
     imageInputRef.current?.click()
@@ -130,6 +225,14 @@ export default function Dashboard({ currency }) {
 
   function openComposer() {
     setIsComposerOpen(true)
+  }
+
+  function openMessageThread(itemId) {
+    navigate(`/messages?item=${encodeURIComponent(itemId)}`)
+  }
+
+  function getItemImageSrc(item) {
+    return resolveImageUrl(getPrimaryImageValue(item))
   }
 
   function removeUploadedImage(indexToRemove) {
@@ -285,11 +388,12 @@ export default function Dashboard({ currency }) {
     <main className="page-shell marketplace-shell">
       <section className="feed-layout">
         <section className="feed-main-col">
-          <section className="feed-panel composer" aria-label="Post composer">
-            <form className="composer-form" onSubmit={handlePostItemSubmit} noValidate>
+          {mode !== 'buy' && (
+            <section className="feed-panel composer" aria-label="Post composer">
+              <form className="composer-form" onSubmit={handlePostItemSubmit} noValidate>
               <div className="composer-row">
                 <div className="avatar-badge" aria-hidden="true">
-                  {firstName.slice(0, 1)}
+                  {renderAvatarForUser(user) || firstName.slice(0, 1)}
                 </div>
                 <button
                   className="composer-input"
@@ -335,14 +439,19 @@ export default function Dashboard({ currency }) {
                 />
                 {formErrors.price && <p className="composer-feedback is-error">{formErrors.price}</p>}
 
-                <input
+                <select
                   name="category"
-                  type="text"
-                  placeholder="Category"
                   value={formData.category}
                   onChange={handleFormChange}
                   className="composer-text-input"
-                />
+                >
+                  <option value="">Select a category</option>
+                  {CATEGORIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
                 {formErrors.category && <p className="composer-feedback is-error">{formErrors.category}</p>}
 
                 <select
@@ -425,15 +534,10 @@ export default function Dashboard({ currency }) {
                 onChange={handleFileChange}
               />
             </form>
-          </section>
+            </section>
+          )}
 
-          <section className="stories-row" aria-label="Stories">
-            {STORIES.map((story) => (
-              <article className="story-card" key={story}>
-                <span>{story}</span>
-              </article>
-            ))}
-          </section>
+          {/* Stories moved into the Search menu in the navbar */}
 
           <section className="feed-post-list" aria-label="Marketplace feed posts">
             {loading ? (
@@ -453,23 +557,61 @@ export default function Dashboard({ currency }) {
                 <article className="feed-panel post-card" key={item._id}>
                   <header className="post-header">
                     <div className="avatar-badge" aria-hidden="true">
-                      {(item.sellerName || 'S').slice(0, 1)}
+                      {(() => {
+                        const sellerId = item.seller_id || item.sellerId || ''
+                        const candidate =
+                          item.sellerAvatarUrl || sellerAvatars[sellerId] || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url || ''
+                        if (candidate) {
+                          return (
+                            <img
+                              src={resolveImageUrl(candidate)}
+                              alt={(item.sellerName || 'Seller')}
+                            />
+                          )
+                        }
+                        return (item.sellerName || 'S').slice(0, 1)
+                      })()}
                     </div>
                     <div>
                       <strong>{item.sellerName || 'Seller'}</strong>
                       <p>{item.location || 'Campus'}</p>
                     </div>
                   </header>
-                  <div className="post-image" aria-hidden="true" />
+                  <div className="post-image">
+                    {getItemImageSrc(item) ? (
+                      <img
+                        src={getItemImageSrc(item)}
+                        alt={item.title ? `${item.title} listing` : 'Marketplace listing'}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="post-image-fallback" aria-hidden="true">
+                        <span>{(item.category || 'Item').slice(0, 1).toUpperCase()}</span>
+                      </div>
+                    )}
+                  </div>
                   <div className="post-body">
-                    <div className="post-price">{formatPriceFromUsd(item.price, currency)}</div>
+                    <div className="post-meta">
+                      <span className="post-category">{getCategoryLabel(item.category)}</span>
+                      <div className="post-price">{formatPriceFromUsd(item.price, currency)}</div>
+                    </div>
                     <h2>{item.title}</h2>
                     <p>{item.description}</p>
                   </div>
                   <footer className="post-actions" aria-label="Post actions">
                     <button type="button">Like</button>
                     <button type="button">Comment</button>
-                    <button type="button">Send Message</button>
+                    {currentUserId && item.status === 'active' && item.seller_id && item.seller_id !== currentUserId ? (
+                      <button type="button" onClick={() => openMessageThread(item._id)}>
+                        Message seller
+                      </button>
+                    ) : (
+                      <button type="button" disabled>
+                        {currentUserId
+                          ? (item.status === 'active' ? 'Your listing' : 'Messaging unavailable')
+                          : 'Loading account...'}
+                      </button>
+                    )}
                   </footer>
                 </article>
               ))

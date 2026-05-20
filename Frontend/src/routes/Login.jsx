@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { apiRequest } from '../services/api'
+import { saveAuthSession } from '../services/auth'
 
-export default function Login() {
+export default function Login({ onAuthChange }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [showPassword, setShowPassword] = useState(false)
@@ -27,8 +28,10 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       })
 
-      localStorage.setItem('campusMarketplaceToken', response.token)
-      localStorage.setItem('campusMarketplaceUser', JSON.stringify(response.user))
+      saveAuthSession(response.token, response.user)
+      if (typeof onAuthChange === 'function') {
+        onAuthChange()
+      }
       navigate('/dashboard', { replace: true })
     } catch (error) {
       setSubmitStatus({
