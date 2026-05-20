@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiRequest, createItem, fetchItems } from '../services/api'
 import { CATEGORIES } from '../constants/categories'
 import { convertDisplayPriceToUsd, formatPriceFromUsd, getPriceInputMeta } from '../services/currency'
+import { API_ORIGIN } from '../services/api'
 
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
 const MAX_IMAGE_COUNT = 5
@@ -27,6 +28,41 @@ const STORIES = [
   'Tech',
   'Furniture',
 ]
+
+function getPrimaryImageValue(item) {
+  if (item?.image) {
+    if (typeof item.image === 'string') {
+      return item.image
+    }
+    if (typeof item.image === 'object' && item.image.url) {
+      return item.image.url
+    }
+  }
+
+  if (Array.isArray(item?.images) && item.images.length > 0) {
+    const first = item.images[0]
+    if (typeof first === 'string') {
+      return first
+    }
+    if (first && typeof first === 'object' && first.url) {
+      return first.url
+    }
+  }
+
+  return ''
+}
+
+function resolveImageUrl(imageUrl) {
+  if (!imageUrl) {
+    return ''
+  }
+
+  if (/^https?:\/\//i.test(imageUrl) || imageUrl.startsWith('data:') || imageUrl.startsWith('blob:')) {
+    return imageUrl
+  }
+
+  return new URL(imageUrl.replace(/^\/+/, ''), `${API_ORIGIN}/`).href
+}
 
 export default function Dashboard({ currency }) {
   const navigate = useNavigate()
@@ -136,6 +172,10 @@ export default function Dashboard({ currency }) {
 
   function openMessageThread(itemId) {
     navigate(`/messages?item=${encodeURIComponent(itemId)}`)
+  }
+
+  function getItemImageSrc(item) {
+    return resolveImageUrl(getPrimaryImageValue(item))
   }
 
   function removeUploadedImage(indexToRemove) {
@@ -465,7 +505,19 @@ export default function Dashboard({ currency }) {
                       <p>{item.location || 'Campus'}</p>
                     </div>
                   </header>
-                  <div className="post-image" aria-hidden="true" />
+                  <div className="post-image">
+                    {getItemImageSrc(item) ? (
+                      <img
+                        src={getItemImageSrc(item)}
+                        alt={item.title ? `${item.title} listing` : 'Marketplace listing'}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="post-image-fallback" aria-hidden="true">
+                        <span>{(item.category || 'Item').slice(0, 1).toUpperCase()}</span>
+                      </div>
+                    )}
+                  </div>
                   <div className="post-body">
                     <div className="post-price">{formatPriceFromUsd(item.price, currency)}</div>
                     <h2>{item.title}</h2>
