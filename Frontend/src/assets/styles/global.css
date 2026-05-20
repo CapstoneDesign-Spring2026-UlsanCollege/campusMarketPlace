@@ -100,10 +100,9 @@ input {
 
 .currency-hamburger {
   display: inline-flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  width: 38px;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 92px;
   height: 34px;
   padding: 6px;
   border-radius: 10px;
@@ -119,10 +118,7 @@ input {
 }
 
 .currency-hamburger span[aria-hidden] {
-  display: block;
-  height: 2px;
   border-radius: 2px;
-  background: currentColor;
 }
 
 .currency-menu {
@@ -1268,21 +1264,48 @@ h1 {
   background: rgba(255, 255, 255, 0.04);
 }
 
-.composer-preview img {
+.composer-preview-single img,
+.composer-thumb img {
   display: block;
   width: 100%;
-  max-height: 260px;
+  height: 100%;
   object-fit: cover;
 }
 
-.composer-preview-strip {
+.composer-preview-single {
+  min-height: 220px;
+}
+
+.composer-preview-single img {
+  max-height: 260px;
+}
+
+.composer-preview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
   gap: 0.5rem;
   padding: 0.7rem;
 }
 
-.composer-thumb {
+.composer-preview-grid.is-collapsed {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.composer-preview-grid.is-expanded {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.composer-preview-grid.is-collapsed .composer-thumb,
+.composer-preview-grid.is-collapsed .composer-more-tile {
+  min-height: 120px;
+}
+
+.composer-preview-grid.is-expanded .composer-thumb,
+.composer-preview-grid.is-expanded .composer-more-tile {
+  min-height: 112px;
+}
+
+.composer-thumb,
+.composer-more-tile {
   position: relative;
   border-radius: 12px;
   overflow: hidden;
@@ -1290,11 +1313,63 @@ h1 {
   min-height: 72px;
 }
 
-.composer-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.composer-thumb {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.composer-more-tile {
+  display: grid;
+  place-items: center;
+  gap: 0.15rem;
+  border: 1px dashed rgba(77, 195, 255, 0.45);
+  background:
+    radial-gradient(circle at top, rgba(77, 195, 255, 0.18), transparent 60%),
+    rgba(3, 11, 19, 0.74);
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+  padding: 0.75rem;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.composer-more-tile:hover {
+  transform: translateY(-1px);
+  border-color: rgba(77, 195, 255, 0.7);
+  background:
+    radial-gradient(circle at top, rgba(77, 195, 255, 0.24), transparent 60%),
+    rgba(5, 15, 26, 0.9);
+}
+
+.composer-more-count {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.composer-more-label {
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.composer-more-toggle {
+  grid-column: 1 / -1;
+  margin-top: 0.1rem;
+  justify-self: end;
+  padding: 0.4rem 0.7rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.composer-more-toggle:hover {
+  background: rgba(77, 195, 255, 0.18);
+  color: var(--text);
+}
+
+.composer-preview-grid {
+  gap: 0.5rem;
 }
 
 .composer-thumb-remove,

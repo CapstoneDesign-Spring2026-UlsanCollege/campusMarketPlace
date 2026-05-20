@@ -21,6 +21,25 @@ const ALLOWED_IMAGE_TYPES = new Set([
   'image/x-icon',
 ])
 const DEFAULT_ITEM_LOCATION = 'Campus'
+const LOCATION_OPTIONS = [
+  'Cafeteria',
+  'Hall',
+  'Study Cafe',
+  'Library',
+  'Floor No. 1',
+  'Floor No. 2',
+  'Floor No. 3',
+  'Floor No. 4',
+  'Floor No. 5',
+  'Canteen',
+  'Dorm',
+  'Football Ground',
+  'Building No. 1',
+  'Building No. 2',
+  'Building No. 3',
+  'Building No. 4',
+  'Building No. 5',
+]
 
 const STORIES = [
   'Engineering',
@@ -76,6 +95,7 @@ export default function Dashboard({ currency }) {
   const [uploadError, setUploadError] = useState('')
   const [isUploading, setIsUploading] = useState(false)
   const [uploadedImages, setUploadedImages] = useState([])
+  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false)
 
   const [items, setItems] = useState([])
   const [sellerAvatars, setSellerAvatars] = useState({})
@@ -84,7 +104,7 @@ export default function Dashboard({ currency }) {
   const currentUserId = user?.id || ''
 
   const [formData, setFormData] = useState({
-    title: '',
+    location: '',
     price: '',
     description: '',
     category: '',
@@ -238,6 +258,9 @@ export default function Dashboard({ currency }) {
   function removeUploadedImage(indexToRemove) {
     setUploadedImages((current) => {
       const nextImages = current.filter((_, index) => index !== indexToRemove)
+      if (nextImages.length <= 2) {
+        setIsPreviewExpanded(false)
+      }
       updatePreviewUrl(nextImages[0] || '')
       return nextImages
     })
@@ -247,6 +270,7 @@ export default function Dashboard({ currency }) {
   function clearUploadedImages() {
     setUploadedImages([])
     updatePreviewUrl('')
+    setIsPreviewExpanded(false)
     setFormErrors((prev) => ({ ...prev, image: '' }))
   }
 
@@ -299,6 +323,7 @@ export default function Dashboard({ currency }) {
 
       const nextImages = [...uploadedImages, ...uploadedUrls]
       setUploadedImages(nextImages)
+      setIsPreviewExpanded(false)
       updatePreviewUrl(nextImages[0] || '')
       setUploadMessage(
         uploadedUrls.length > 1
@@ -328,7 +353,7 @@ export default function Dashboard({ currency }) {
     const nextErrors = {}
     const priceValue = Number(formData.price)
 
-    if (!formData.title.trim()) nextErrors.title = 'Title is required.'
+    if (!formData.location.trim()) nextErrors.location = 'Location is required.'
     if (!formData.price.trim() || !Number.isFinite(priceValue) || priceValue <= 0) {
       nextErrors.price = `Price is required and must be a positive ${currency === 'KRW' ? 'KRW amount' : 'USD amount'}.`
     }
@@ -350,13 +375,14 @@ export default function Dashboard({ currency }) {
     setSubmitMessage('')
 
     try {
+      const normalizedLocation = formData.location.trim()
       const payload = {
-        title: formData.title.trim(),
+        title: normalizedLocation,
         price: convertDisplayPriceToUsd(formData.price, currency),
         description: formData.description.trim(),
         category: formData.category.trim(),
         status: formData.status.trim(),
-        location: DEFAULT_ITEM_LOCATION,
+        location: normalizedLocation || DEFAULT_ITEM_LOCATION,
         image: uploadedImages[0],
         images: uploadedImages,
       }
@@ -365,7 +391,7 @@ export default function Dashboard({ currency }) {
 
       setSubmitMessage('Item posted successfully.')
       setFormData({
-        title: '',
+        location: '',
         price: '',
         description: '',
         category: '',
@@ -373,9 +399,11 @@ export default function Dashboard({ currency }) {
       })
       setFormErrors({})
       setUploadedImages([])
+      setIsPreviewExpanded(false)
       updatePreviewUrl('')
       setUploadMessage('')
       setUploadError('')
+      setIsComposerOpen(false)
       await loadItems()
     } catch (submitErr) {
       setSubmitError(submitErr.message || 'Failed to post item.')
@@ -418,14 +446,20 @@ export default function Dashboard({ currency }) {
               {isComposerOpen && (
                 <div className="composer-fields">
                 <input
-                  name="title"
+                  name="location"
                   type="text"
-                  placeholder="Title"
-                  value={formData.title}
+                  list="location-options"
+                  placeholder="Select or write a location"
+                  value={formData.location}
                   onChange={handleFormChange}
                   className="composer-text-input"
                 />
-                {formErrors.title && <p className="composer-feedback is-error">{formErrors.title}</p>}
+                <datalist id="location-options">
+                  {LOCATION_OPTIONS.map((option) => (
+                    <option key={option} value={option} />
+                  ))}
+                </datalist>
+                {formErrors.location && <p className="composer-feedback is-error">{formErrors.location}</p>}
 
                 <input
                   name="price"
@@ -487,10 +521,13 @@ export default function Dashboard({ currency }) {
 
               {isComposerOpen && uploadPreviewUrl && (
                 <div className="composer-preview">
-                  <img src={uploadPreviewUrl} alt="Selected upload preview" />
-                  {uploadedImages.length > 1 && (
-                    <div className="composer-preview-strip" aria-label="Selected image thumbnails">
-                      {uploadedImages.map((imageUrl, index) => (
+                  {uploadedImages.length <= 1 ? (
+                    <div className="composer-preview-single">
+                      <img src={uploadPreviewUrl} alt="Selected upload preview" />
+                    </div>
+                  ) : (
+                    <div className={`composer-preview-grid ${isPreviewExpanded ? 'is-expanded' : 'is-collapsed'}`}>
+                      {uploadedImages.slice(0, isPreviewExpanded ? uploadedImages.length : 2).map((imageUrl, index) => (
                         <div className="composer-thumb" key={`${imageUrl}-${index}`}>
                           <img src={imageUrl} alt={`Selected image ${index + 1}`} />
                           <button
@@ -503,6 +540,24 @@ export default function Dashboard({ currency }) {
                           </button>
                         </div>
                       ))}
+
+                      {!isPreviewExpanded && uploadedImages.length > 2 && (
+                        <button
+                          type="button"
+                          className="composer-more-tile"
+                          onClick={() => setIsPreviewExpanded(true)}
+                          aria-label={`Show ${uploadedImages.length - 2} more uploaded image${uploadedImages.length - 2 === 1 ? '' : 's'}`}
+                        >
+                          <span className="composer-more-count">+{uploadedImages.length - 2}</span>
+                          <span className="composer-more-label">more</span>
+                        </button>
+                      )}
+
+                      {isPreviewExpanded && uploadedImages.length > 2 && (
+                        <button type="button" className="composer-more-toggle" onClick={() => setIsPreviewExpanded(false)}>
+                          Show less
+                        </button>
+                      )}
                     </div>
                   )}
                   {uploadedImages.length > 0 && (

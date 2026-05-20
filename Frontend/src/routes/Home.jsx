@@ -8,7 +8,8 @@ export default function Home() {
       <section className="hero-card">
         <p className="eyebrow">Campus marketplace</p>
         <h1>Ulsan College Marketplace</h1>
-        <p className="tagline">Buy & Sell within Ulsan College</p>
+        <p className="tagline">Buy and sell within Ulsan College.</p>
+        <p className="subcopy">Sign in to browse campus listings, search items, and access the full marketplace.</p>
 
         <div className="feature-list" aria-label="Marketplace features">
           {features.map((feature) => (
@@ -19,9 +20,6 @@ export default function Home() {
         </div>
 
         <div className="hero-actions">
-          <Link className="button button-secondary" to="/browse">
-            Browse Items
-          </Link>
           <Link className="button button-primary" to="/signup">
             Get Started
           </Link>

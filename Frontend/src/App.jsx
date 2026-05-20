@@ -47,8 +47,6 @@ export default function App() {
   return (
     <div className="app-shell">
       <Navbar
-        currency={currency}
-        onCurrencyChange={setCurrency}
         language={language}
         onLanguageChange={setLanguage}
         isAuthenticated={Boolean(authSession.token)}
@@ -56,7 +54,7 @@ export default function App() {
         onAuthChange={refreshAuthSession}
       />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={authSession.token ? <Navigate to="/dashboard" replace /> : <Home />} />
         <Route
           path="/browse"
           element={authSession.token ? <Browse currency={currency} /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />}
