@@ -165,10 +165,10 @@ export default function Navbar({
                     Messages
                   </button>
                 )}
-                <button className="nav-pill" type="button" onClick={() => navigate('/dashboard')}>
+                <button className="nav-pill" type="button" onClick={() => navigate('/dashboard', { state: { mode: 'buy' } })}>
                   Buy
                 </button>
-                <button className="nav-pill" type="button" onClick={() => navigate('/dashboard')}>
+                <button className="nav-pill" type="button" onClick={() => navigate('/dashboard', { state: { mode: 'sell' } })}>
                   Sell
                 </button>
                 <button className="nav-signout" type="button" onClick={handleSignOut}>
