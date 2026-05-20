@@ -68,7 +68,7 @@ export default function Dashboard({ currency }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [user, setUser] = useState(null)
-  const [mode, setMode] = useState(location.state?.mode || 'sell')
+  const [mode, setMode] = useState(location.state?.mode || 'home')
 
   const [uploadPreviewUrl, setUploadPreviewUrl] = useState('')
   const [uploadMessage, setUploadMessage] = useState('')
@@ -141,16 +141,24 @@ export default function Dashboard({ currency }) {
       setError(null)
       const data = await fetchItems(1, 20)
       let filteredItems = data.items || []
-      
+
       // Filter items based on mode
       if (mode === 'sell') {
         // Show only items posted by current user
-        filteredItems = filteredItems.filter(item => 
-          item.sellerName === `${user?.firstName} ${user?.lastName}`
-        )
+        filteredItems = filteredItems.filter((item) => {
+          const sellerId = item.seller_id || item.sellerId || ''
+          return sellerId === currentUserId
+        })
+      } else if (mode === 'buy') {
+        // Show only items posted by other users
+        filteredItems = filteredItems.filter((item) => {
+          const sellerId = item.seller_id || item.sellerId || ''
+          return sellerId && sellerId !== currentUserId
+        })
+      } else {
+        // 'home' mode: show all items
       }
-      // In 'buy' mode, show all items from other sellers
-      
+
       setItems(filteredItems)
     } catch (err) {
       setError(err.message || 'Failed to load items')

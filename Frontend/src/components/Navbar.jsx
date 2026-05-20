@@ -28,10 +28,9 @@ export default function Navbar({
     }
 
     // If the user is authenticated, keep them inside the authenticated
-    // dashboard experience instead of sending them back to the public home
-    // page. Only unauthenticated users are routed to the public `/` home.
+    // dashboard experience and show the full marketplace (home mode).
     if (isAuthenticated) {
-      navigate('/dashboard')
+      navigate('/dashboard', { state: { mode: 'home' } })
       return
     }
 
