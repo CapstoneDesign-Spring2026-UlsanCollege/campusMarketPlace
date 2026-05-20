@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiRequest } from '../services/api'
+import { saveAuthSession } from '../services/auth'
 
 const REQUIRED_FIELDS = ['firstName', 'lastName', 'email', 'password', 'confirmPassword']
 
@@ -172,8 +173,7 @@ export default function Signup({ onAuthChange }) {
         throw new Error('Signup completed but no session was returned.')
       }
 
-      localStorage.setItem('campusMarketplaceToken', response.token)
-      localStorage.setItem('campusMarketplaceUser', JSON.stringify(response.user))
+      saveAuthSession(response.token, response.user)
       if (typeof onAuthChange === 'function') {
         onAuthChange()
       }

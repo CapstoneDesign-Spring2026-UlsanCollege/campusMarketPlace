@@ -869,6 +869,35 @@ h1 {
   color: var(--muted);
 }
 
+.category-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.category-chip {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  padding: 0.48rem 0.8rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.category-chip:hover {
+  border-color: rgba(77, 195, 255, 0.4);
+  background: rgba(77, 195, 255, 0.12);
+}
+
+.category-chip.is-active {
+  border-color: rgba(77, 195, 255, 0.65);
+  background: rgba(77, 195, 255, 0.18);
+  color: var(--accent);
+  font-weight: 700;
+}
+
 .pagination-summary {
   display: grid;
   gap: 0.55rem;

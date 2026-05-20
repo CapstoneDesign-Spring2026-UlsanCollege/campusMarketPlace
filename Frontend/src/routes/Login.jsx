@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { apiRequest } from '../services/api'
+import { saveAuthSession } from '../services/auth'
 
 export default function Login({ onAuthChange }) {
   const navigate = useNavigate()
@@ -27,8 +28,7 @@ export default function Login({ onAuthChange }) {
         body: JSON.stringify({ email, password }),
       })
 
-      localStorage.setItem('campusMarketplaceToken', response.token)
-      localStorage.setItem('campusMarketplaceUser', JSON.stringify(response.user))
+      saveAuthSession(response.token, response.user)
       if (typeof onAuthChange === 'function') {
         onAuthChange()
       }

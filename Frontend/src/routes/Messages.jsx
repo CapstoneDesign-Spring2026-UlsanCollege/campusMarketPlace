@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { fetchMessageThreads, fetchThreadMessages, openMessageThread, sendThreadMessage, markThreadRead } from '../services/api'
+import { getAuthToken, getAuthUser } from '../services/auth'
 
 const POLL_INTERVAL_MS = 4000
 
@@ -39,20 +40,11 @@ export default function Messages() {
   const itemId = searchParams.get('item') || ''
 
   const user = useMemo(() => {
-    const raw = localStorage.getItem('campusMarketplaceUser')
-    if (!raw) {
-      return null
-    }
-
-    try {
-      return JSON.parse(raw)
-    } catch {
-      return null
-    }
+    return getAuthUser()
   }, [])
 
   useEffect(() => {
-    const token = localStorage.getItem('campusMarketplaceToken')
+    const token = getAuthToken()
     if (!token) {
       navigate('/login', { replace: true, state: { message: 'Please log in first.' } })
       return

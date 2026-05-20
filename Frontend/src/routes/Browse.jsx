@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import ItemGrid from '../components/ItemGrid'
 import { fetchItems } from '../services/api'
+import { CATEGORIES } from '../constants/categories'
 
 const ITEMS_PER_PAGE = 20
 
@@ -24,14 +25,7 @@ export default function Browse({ currency }) {
         setIsLoading(true)
         setError('')
 
-        // Require a category selection before fetching; browse shows sold items only.
-        if (!currentCategory) {
-          setItems([])
-          setPagination({ page: 1, limit: ITEMS_PER_PAGE, total: 0, pages: 1 })
-          return
-        }
-
-        const data = await fetchItems(currentPage, ITEMS_PER_PAGE, currentCategory, 'sold')
+        const data = await fetchItems(currentPage, ITEMS_PER_PAGE, currentCategory || null)
 
         if (!isActive) {
           return
@@ -91,6 +85,25 @@ export default function Browse({ currency }) {
         <p className="eyebrow">Campus marketplace</p>
         <h1>Browse items</h1>
         <p className="subcopy">Find books, tech, furniture, and everyday essentials in a clean grid view.</p>
+        <div className="category-chip-row" aria-label="Quick category filters">
+          <button
+            type="button"
+            className={`category-chip ${!currentCategory ? 'is-active' : ''}`}
+            onClick={() => handleCategoryChange('')}
+          >
+            All
+          </button>
+          {CATEGORIES.map((category) => (
+            <button
+              key={category}
+              type="button"
+              className={`category-chip ${currentCategory === category ? 'is-active' : ''}`}
+              onClick={() => handleCategoryChange(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
       </section>
 
       <ItemGrid

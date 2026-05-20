@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchProfile } from '../services/api'
 import { formatPriceFromUsd } from '../services/currency'
+import { getAuthToken } from '../services/auth'
 
 function getInitial(value) {
   return (value || 'Student').trim().charAt(0).toUpperCase() || 'S'
@@ -96,7 +97,7 @@ export default function Profile({ currency }) {
   const [loadError, setLoadError] = useState('')
 
   useEffect(() => {
-    const token = localStorage.getItem('campusMarketplaceToken')
+    const token = getAuthToken()
     if (!token) {
       navigate('/login', { replace: true, state: { message: 'Please log in first.' } })
       return

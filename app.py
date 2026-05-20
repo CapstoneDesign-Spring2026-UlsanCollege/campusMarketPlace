@@ -6,6 +6,11 @@ from datetime import datetime, timedelta, timezone
 import certifi
 import jwt
 from bson import ObjectId
+try:
+    import cloudinary
+    import cloudinary.uploader
+except Exception:
+    cloudinary = None
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request, send_from_directory, has_request_context
 import re
@@ -48,9 +53,32 @@ ADDITIONAL_FRONTEND_ORIGINS = os.getenv(
     'ADDITIONAL_FRONTEND_ORIGINS',
     'http://localhost:5176,https://capstonedesign-spring2026-ulsancollege.github.io',
 )
+CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME', '').strip()
+CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY', '').strip()
+CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET', '').strip()
+CLOUDINARY_UPLOAD_FOLDER = os.getenv(
+    'CLOUDINARY_UPLOAD_FOLDER',
+    'campus-marketplace',
+).strip('/')
 
 if not MONGODB_URI:
     raise RuntimeError('MONGODB_URI is required')
+
+use_cloudinary = bool(
+    CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET
+)
+if use_cloudinary and cloudinary is None:
+    raise RuntimeError(
+        'Cloudinary is configured but SDK is not installed. '
+        'Install dependency: cloudinary'
+    )
+if use_cloudinary and cloudinary is not None:
+    cloudinary.config(
+        cloud_name=CLOUDINARY_CLOUD_NAME,
+        api_key=CLOUDINARY_API_KEY,
+        api_secret=CLOUDINARY_API_SECRET,
+        secure=True,
+    )
 
 client = MongoClient(
     MONGODB_URI,
@@ -388,8 +416,16 @@ except Exception as exc:
     ) from exc
 
 app = Flask(__name__)
-UPLOAD_FOLDER = Path(__file__).resolve().parent / 'uploads'
-UPLOAD_FOLDER.mkdir(exist_ok=True)
+upload_dir_env = os.getenv('UPLOAD_DIR', '').strip()
+if upload_dir_env:
+    upload_path = Path(upload_dir_env)
+    if not upload_path.is_absolute():
+        upload_path = Path(__file__).resolve().parent / upload_path
+else:
+    upload_path = Path(__file__).resolve().parent / 'uploads'
+
+UPLOAD_FOLDER = upload_path.resolve()
+UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024
 ALLOWED_IMAGE_EXTENSIONS = {
     '.jpg',
@@ -434,6 +470,56 @@ CORS(app, resources={r'/api/*': {'origins': allowed_origins}})
 
 def json_error(message, status_code):
     return jsonify({'error': message}), status_code
+
+
+def upload_image_to_storage(uploaded_file, folder):
+    safe_filename = secure_filename(uploaded_file.filename)
+    if not safe_filename:
+        return None, json_error('The uploaded filename is not valid.', 400)
+
+    file_extension = os.path.splitext(safe_filename)[1].lower()
+    if file_extension not in ALLOWED_IMAGE_EXTENSIONS:
+        return None, json_error(
+            'Only supported image formats are allowed '
+            '(JPG, PNG, GIF, WebP, AVIF, BMP, TIFF, HEIC, HEIF, ICO).',
+            400,
+        )
+
+    if uploaded_file.mimetype not in ALLOWED_IMAGE_MIMETYPES:
+        return None, json_error('Only image uploads are allowed.', 400)
+
+    if request.content_length and request.content_length > MAX_IMAGE_UPLOAD_BYTES:
+        return None, json_error('Image must be smaller than 5 MB.', 413)
+
+    if use_cloudinary:
+        cloudinary_folder = '/'.join(
+            part.strip('/') for part in [CLOUDINARY_UPLOAD_FOLDER, folder] if part
+        )
+        upload_result = cloudinary.uploader.upload(
+            uploaded_file.stream,
+            folder=cloudinary_folder,
+            resource_type='image',
+            public_id=f"{uuid4().hex}-{os.path.splitext(safe_filename)[0]}",
+            overwrite=False,
+        )
+        return {
+            'filename': upload_result.get('public_id') or safe_filename,
+            'url': upload_result.get('secure_url'),
+            'public_id': upload_result.get('public_id'),
+            'storage': 'cloudinary',
+        }, None
+
+    stored_filename = f"{uuid4().hex}-{safe_filename}"
+    stored_path = UPLOAD_FOLDER / stored_filename
+    uploaded_file.save(stored_path)
+    file_url = f"{request.host_url.rstrip('/')}/api/uploads/{stored_filename}"
+
+    return {
+        'filename': stored_filename,
+        'url': file_url,
+        'public_id': None,
+        'storage': 'local',
+    }, None
 
 
 @app.errorhandler(RequestEntityTooLarge)
@@ -629,36 +715,15 @@ def upload_image():
     if not uploaded_file or not uploaded_file.filename:
         return json_error('An image file is required.', 400)
 
-    safe_filename = secure_filename(uploaded_file.filename)
-    if not safe_filename:
-        return json_error('The uploaded filename is not valid.', 400)
-
-    file_extension = os.path.splitext(safe_filename)[1].lower()
-    if file_extension not in ALLOWED_IMAGE_EXTENSIONS:
-        return json_error(
-            'Only supported image formats are allowed (JPG, PNG, GIF, WebP, AVIF, BMP, TIFF, HEIC, HEIF, ICO).',
-            400,
-        )
-
-    if uploaded_file.mimetype not in ALLOWED_IMAGE_MIMETYPES:
-        return json_error('Only image uploads are allowed.', 400)
-
-    if (
-        request.content_length
-        and request.content_length > MAX_IMAGE_UPLOAD_BYTES
-    ):
-        return json_error('Image must be smaller than 5 MB.', 413)
-
-    stored_filename = f"{uuid4().hex}-{safe_filename}"
-    stored_path = UPLOAD_FOLDER / stored_filename
-    uploaded_file.save(stored_path)
-
-    file_url = f"{request.host_url.rstrip('/')}/api/uploads/{stored_filename}"
+    upload_data, error_response = upload_image_to_storage(uploaded_file, 'listings')
+    if error_response is not None:
+        return error_response
 
     return jsonify({
         'message': 'Image uploaded successfully.',
-        'filename': stored_filename,
-        'url': file_url,
+        'filename': upload_data['filename'],
+        'url': upload_data['url'],
+        'storage': upload_data['storage'],
     }), 201
 
 
@@ -687,35 +752,32 @@ def upload_profile_avatar():
     if not uploaded_file or not uploaded_file.filename:
         return json_error('An image file is required.', 400)
 
-    safe_filename = secure_filename(uploaded_file.filename)
-    if not safe_filename:
-        return json_error('The uploaded filename is not valid.', 400)
-
-    file_extension = os.path.splitext(safe_filename)[1].lower()
-    if file_extension not in ALLOWED_IMAGE_EXTENSIONS:
-        return json_error('Unsupported image format.', 400)
-
-    if uploaded_file.mimetype not in ALLOWED_IMAGE_MIMETYPES:
-        return json_error('Only image uploads are allowed.', 400)
-
-    if (
-        request.content_length
-        and request.content_length > MAX_IMAGE_UPLOAD_BYTES
-    ):
-        return json_error('Image must be smaller than 5 MB.', 413)
-
-    stored_filename = f"{uuid4().hex}-{safe_filename}"
-    stored_path = UPLOAD_FOLDER / stored_filename
-    uploaded_file.save(stored_path)
-
-    file_url = f"{request.host_url.rstrip('/')}/api/uploads/{stored_filename}"
+    upload_data, error_response = upload_image_to_storage(uploaded_file, 'avatars')
+    if error_response is not None:
+        return error_response
 
     try:
-        users.update_one({'_id': user_id}, {'$set': {'avatar': stored_filename, 'updatedAt': datetime.now(timezone.utc)}})
+        users.update_one(
+            {'_id': user_id},
+            {
+                '$set': {
+                    'avatar': upload_data['url']
+                    if upload_data['storage'] == 'cloudinary'
+                    else upload_data['filename'],
+                    'avatar_public_id': upload_data['public_id'],
+                    'updatedAt': datetime.now(timezone.utc),
+                }
+            },
+        )
     except Exception as exc:
         return json_error(f'Failed to attach avatar to profile: {str(exc)}', 500)
 
-    return jsonify({'message': 'Avatar uploaded successfully.', 'filename': stored_filename, 'url': file_url}), 201
+    return jsonify({
+        'message': 'Avatar uploaded successfully.',
+        'filename': upload_data['filename'],
+        'url': upload_data['url'],
+        'storage': upload_data['storage'],
+    }), 201
 
 
 @app.delete('/api/profile/avatar')
@@ -743,17 +805,29 @@ def delete_profile_avatar():
     if not avatar_val:
         return json_error('No avatar to delete.', 400)
 
-    # Attempt to delete the file from disk but don't fail if it does not exist.
-    try:
-        file_path = UPLOAD_FOLDER / str(avatar_val)
-        if file_path.exists():
-            file_path.unlink()
-    except Exception:
-        # Log and continue — we'll still clear the DB reference.
-        pass
+    avatar_public_id = user_doc.get('avatar_public_id')
+    if avatar_public_id and use_cloudinary:
+        try:
+            cloudinary.uploader.destroy(avatar_public_id, resource_type='image')
+        except Exception:
+            pass
+    elif isinstance(avatar_val, str) and avatar_val and not re.match(r'^https?://', avatar_val):
+        # Attempt to delete old local avatar files.
+        try:
+            file_path = UPLOAD_FOLDER / str(avatar_val)
+            if file_path.exists():
+                file_path.unlink()
+        except Exception:
+            pass
 
     try:
-        users.update_one({'_id': user_id}, {'$unset': {'avatar': ''}, '$set': {'updatedAt': datetime.now(timezone.utc)}})
+        users.update_one(
+            {'_id': user_id},
+            {
+                '$unset': {'avatar': '', 'avatar_public_id': ''},
+                '$set': {'updatedAt': datetime.now(timezone.utc)},
+            },
+        )
     except Exception as exc:
         return json_error(f'Failed to clear avatar from profile: {str(exc)}', 500)
 

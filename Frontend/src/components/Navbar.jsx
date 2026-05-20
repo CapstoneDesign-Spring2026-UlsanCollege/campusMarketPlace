@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { CURRENCY_OPTIONS } from '../services/currency'
+import { CATEGORIES } from '../constants/categories'
+import { clearAuthSession } from '../services/auth'
 
 export default function Navbar({
   currency,
@@ -18,8 +20,6 @@ export default function Navbar({
   const [showSignOutModal, setShowSignOutModal] = useState(false)
   const [currencyMenuOpen, setCurrencyMenuOpen] = useState(false)
   const [searchMenuOpen, setSearchMenuOpen] = useState(false)
-
-  const STORIES = ['Engineering', 'Dorm Deals', 'Books']
 
   function handleHome() {
     if (isDashboard) {
@@ -54,8 +54,7 @@ export default function Navbar({
   function confirmSignOut() {
     setShowSignOutModal(false)
 
-    localStorage.removeItem('campusMarketplaceToken')
-    localStorage.removeItem('campusMarketplaceUser')
+    clearAuthSession()
     if (typeof onAuthChange === 'function') {
       onAuthChange()
     }
@@ -140,7 +139,7 @@ export default function Navbar({
                 </button>
                 {searchMenuOpen && (
                   <div className="search-menu" role="menu" aria-label="Quick categories">
-                    {STORIES.map((s) => (
+                    {CATEGORIES.map((s) => (
                       <button
                         key={s}
                         type="button"

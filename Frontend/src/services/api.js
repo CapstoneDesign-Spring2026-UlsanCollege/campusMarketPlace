@@ -1,3 +1,4 @@
+import { getAuthToken } from './auth'
 const envApiBaseUrl = import.meta.env.VITE_API_BASE_URL
 
 function resolveApiBaseUrl() {
@@ -27,7 +28,7 @@ export async function apiRequest(path, options = {}) {
   }
 
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('campusMarketplaceToken')
+    const token = getAuthToken()
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
     }

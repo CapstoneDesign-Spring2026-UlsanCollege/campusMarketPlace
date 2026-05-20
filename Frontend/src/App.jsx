@@ -12,25 +12,10 @@ import Profile from './routes/Profile'
 import EditProfile from './routes/EditProfile'
 import ChangePassword from './routes/ChangePassword'
 import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from './services/currency'
+import { readAuthSession } from './services/auth'
 
 const CURRENCY_STORAGE_KEY = 'campusMarketplaceCurrency'
 const LANGUAGE_STORAGE_KEY = 'campusMarketplaceLanguage'
-
-function readAuthSession() {
-  const token = localStorage.getItem('campusMarketplaceToken')
-  const userRaw = localStorage.getItem('campusMarketplaceUser')
-
-  let user = null
-  if (userRaw) {
-    try {
-      user = JSON.parse(userRaw)
-    } catch {
-      user = null
-    }
-  }
-
-  return { token, user }
-}
 
 export default function App() {
   const [authSession, setAuthSession] = useState(readAuthSession)
@@ -70,11 +55,17 @@ export default function App() {
         onAuthChange={refreshAuthSession}
       />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/browse" element={<Browse currency={currency} />} />
+        <Route path="/" element={authSession.token ? <Home /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />} />
+        <Route
+          path="/browse"
+          element={authSession.token ? <Browse currency={currency} /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />}
+        />
         <Route path="/login" element={<Login onAuthChange={refreshAuthSession} />} />
         <Route path="/signup" element={<Signup onAuthChange={refreshAuthSession} />} />
-        <Route path="/dashboard" element={<Dashboard currency={currency} />} />
+        <Route
+          path="/dashboard"
+          element={authSession.token ? <Dashboard currency={currency} /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />}
+        />
         <Route
           path="/messages"
           element={authSession.token ? <Messages /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />}

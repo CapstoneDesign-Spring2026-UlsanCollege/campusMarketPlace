@@ -37,6 +37,34 @@ npm run dev
 
 Open the local URL shown by Vite (usually `http://localhost:5173`).
 
+## Image Upload Storage (Important)
+
+Uploaded listing images are written to the backend upload directory.
+
+- Local development default: `./uploads`
+- Production recommended: set `UPLOAD_DIR` to a persistent disk mount (example: `/var/data/uploads`)
+
+If `UPLOAD_DIR` is not set in production, images may disappear after app restarts or redeploys when using ephemeral filesystem hosting.
+
+### Recommended: Cloudinary (Permanent Object Storage)
+
+The backend now supports Cloudinary uploads for listing images and profile avatars.
+
+Add these environment variables to enable it:
+
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+- Optional: `CLOUDINARY_UPLOAD_FOLDER` (default: `campus-marketplace`)
+
+When these variables are present, image uploads are stored in Cloudinary instead of local disk.
+
+Install dependencies after pulling this change:
+
+```bash
+pip install -r requirements.txt
+```
+
 ## Build
 
 ### Implemented
