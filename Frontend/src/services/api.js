@@ -116,3 +116,17 @@ export async function uploadProfileAvatar(file) {
     body: fd,
   })
 }
+
+export async function updateEmail(email) {
+  return apiRequest('/profile/email', {
+    method: 'PUT',
+    body: JSON.stringify({ email }),
+  })
+}
+
+export async function changePassword(password, currentPassword = '') {
+  return apiRequest('/profile/password', {
+    method: 'PUT',
+    body: JSON.stringify({ password, currentPassword }),
+  })
+}

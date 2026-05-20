@@ -10,6 +10,7 @@ import Dashboard from './routes/Dashboard'
 import Messages from './routes/Messages'
 import Profile from './routes/Profile'
 import EditProfile from './routes/EditProfile'
+import ChangePassword from './routes/ChangePassword'
 import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from './services/currency'
 
 const CURRENCY_STORAGE_KEY = 'campusMarketplaceCurrency'
@@ -93,6 +94,16 @@ export default function App() {
           element={
             authSession.token ? (
               <EditProfile />
+            ) : (
+              <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />
+            )
+          }
+        />
+        <Route
+          path="/profile/change-password"
+          element={
+            authSession.token ? (
+              <ChangePassword />
             ) : (
               <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />
             )
