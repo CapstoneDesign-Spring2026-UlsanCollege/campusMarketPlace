@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchProfile, updateProfile, uploadProfileAvatar } from '../services/api'
+import { fetchProfile, updateProfile, uploadProfileAvatar, updateEmail } from '../services/api'
 
 export default function EditProfile() {
   const navigate = useNavigate()
   const [form, setForm] = useState({ firstName: '', lastName: '', location: '' })
+  const [email, setEmail] = useState('')
+  const [originalEmail, setOriginalEmail] = useState('')
+  const [isDirty, setIsDirty] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' })
   const [avatarFile, setAvatarFile] = useState(null)
   const [avatarPreview, setAvatarPreview] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -23,6 +27,8 @@ export default function EditProfile() {
           location: user.location || '',
         })
         setAvatarPreview(user.avatarUrl || '')
+        setEmail(user.email || '')
+        setOriginalEmail(user.email || '')
       } catch (err) {
         if (!isActive) return
         setError(err?.message || 'Unable to load profile')
@@ -37,6 +43,7 @@ export default function EditProfile() {
   function onChange(e) {
     const { name, value } = e.target
     setForm((s) => ({ ...s, [name]: value }))
+    setIsDirty(true)
   }
 
   function onAvatarSelect(e) {
@@ -49,11 +56,13 @@ export default function EditProfile() {
           const fileWithMeta = new File([resized], f.name, { type: resized.type })
           setAvatarFile(fileWithMeta)
           setAvatarPreview(URL.createObjectURL(fileWithMeta))
+          setIsDirty(true)
         })
         .catch(() => {
           // Fallback to original file if resizing fails
           setAvatarFile(f)
           setAvatarPreview(URL.createObjectURL(f))
+          setIsDirty(true)
         })
     }
   }
@@ -100,15 +109,32 @@ export default function EditProfile() {
     e.preventDefault()
     setIsSaving(true)
     setError('')
+    setSubmitStatus({ type: '', message: '' })
     try {
       // If an avatar file was selected, upload it first and update avatarUrl
       if (avatarFile) {
         await uploadProfileAvatar(avatarFile)
       }
-      await updateProfile(form)
+      // If email changed, try dedicated endpoint first and fallback to profile PUT on 404
+      if (email && email !== originalEmail) {
+        try {
+          await updateEmail(email)
+        } catch (err) {
+          // fallback when dedicated endpoint not found on backend
+          if (String(err?.message || '').includes('404')) {
+            await updateProfile({ ...form, email })
+          } else {
+            throw err
+          }
+        }
+      } else {
+        await updateProfile(form)
+      }
+      setSubmitStatus({ type: 'success', message: 'Profile updated.' })
       navigate('/profile', { replace: true })
     } catch (err) {
       setError(err?.message || 'Unable to save profile')
+      setSubmitStatus({ type: 'error', message: err?.message || 'Unable to save profile' })
     } finally {
       setIsSaving(false)
     }
@@ -147,20 +173,34 @@ export default function EditProfile() {
             </label>
 
             <label>
+              Email
+              <input name="email" value={email} onChange={(e) => { setEmail(e.target.value); setIsDirty(true) }} />
+            </label>
+
+            <label>
               Location
               <input name="location" value={form.location} onChange={onChange} />
             </label>
 
             {error ? <div className="profile-empty-state">{error}</div> : null}
-
-            <div style={{ marginTop: 12 }}>
+            <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'center' }}>
               <button className="button button-secondary" type="button" onClick={() => navigate('/profile')} disabled={isSaving}>
                 Cancel
               </button>
-              <button className="button button-primary" type="submit" disabled={isSaving} style={{ marginLeft: 8 }}>
+
+              <button className="button" type="button" onClick={() => navigate('/profile/change-password')} style={{ marginLeft: 8 }}>
+                Change password
+              </button>
+
+              <button className="button button-primary" type="submit" disabled={isSaving || !isDirty} style={{ marginLeft: 'auto' }}>
                 {isSaving ? 'Saving…' : 'Save changes'}
               </button>
             </div>
+            {submitStatus.message && (
+              <p className={`form-message ${submitStatus.type}`} role="status" style={{ marginTop: 12 }}>
+                {submitStatus.message}
+              </p>
+            )}
           </form>
         </article>
       </section>
