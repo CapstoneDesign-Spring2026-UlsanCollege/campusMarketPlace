@@ -151,11 +151,8 @@ export default function Profile({ currency }) {
       <section className="profile-hero panel">
         <div className="profile-hero-content">
           <div className="profile-avatar-wrapper">
-            {profile?.avatarUrl ? (
-              <img src={profile.avatarUrl} alt={`${displayName} avatar`} className="profile-avatar-img" />
-            ) : (
-              <div className="profile-avatar" aria-hidden="true">{getInitial(displayName)}</div>
-            )}
+            <img src={profile?.avatarUrl || ''} alt={`${displayName} avatar`} className="profile-avatar-img" onError={(e) => { e.target.style.display = 'none' }} />
+            {!profile?.avatarUrl ? <div className="profile-avatar" aria-hidden="true">{getInitial(displayName)}</div> : null}
           </div>
           <div className="profile-hero-copy">
             <p className="eyebrow">Your account</p>

@@ -52,6 +52,7 @@ export default function App() {
         language={language}
         onLanguageChange={setLanguage}
         isAuthenticated={Boolean(authSession.token)}
+        authUser={authSession.user}
         onAuthChange={refreshAuthSession}
       />
       <Routes>

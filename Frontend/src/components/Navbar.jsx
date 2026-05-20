@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { CURRENCY_OPTIONS } from '../services/currency'
+import Avatar from './Avatar'
 import { CATEGORIES } from '../constants/categories'
 import { clearAuthSession } from '../services/auth'
 
@@ -10,6 +11,7 @@ export default function Navbar({
   language,
   onLanguageChange,
   isAuthenticated,
+  authUser,
   onAuthChange,
 }) {
   const location = useLocation()
@@ -154,7 +156,8 @@ export default function Navbar({
                   </div>
                 )}
                 {isAuthenticated && (
-                  <button className="nav-pill" type="button" onClick={handleProfile}>
+                  <button className="nav-pill" type="button" onClick={handleProfile} style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                    <Avatar src={authUser?.avatarUrl || authUser?.avatar} alt={authUser?.firstName || 'You'} size={28} />
                     Profile
                   </button>
                 )}

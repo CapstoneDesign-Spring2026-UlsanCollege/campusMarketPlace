@@ -224,13 +224,16 @@ export default function Messages() {
                   className={`thread-item ${thread._id === activeThreadId ? 'is-active' : ''}`}
                   onClick={() => handleSelectThread(thread._id)}
                 >
-                  <div className="thread-item-top">
-                    <strong>{thread.other_user_name || 'Conversation'}</strong>
-                    <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
-                      <span>{formatTime(thread.latestMessageAt || thread.updatedAt)}</span>
-                      {thread.unreadCount > 0 ? (
-                        <span className="thread-unread-badge" aria-label={`${thread.unreadCount} unread messages`}>{thread.unreadCount}</span>
-                      ) : null}
+                  <div className="thread-item-top" style={{display: 'flex', gap: 8, alignItems: 'center'}}>
+                    <img src={thread.other_user_avatar || thread.other_user_avatar_url || thread.otherUserAvatar || ''} alt={thread.other_user_name || 'User'} style={{width:36, height:36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0}} />
+                    <div style={{flex: 1}}>
+                      <strong>{thread.other_user_name || 'Conversation'}</strong>
+                      <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                        <span>{formatTime(thread.latestMessageAt || thread.updatedAt)}</span>
+                        {thread.unreadCount > 0 ? (
+                          <span className="thread-unread-badge" aria-label={`${thread.unreadCount} unread messages`}>{thread.unreadCount}</span>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                   <p>{thread.itemTitle || 'Listing conversation'}</p>

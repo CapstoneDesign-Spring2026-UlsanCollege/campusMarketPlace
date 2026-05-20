@@ -1,4 +1,5 @@
 import { API_ORIGIN } from '../services/api'
+import Avatar from './Avatar'
 import { formatPriceFromUsd } from '../services/currency'
 
 function getPrimaryImageValue(item) {
@@ -62,7 +63,10 @@ export default function ItemCard({ item, currency }) {
           <span className="item-price">{formattedPrice}</span>
         </div>
         <h2 className="item-title">{item.title}</h2>
-        <p className="item-seller">Sold by {item.sellerName}</p>
+        <div className="item-seller-row" style={{display: 'flex', gap: 8, alignItems: 'center'}}>
+          <Avatar src={item.sellerAvatarUrl || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url} alt={item.sellerName || 'Seller'} size={36} />
+          <p className="item-seller" style={{margin: 0}}>Sold by {item.sellerName}</p>
+        </div>
       </div>
     </article>
   )
