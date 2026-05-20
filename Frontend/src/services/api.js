@@ -71,3 +71,48 @@ export async function createItem(itemData) {
 export async function fetchProfile() {
   return apiRequest('/profile')
 }
+
+export async function updateProfile(data) {
+  return apiRequest('/profile', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function fetchMessageThreads() {
+  return apiRequest('/messages/threads')
+}
+
+export async function openMessageThread(itemId) {
+  return apiRequest('/messages/threads', {
+    method: 'POST',
+    body: JSON.stringify({ itemId }),
+  })
+}
+
+export async function fetchThreadMessages(threadId, since = '') {
+  const suffix = since ? `?since=${encodeURIComponent(since)}` : ''
+  return apiRequest(`/messages/threads/${threadId}/messages${suffix}`)
+}
+
+export async function sendThreadMessage(threadId, body) {
+  return apiRequest(`/messages/threads/${threadId}/messages`, {
+    method: 'POST',
+    body: JSON.stringify({ body }),
+  })
+}
+
+export async function markThreadRead(threadId) {
+  return apiRequest(`/messages/threads/${threadId}/read`, {
+    method: 'POST',
+  })
+}
+
+export async function uploadProfileAvatar(file) {
+  const fd = new FormData()
+  fd.append('image', file)
+  return apiRequest('/profile/avatar', {
+    method: 'POST',
+    body: fd,
+  })
+}

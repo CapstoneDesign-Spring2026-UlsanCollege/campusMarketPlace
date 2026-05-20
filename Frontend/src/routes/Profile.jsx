@@ -139,15 +139,22 @@ export default function Profile({ currency }) {
   return (
     <main className="page-shell profile-shell">
       <section className="profile-hero panel">
-        <div className="profile-avatar" aria-hidden="true">
-          {getInitial(displayName)}
-        </div>
+        {profile?.avatarUrl ? (
+          <img src={profile.avatarUrl} alt={`${displayName} avatar`} className="profile-avatar-img" />
+        ) : (
+          <div className="profile-avatar" aria-hidden="true">{getInitial(displayName)}</div>
+        )}
         <div className="profile-hero-copy">
           <p className="eyebrow">Your account</p>
           <h1>{displayName}</h1>
           <p className="subcopy">
             Your profile is powered by the backend and keeps your listings, location, and saved payment methods in one place.
           </p>
+        </div>
+        <div style={{ marginLeft: 'auto' }}>
+          <button className="button button-secondary" type="button" onClick={() => navigate('/profile/edit')}>
+            Edit profile
+          </button>
         </div>
         <div className="profile-hero-meta">
           <div>

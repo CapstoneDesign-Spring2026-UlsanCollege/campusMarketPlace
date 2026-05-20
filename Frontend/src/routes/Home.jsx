@@ -19,9 +19,6 @@ export default function Home() {
         </div>
 
         <div className="hero-actions">
-          <Link className="button button-secondary" to="/browse">
-            Browse Items
-          </Link>
           <Link className="button button-primary" to="/signup">
             Get Started
           </Link>

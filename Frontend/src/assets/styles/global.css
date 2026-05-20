@@ -141,6 +141,22 @@ input {
   box-shadow: var(--shadow);
 }
 
+.search-menu {
+  min-width: 160px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(3,11,19,0.98);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 56px;
+  z-index: 45;
+  box-shadow: var(--shadow);
+}
+
 .menu-section {
   display: flex;
   flex-direction: column;
@@ -225,6 +241,42 @@ input {
   border-color: rgba(77, 195, 255, 0.55);
 }
 
+/* Responsive tweaks for small screens to keep profile/button layout tidy */
+@media (max-width: 640px) {
+  .brand-row {
+    padding: 0.75rem 1rem;
+  }
+
+  .nav-links {
+    padding-right: 1rem;
+    gap: 0.45rem;
+    justify-content: flex-end;
+  }
+
+  .nav-links .nav-pill,
+  .nav-links .nav-signout,
+  .nav-links a {
+    padding: 0.45rem 0.6rem;
+    min-width: 0;
+    font-size: 0.92rem;
+  }
+
+  .currency-hamburger-wrapper {
+    right: 8px;
+    top: 8px;
+  }
+
+  .currency-hamburger {
+    width: 34px;
+    height: 30px;
+    padding: 6px;
+  }
+
+  .brand {
+    font-size: 0.98rem;
+  }
+}
+
 .profile-shell {
   align-content: start;
   justify-items: center;
@@ -249,6 +301,15 @@ input {
   font-weight: 800;
   background: linear-gradient(135deg, rgba(77, 195, 255, 0.32), rgba(27, 166, 238, 0.18));
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profile-avatar-img {
+  width: 84px;
+  height: 84px;
+  border-radius: 24px;
+  object-fit: cover;
+  display: block;
+  border: 1px solid rgba(255,255,255,0.06);
 }
 
 .profile-hero-copy h1 {
@@ -1140,6 +1201,218 @@ h1 {
   background: rgba(77, 195, 255, 0.18);
 }
 
+.post-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.post-actions button:disabled:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.messages-shell {
+  align-items: start;
+  width: min(100%, 1120px);
+}
+
+.messages-layout {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.messages-sidebar,
+.messages-panel {
+  min-height: 680px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.messages-sidebar {
+  padding: 1rem;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 1rem;
+}
+
+.messages-sidebar-head h1,
+.messages-panel-head h2 {
+  margin: 0.2rem 0 0;
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+}
+
+.thread-list {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.thread-item {
+  width: 100%;
+  text-align: left;
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.thread-item.is-active {
+  border-color: rgba(77, 195, 255, 0.45);
+  background: var(--accent-soft);
+}
+
+.thread-item-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.thread-item-top span,
+.thread-item small {
+  color: var(--muted);
+}
+
+.thread-unread-badge {
+  display: inline-grid;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 8px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #03111c;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.thread-item p {
+  margin: 0.35rem 0 0;
+  font-weight: 700;
+}
+
+.thread-item small {
+  display: block;
+  margin-top: 0.3rem;
+  line-height: 1.35;
+}
+
+.messages-panel {
+  padding: 1rem;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 1rem;
+}
+
+.messages-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.messages-listing-thumb {
+  width: 88px;
+  height: 88px;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.messages-stream {
+  min-height: 420px;
+  display: grid;
+  gap: 0.8rem;
+  align-content: start;
+  padding-right: 0.25rem;
+}
+
+.message-bubble {
+  max-width: min(78%, 640px);
+  padding: 0.85rem 0.95rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.message-bubble.is-own {
+  margin-left: auto;
+  background: rgba(77, 195, 255, 0.16);
+}
+
+.message-bubble.is-other {
+  margin-right: auto;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.message-bubble-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.45rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.message-bubble p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.message-compose {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.message-compose textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 110px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  padding: 0.95rem 1rem;
+  font: inherit;
+}
+
+.message-compose textarea:focus {
+  outline: none;
+  border-color: rgba(77, 195, 255, 0.45);
+}
+
+.message-compose-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.message-status {
+  min-height: 1.25rem;
+  color: var(--muted);
+}
+
+.message-empty-state {
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.message-empty-centered {
+  display: grid;
+  place-items: center;
+  min-height: 420px;
+  text-align: center;
+}
+
 .profile-strip {
   display: grid;
   gap: 1rem;
@@ -1241,4 +1514,152 @@ h1 {
   .composer-textarea {
     font-size: 0.95rem;
   }
+
+  .messages-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .messages-sidebar,
+  .messages-panel {
+    min-height: auto;
+  }
+
+  .message-bubble {
+    max-width: 100%;
+  }
+}
+
+/* Dashboard Tabs and Add Item Section */
+.add-item-section {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.dashboard-tabs {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 1rem;
+}
+
+.tab-button {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 160ms ease;
+}
+
+.tab-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+}
+
+.tab-button.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #001220;
+  font-weight: 700;
+}
+
+.button-sm {
+  min-width: 100px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+/* My Items Section */
+.my-items-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.my-item-card {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.my-item-card .post-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.my-item-card .post-body {
+  margin-top: 0.4rem;
+}
+
+/* Item Edit Form */
+.item-edit-form {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.edit-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.edit-field label {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.edit-input {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: all 160ms ease;
+}
+
+.edit-input:hover {
+  border-color: rgba(77, 195, 255, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(77, 195, 255, 0.08);
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  margin-top: 0.4rem;
+}
+
+.edit-actions .button {
+  min-width: auto;
+  padding: 0.55rem 1rem;
+}
+
+/* Item Status Badge */
+.item-status-badge {
+  margin-top: 0.8rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.status-value {
+  color: var(--accent);
+  font-weight: 600;
+  text-transform: capitalize;
 }

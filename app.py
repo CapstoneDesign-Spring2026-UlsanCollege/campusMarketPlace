@@ -46,7 +46,7 @@ JWT_EXPIRES_HOURS = int(os.getenv('JWT_EXPIRES_HOURS', '24'))
 FRONTEND_ORIGIN = os.getenv('FRONTEND_ORIGIN', 'http://localhost:5173')
 ADDITIONAL_FRONTEND_ORIGINS = os.getenv(
     'ADDITIONAL_FRONTEND_ORIGINS',
-    'http://localhost:5176',
+    'http://localhost:5176,https://capstonedesign-spring2026-ulsancollege.github.io',
 )
 
 if not MONGODB_URI:
@@ -61,6 +61,8 @@ client = MongoClient(
 db = client[MONGODB_DB_NAME]
 users = db.users
 items = db.items
+message_threads = db.message_threads
+message_messages = db.message_messages
 # Adopt richer status values for listings
 ITEM_STATUSES = {'draft', 'active', 'sold', 'removed'}
 
@@ -156,6 +158,89 @@ def ensure_items_collection_schema():
         )
 
 
+def ensure_messages_collection_schema():
+    """Ensure the messaging collections exist with light validation."""
+    thread_validator = {
+        '$jsonSchema': {
+            'bsonType': 'object',
+            'required': [
+                'item_id',
+                'buyer_id',
+                'seller_id',
+                'participants',
+                'createdAt',
+                'updatedAt',
+            ],
+            'properties': {
+                'item_id': {'bsonType': 'objectId'},
+                'buyer_id': {'bsonType': 'objectId'},
+                'seller_id': {'bsonType': 'objectId'},
+                'participants': {
+                    'bsonType': 'array',
+                    'minItems': 2,
+                    'items': {'bsonType': 'objectId'},
+                },
+                'buyer_name': {'bsonType': ['string', 'null']},
+                'seller_name': {'bsonType': ['string', 'null']},
+                'item_title': {'bsonType': ['string', 'null']},
+                'item_status': {'bsonType': ['string', 'null']},
+                'item_image': {'bsonType': ['string', 'null']},
+                'latest_message': {'bsonType': ['string', 'null']},
+                'latest_message_at': {'bsonType': ['date', 'null']},
+                'createdAt': {'bsonType': 'date'},
+                'updatedAt': {'bsonType': 'date'},
+            },
+        }
+    }
+
+    message_validator = {
+        '$jsonSchema': {
+            'bsonType': 'object',
+            'required': ['thread_id', 'sender_id', 'body', 'createdAt'],
+            'properties': {
+                'thread_id': {'bsonType': 'objectId'},
+                'sender_id': {'bsonType': 'objectId'},
+                'sender_name': {'bsonType': ['string', 'null']},
+                'body': {'bsonType': 'string', 'minLength': 1},
+                'createdAt': {'bsonType': 'date'},
+            },
+        }
+    }
+
+    collection_names = db.list_collection_names()
+    if 'message_threads' in collection_names:
+        try:
+            db.command({
+                'collMod': 'message_threads',
+                'validator': thread_validator,
+                'validationLevel': 'moderate',
+            })
+        except OperationFailure:
+            pass
+    else:
+        db.create_collection(
+            'message_threads',
+            validator=thread_validator,
+            validationLevel='moderate',
+        )
+
+    if 'message_messages' in collection_names:
+        try:
+            db.command({
+                'collMod': 'message_messages',
+                'validator': message_validator,
+                'validationLevel': 'moderate',
+            })
+        except OperationFailure:
+            pass
+    else:
+        db.create_collection(
+            'message_messages',
+            validator=message_validator,
+            validationLevel='moderate',
+        )
+
+
 def serialize_item_document(item_doc):
     """Normalize item docs for JSON and legacy frontend fields."""
     item_doc['_id'] = str(item_doc['_id'])
@@ -227,10 +312,46 @@ def serialize_item_document(item_doc):
     return item_doc
 
 
+def serialize_message_thread_document(thread_doc, current_user_id=None):
+    thread_doc['_id'] = str(thread_doc['_id'])
+    for field in ('item_id', 'buyer_id', 'seller_id'):
+        if field in thread_doc and thread_doc[field] is not None:
+            thread_doc[field] = str(thread_doc[field])
+    if isinstance(thread_doc.get('participants'), list):
+        thread_doc['participants'] = [str(participant) for participant in thread_doc['participants'] if participant is not None]
+    if current_user_id:
+        current_user_str = str(current_user_id)
+        if thread_doc.get('buyer_id') == current_user_str:
+            thread_doc['other_user_id'] = thread_doc.get('seller_id')
+            thread_doc['other_user_name'] = thread_doc.get('seller_name', 'Seller')
+            thread_doc['current_user_role'] = 'buyer'
+        else:
+            thread_doc['other_user_id'] = thread_doc.get('buyer_id')
+            thread_doc['other_user_name'] = thread_doc.get('buyer_name', 'Buyer')
+            thread_doc['current_user_role'] = 'seller'
+    if 'latest_message_at' in thread_doc and hasattr(thread_doc['latest_message_at'], 'isoformat'):
+        thread_doc['latest_message_at'] = thread_doc['latest_message_at'].isoformat()
+    if 'createdAt' in thread_doc and hasattr(thread_doc['createdAt'], 'isoformat'):
+        thread_doc['createdAt'] = thread_doc['createdAt'].isoformat()
+    if 'updatedAt' in thread_doc and hasattr(thread_doc['updatedAt'], 'isoformat'):
+        thread_doc['updatedAt'] = thread_doc['updatedAt'].isoformat()
+    return thread_doc
+
+
+def serialize_message_document(message_doc):
+    message_doc['_id'] = str(message_doc['_id'])
+    message_doc['thread_id'] = str(message_doc['thread_id'])
+    message_doc['sender_id'] = str(message_doc['sender_id'])
+    if 'createdAt' in message_doc and hasattr(message_doc['createdAt'], 'isoformat'):
+        message_doc['createdAt'] = message_doc['createdAt'].isoformat()
+    return message_doc
+
+
 try:
     client.admin.command('ping')
     users.create_index('email', unique=True)
     ensure_items_collection_schema()
+    ensure_messages_collection_schema()
     items = db.items
     items.create_index([('seller_id', 1), ('createdAt', -1)])
     items.create_index([('status', 1), ('createdAt', -1)])
@@ -248,6 +369,16 @@ try:
     # Text index for search on title and description
     try:
         items.create_index([('title', 'text'), ('description', 'text')], name='items_text_idx')
+    except Exception:
+        pass
+    try:
+        message_threads.create_index([('item_id', 1), ('buyer_id', 1)], unique=True)
+        message_threads.create_index([('participants', 1), ('updatedAt', -1)])
+        message_threads.create_index([('updatedAt', -1)])
+    except Exception:
+        pass
+    try:
+        message_messages.create_index([('thread_id', 1), ('createdAt', 1)])
     except Exception:
         pass
 except Exception as exc:
@@ -327,6 +458,7 @@ def build_user_payload(user_doc):
         'email': user_doc['email'],
         'isVerified': user_doc.get('isVerified', False),
         'location': user_doc.get('location', ''),
+        'avatar': user_doc.get('avatar', ''),
         'paymentMethods': payment_methods,
     }
 
@@ -411,6 +543,72 @@ def issue_token(user_doc):
     return jwt.encode(payload, JWT_SECRET, algorithm='HS256')
 
 
+def get_current_user_from_request():
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return None, None, json_error('Missing bearer token.', 401)
+
+    token = auth_header.removeprefix('Bearer ').strip()
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.PyJWTError:
+        return None, None, json_error('Invalid or expired token.', 401)
+
+    user_id = parse_object_id(payload.get('sub'))
+    if not user_id:
+        return None, None, json_error('Invalid or expired token.', 401)
+
+    user_doc = users.find_one({'_id': user_id})
+    if not user_doc:
+        return None, None, json_error('Invalid or expired token.', 401)
+
+    return user_id, user_doc, None
+
+
+def build_message_thread_payload(thread_doc, current_user_id=None):
+    payload = dict(thread_doc)
+    payload = serialize_message_thread_document(payload, current_user_id=current_user_id)
+    payload['buyerName'] = thread_doc.get('buyer_name', 'Buyer')
+    payload['sellerName'] = thread_doc.get('seller_name', 'Seller')
+    payload['itemTitle'] = thread_doc.get('item_title', '')
+    payload['itemStatus'] = thread_doc.get('item_status', '')
+    payload['itemImage'] = thread_doc.get('item_image', '')
+    payload['latestMessage'] = thread_doc.get('latest_message', '')
+    payload['latestMessageAt'] = payload.pop('latest_message_at', None)
+    # Compute unread count for the current user (messages with createdAt > last_read)
+    try:
+        thread_oid = thread_doc.get('_id')
+        # thread_doc may have stringified _id after serialize; attempt to parse
+        if isinstance(thread_oid, str):
+            thread_oid = parse_object_id(thread_oid)
+    except Exception:
+        thread_oid = None
+
+    unread_count = 0
+    if current_user_id and thread_oid:
+        try:
+            last_read_map = thread_doc.get('last_read', {}) or {}
+            last_read_str = last_read_map.get(str(current_user_id))
+            if last_read_str:
+                try:
+                    last_read_dt = datetime.fromisoformat(last_read_str.replace('Z', '+00:00'))
+                except Exception:
+                    last_read_dt = None
+            else:
+                last_read_dt = None
+
+            query = {'thread_id': thread_oid}
+            if last_read_dt:
+                query['createdAt'] = {'$gt': last_read_dt}
+
+            unread_count = message_messages.count_documents(query)
+        except Exception:
+            unread_count = 0
+
+    payload['unreadCount'] = int(unread_count)
+    return payload
+
+
 @app.get('/api/health')
 def health_check():
     try:
@@ -462,6 +660,104 @@ def upload_image():
         'filename': stored_filename,
         'url': file_url,
     }), 201
+
+
+@app.post('/api/profile/avatar')
+def upload_profile_avatar():
+    """Upload and attach an avatar image to the authenticated user's profile."""
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return json_error('Missing bearer token.', 401)
+
+    token = auth_header.removeprefix('Bearer ').strip()
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.PyJWTError:
+        return json_error('Invalid or expired token.', 401)
+
+    user_id = parse_object_id(payload.get('sub'))
+    if not user_id:
+        return json_error('Invalid or expired token.', 401)
+
+    user_doc = users.find_one({'_id': user_id})
+    if not user_doc:
+        return json_error('Invalid or expired token.', 401)
+
+    uploaded_file = request.files.get('image') or request.files.get('avatar')
+    if not uploaded_file or not uploaded_file.filename:
+        return json_error('An image file is required.', 400)
+
+    safe_filename = secure_filename(uploaded_file.filename)
+    if not safe_filename:
+        return json_error('The uploaded filename is not valid.', 400)
+
+    file_extension = os.path.splitext(safe_filename)[1].lower()
+    if file_extension not in ALLOWED_IMAGE_EXTENSIONS:
+        return json_error('Unsupported image format.', 400)
+
+    if uploaded_file.mimetype not in ALLOWED_IMAGE_MIMETYPES:
+        return json_error('Only image uploads are allowed.', 400)
+
+    if (
+        request.content_length
+        and request.content_length > MAX_IMAGE_UPLOAD_BYTES
+    ):
+        return json_error('Image must be smaller than 5 MB.', 413)
+
+    stored_filename = f"{uuid4().hex}-{safe_filename}"
+    stored_path = UPLOAD_FOLDER / stored_filename
+    uploaded_file.save(stored_path)
+
+    file_url = f"{request.host_url.rstrip('/')}/api/uploads/{stored_filename}"
+
+    try:
+        users.update_one({'_id': user_id}, {'$set': {'avatar': stored_filename, 'updatedAt': datetime.now(timezone.utc)}})
+    except Exception as exc:
+        return json_error(f'Failed to attach avatar to profile: {str(exc)}', 500)
+
+    return jsonify({'message': 'Avatar uploaded successfully.', 'filename': stored_filename, 'url': file_url}), 201
+
+
+@app.delete('/api/profile/avatar')
+def delete_profile_avatar():
+    """Remove a user's avatar file and clear the avatar field from their profile."""
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return json_error('Missing bearer token.', 401)
+
+    token = auth_header.removeprefix('Bearer ').strip()
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.PyJWTError:
+        return json_error('Invalid or expired token.', 401)
+
+    user_id = parse_object_id(payload.get('sub'))
+    if not user_id:
+        return json_error('Invalid or expired token.', 401)
+
+    user_doc = users.find_one({'_id': user_id})
+    if not user_doc:
+        return json_error('Invalid or expired token.', 401)
+
+    avatar_val = user_doc.get('avatar')
+    if not avatar_val:
+        return json_error('No avatar to delete.', 400)
+
+    # Attempt to delete the file from disk but don't fail if it does not exist.
+    try:
+        file_path = UPLOAD_FOLDER / str(avatar_val)
+        if file_path.exists():
+            file_path.unlink()
+    except Exception:
+        # Log and continue — we'll still clear the DB reference.
+        pass
+
+    try:
+        users.update_one({'_id': user_id}, {'$unset': {'avatar': ''}, '$set': {'updatedAt': datetime.now(timezone.utc)}})
+    except Exception as exc:
+        return json_error(f'Failed to clear avatar from profile: {str(exc)}', 500)
+
+    return jsonify({'message': 'Avatar removed.'})
 
 
 @app.post('/api/auth/signup')
@@ -596,6 +892,17 @@ def profile_summary():
     user_payload = build_user_payload(user_doc)
     user_payload['paymentMethods'] = get_safe_payment_methods(user_doc)
 
+    # Expose avatarUrl as an absolute URL when available so frontend can load it.
+    avatar_val = user_doc.get('avatar') or user_doc.get('avatarUrl')
+    if avatar_val:
+        if isinstance(avatar_val, str) and avatar_val.strip():
+            if re.match(r'^https?://', avatar_val):
+                user_payload['avatarUrl'] = avatar_val
+            else:
+                user_payload['avatarUrl'] = f"{request.host_url.rstrip('/')}/api/uploads/{str(avatar_val).lstrip('/')}"
+    else:
+        user_payload['avatarUrl'] = ''
+
     return jsonify({
         'user': user_payload,
         'profile': {
@@ -607,6 +914,287 @@ def profile_summary():
         'buyHistory': activity['buyHistory'],
         'sellHistory': activity['sellHistory'],
     })
+
+
+@app.put('/api/profile')
+def update_profile():
+    """Update basic profile fields for the current authenticated user.
+
+    Accepts JSON body with optional keys: firstName, lastName, location
+    Returns the updated user payload on success.
+    """
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return json_error('Missing bearer token.', 401)
+
+    token = auth_header.removeprefix('Bearer ').strip()
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.PyJWTError:
+        return json_error('Invalid or expired token.', 401)
+
+    user_id = parse_object_id(payload.get('sub'))
+    if not user_id:
+        return json_error('Invalid or expired token.', 401)
+
+    user_doc = users.find_one({'_id': user_id})
+    if not user_doc:
+        return json_error('Invalid or expired token.', 401)
+
+    data = request.get_json(silent=True) or {}
+    updates = {}
+    if 'firstName' in data:
+        fn = str(data.get('firstName', '')).strip()
+        if fn:
+            updates['firstName'] = fn
+    if 'lastName' in data:
+        ln = str(data.get('lastName', '')).strip()
+        if ln:
+            updates['lastName'] = ln
+    if 'location' in data:
+        loc = str(data.get('location', '')).strip()
+        updates['location'] = loc
+
+    if not updates:
+        return json_error('No profile fields provided to update.', 400)
+
+    updates['updatedAt'] = datetime.now(timezone.utc)
+
+    try:
+        users.update_one({'_id': user_id}, {'$set': updates})
+    except Exception as exc:
+        return json_error(f'Failed to update profile: {str(exc)}', 500)
+
+    updated_user_doc = users.find_one({'_id': user_id})
+    return jsonify({'user': build_user_payload(updated_user_doc)})
+
+
+@app.get('/api/messages/threads')
+def get_message_threads():
+    user_id, _user_doc, auth_error = get_current_user_from_request()
+    if auth_error:
+        return auth_error
+
+    thread_docs = list(
+        message_threads.find({'participants': user_id}).sort('updatedAt', -1)
+    )
+    return jsonify({
+        'threads': [build_message_thread_payload(thread_doc, current_user_id=user_id) for thread_doc in thread_docs],
+    })
+
+
+@app.post('/api/messages/threads')
+def open_message_thread():
+    user_id, user_doc, auth_error = get_current_user_from_request()
+    if auth_error:
+        return auth_error
+
+    data = request.get_json(silent=True) or {}
+    item_id = parse_object_id(data.get('itemId'))
+    if not item_id:
+        return json_error('A valid itemId is required.', 400)
+
+    item_doc = items.find_one({'_id': item_id})
+    if not item_doc:
+        return json_error('Item not found.', 404)
+
+    if item_doc.get('status') != 'active':
+        return json_error('Messages are only available for active listings.', 400)
+
+    seller_id = item_doc.get('seller_id') or item_doc.get('sellerId')
+    if not isinstance(seller_id, ObjectId):
+        seller_id = parse_object_id(seller_id)
+    if not seller_id:
+        return json_error('Listing seller not found.', 404)
+
+    if seller_id == user_id:
+        return json_error('You cannot message yourself about your own listing.', 400)
+
+    seller_doc = users.find_one({'_id': seller_id})
+    if not seller_doc:
+        return json_error('Listing seller not found.', 404)
+
+    buyer_name = f"{user_doc.get('firstName', '').strip()} {user_doc.get('lastName', '').strip()}".strip() or 'Buyer'
+    seller_name = f"{seller_doc.get('firstName', '').strip()} {seller_doc.get('lastName', '').strip()}".strip() or 'Seller'
+    now = datetime.now(timezone.utc)
+
+    thread_doc = message_threads.find_one({
+        'item_id': item_id,
+        'buyer_id': user_id,
+        'seller_id': seller_id,
+    })
+    is_new_thread = thread_doc is None
+    if is_new_thread:
+        thread_doc = {
+            'item_id': item_id,
+            'buyer_id': user_id,
+            'seller_id': seller_id,
+            'participants': [user_id, seller_id],
+            'buyer_name': buyer_name,
+            'seller_name': seller_name,
+            'item_title': item_doc.get('title', ''),
+            'item_status': item_doc.get('status', ''),
+            'item_image': item_doc.get('image', ''),
+            'latest_message': '',
+            'latest_message_at': None,
+            'createdAt': now,
+            'updatedAt': now,
+            'last_read': {},
+        }
+        inserted = message_threads.insert_one(thread_doc)
+        thread_doc['_id'] = inserted.inserted_id
+    # Mark the opener as having last-read at this moment so messages prior are not treated as unread for them
+    try:
+        message_threads.update_one({'_id': thread_doc['_id']}, {'$set': {f'last_read.{str(user_id)}': datetime.now(timezone.utc).isoformat(), 'updatedAt': datetime.now(timezone.utc)}})
+        # refresh thread_doc
+        thread_doc = message_threads.find_one({'_id': thread_doc['_id']})
+    except Exception:
+        pass
+
+    return jsonify({
+        'thread': build_message_thread_payload(thread_doc, current_user_id=user_id),
+    }), 201 if is_new_thread else 200
+
+
+@app.get('/api/messages/threads/<thread_id>')
+def get_message_thread(thread_id):
+    user_id, _user_doc, auth_error = get_current_user_from_request()
+    if auth_error:
+        return auth_error
+
+    thread_oid = parse_object_id(thread_id)
+    if not thread_oid:
+        return json_error('Invalid thread id.', 400)
+
+    thread_doc = message_threads.find_one({'_id': thread_oid})
+    if not thread_doc:
+        return json_error('Conversation not found.', 404)
+
+    if user_id not in thread_doc.get('participants', []):
+        return json_error('You do not have access to this conversation.', 403)
+
+    return jsonify({
+        'thread': build_message_thread_payload(thread_doc, current_user_id=user_id),
+    })
+
+
+@app.post('/api/messages/threads/<thread_id>/read')
+def mark_thread_read(thread_id):
+    """Mark the current user as having read the conversation up to now."""
+    user_id, _user_doc, auth_error = get_current_user_from_request()
+    if auth_error:
+        return auth_error
+
+    thread_oid = parse_object_id(thread_id)
+    if not thread_oid:
+        return json_error('Invalid thread id.', 400)
+
+    thread_doc = message_threads.find_one({'_id': thread_oid})
+    if not thread_doc:
+        return json_error('Conversation not found.', 404)
+
+    if user_id not in thread_doc.get('participants', []):
+        return json_error('You do not have access to this conversation.', 403)
+
+    now = datetime.now(timezone.utc)
+    try:
+        message_threads.update_one({'_id': thread_oid}, {'$set': {f'last_read.{str(user_id)}': now.isoformat(), 'updatedAt': now}})
+    except Exception as exc:
+        return json_error(f'Failed to mark thread read: {str(exc)}', 500)
+
+    thread_doc = message_threads.find_one({'_id': thread_oid})
+    return jsonify({'thread': build_message_thread_payload(thread_doc, current_user_id=user_id)})
+
+
+@app.get('/api/messages/threads/<thread_id>/messages')
+def get_message_thread_messages(thread_id):
+    user_id, _user_doc, auth_error = get_current_user_from_request()
+    if auth_error:
+        return auth_error
+
+    thread_oid = parse_object_id(thread_id)
+    if not thread_oid:
+        return json_error('Invalid thread id.', 400)
+
+    thread_doc = message_threads.find_one({'_id': thread_oid})
+    if not thread_doc:
+        return json_error('Conversation not found.', 404)
+
+    if user_id not in thread_doc.get('participants', []):
+        return json_error('You do not have access to this conversation.', 403)
+
+    since_value = str(request.args.get('since', '')).strip()
+    query = {'thread_id': thread_oid}
+    if since_value:
+        try:
+            since_dt = datetime.fromisoformat(since_value.replace('Z', '+00:00'))
+            query['createdAt'] = {'$gt': since_dt}
+        except ValueError:
+            pass
+
+    message_docs = list(message_messages.find(query).sort('createdAt', 1))
+    return jsonify({
+        'thread': build_message_thread_payload(thread_doc, current_user_id=user_id),
+        'messages': [serialize_message_document(message_doc) for message_doc in message_docs],
+    })
+
+
+@app.post('/api/messages/threads/<thread_id>/messages')
+def send_message(thread_id):
+    user_id, user_doc, auth_error = get_current_user_from_request()
+    if auth_error:
+        return auth_error
+
+    thread_oid = parse_object_id(thread_id)
+    if not thread_oid:
+        return json_error('Invalid thread id.', 400)
+
+    thread_doc = message_threads.find_one({'_id': thread_oid})
+    if not thread_doc:
+        return json_error('Conversation not found.', 404)
+
+    if user_id not in thread_doc.get('participants', []):
+        return json_error('You do not have access to this conversation.', 403)
+
+    data = request.get_json(silent=True) or {}
+    body = str(data.get('body', '')).strip()
+    if not body:
+        return json_error('Message body is required.', 400)
+    if len(body) > 1000:
+        return json_error('Messages must be 1000 characters or fewer.', 400)
+
+    sender_name = f"{user_doc.get('firstName', '').strip()} {user_doc.get('lastName', '').strip()}".strip() or 'Student'
+    now = datetime.now(timezone.utc)
+    message_doc = {
+        'thread_id': thread_oid,
+        'sender_id': user_id,
+        'sender_name': sender_name,
+        'body': body,
+        'createdAt': now,
+    }
+    inserted = message_messages.insert_one(message_doc)
+    message_doc['_id'] = inserted.inserted_id
+
+    message_threads.update_one(
+        {'_id': thread_oid},
+        {
+            '$set': {
+                'latest_message': body,
+                'latest_message_at': now,
+                'updatedAt': now,
+            }
+        },
+    )
+
+    # Do not modify recipient last_read here; recipient will see this message as unread until they mark as read or open the thread.
+
+    return jsonify({
+        'message': serialize_message_document(message_doc),
+        'thread': build_message_thread_payload(
+            message_threads.find_one({'_id': thread_oid}),
+            current_user_id=user_id,
+        ),
+    }), 201
 
 
 @app.get('/api/items')

@@ -13,12 +13,25 @@ export default function Navbar({
   const location = useLocation()
   const navigate = useNavigate()
   const isDashboard = location.pathname === '/dashboard'
+  // Show the authenticated (dashboard-style) nav when user is signed in
+  const showAuthNav = isDashboard || isAuthenticated
   const [showSignOutModal, setShowSignOutModal] = useState(false)
   const [currencyMenuOpen, setCurrencyMenuOpen] = useState(false)
+  const [searchMenuOpen, setSearchMenuOpen] = useState(false)
+
+  const STORIES = ['Engineering', 'Dorm Deals', 'Books']
 
   function handleHome() {
     if (isDashboard) {
       window.location.reload()
+      return
+    }
+
+    // If the user is authenticated, keep them inside the authenticated
+    // dashboard experience instead of sending them back to the public home
+    // page. Only unauthenticated users are routed to the public `/` home.
+    if (isAuthenticated) {
+      navigate('/dashboard')
       return
     }
 
@@ -30,11 +43,8 @@ export default function Navbar({
   }
 
   function handleSearch() {
-    const composerButton = document.querySelector('.composer-input')
-    if (composerButton instanceof HTMLElement) {
-      composerButton.focus()
-      composerButton.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
+    // Toggle the search/story menu instead of focusing the composer directly
+    setSearchMenuOpen((s) => !s)
   }
 
   function handleSignOut() {
@@ -120,7 +130,7 @@ export default function Navbar({
                   </div>
                 )}
               </div>
-            {isDashboard ? (
+            {showAuthNav ? (
               <>
                 <button className="nav-pill" type="button" onClick={handleHome}>
                   Home
@@ -128,9 +138,31 @@ export default function Navbar({
                 <button className="nav-pill" type="button" onClick={handleSearch}>
                   Search
                 </button>
+                {searchMenuOpen && (
+                  <div className="search-menu" role="menu" aria-label="Quick categories">
+                    {STORIES.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        className="currency-menu-item"
+                        onClick={() => {
+                          setSearchMenuOpen(false)
+                          navigate(`/browse?category=${encodeURIComponent(s)}`)
+                        }}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 {isAuthenticated && (
                   <button className="nav-pill" type="button" onClick={handleProfile}>
                     Profile
+                  </button>
+                )}
+                {isAuthenticated && (
+                  <button className="nav-pill" type="button" onClick={() => navigate('/messages')}>
+                    Messages
                   </button>
                 )}
                 <button className="nav-pill" type="button" onClick={() => navigate('/dashboard', { state: { mode: 'buy' } })}>
@@ -148,7 +180,6 @@ export default function Navbar({
                 <NavLink to="/" end>
                   Home
                 </NavLink>
-                <NavLink to="/browse">Browse</NavLink>
                 {isAuthenticated ? <NavLink to="/profile">Profile</NavLink> : <NavLink to="/login">Login</NavLink>}
                 {!isAuthenticated ? <NavLink to="/signup">Sign Up</NavLink> : null}
                 {isAuthenticated ? (
