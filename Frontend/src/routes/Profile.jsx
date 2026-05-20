@@ -28,7 +28,9 @@ function PaymentMethodList({ paymentMethods }) {
   if (!paymentMethods.length) {
     return (
       <div className="profile-empty-state">
-        <p>No saved payment methods.</p>
+        <div className="empty-state-icon">💳</div>
+        <p><strong>No payment methods yet</strong></p>
+        <p className="empty-state-hint">Add a payment method in your account settings.</p>
       </div>
     )
   }
@@ -36,16 +38,19 @@ function PaymentMethodList({ paymentMethods }) {
   return (
     <div className="profile-list">
       {paymentMethods.map((method, index) => (
-        <article className="profile-list-item" key={method.id || method.label || index}>
-          <div>
-            <strong>{method.label || method.provider || method.type || 'Payment method'}</strong>
-            <p>
-              {[method.type, method.provider, method.last4 ? `•••• ${method.last4}` : null]
-                .filter(Boolean)
-                .join(' • ')}
-            </p>
+        <article className="profile-list-item profile-payment-item" key={method.id || method.label || index}>
+          <div className="payment-info">
+            <div className="payment-icon">💳</div>
+            <div>
+              <strong>{method.label || method.provider || method.type || 'Payment method'}</strong>
+              <p>
+                {[method.type, method.provider, method.last4 ? `•••• ${method.last4}` : null]
+                  .filter(Boolean)
+                  .join(' • ')}
+              </p>
+            </div>
           </div>
-          {method.isDefault ? <span>Default</span> : null}
+          {method.isDefault ? <span className="badge badge-default">Default</span> : null}
         </article>
       ))}
     </div>
@@ -56,7 +61,9 @@ function ActivityList({ items, currency, emptyMessage }) {
   if (!items.length) {
     return (
       <div className="profile-empty-state">
-        <p>{emptyMessage}</p>
+        <div className="empty-state-icon">📦</div>
+        <p><strong>Nothing here yet</strong></p>
+        <p className="empty-state-hint">{emptyMessage}</p>
       </div>
     )
   }
@@ -64,14 +71,16 @@ function ActivityList({ items, currency, emptyMessage }) {
   return (
     <div className="profile-list">
       {items.map((item) => (
-        <article className="profile-list-item" key={item._id}>
-          <div>
-            <strong>{item.title}</strong>
-            <p>
-              {item.category || 'Listing'} • {item.status || 'active'} • {formatDate(item.createdAt)}
+        <article className="profile-list-item profile-activity-item" key={item._id}>
+          <div className="activity-info">
+            <strong className="activity-title">{item.title}</strong>
+            <p className="activity-meta">
+              <span className="category-badge">{item.category || 'Listing'}</span>
+              <span className={`status-badge status-${(item.status || 'active').toLowerCase()}`}>{item.status || 'active'}</span>
+              <span className="date-meta">{formatDate(item.createdAt)}</span>
             </p>
           </div>
-          <span>{formatPriceFromUsd(item.price, currency)}</span>
+          <span className="activity-price">{formatPriceFromUsd(item.price, currency)}</span>
         </article>
       ))}
     </div>
@@ -139,35 +148,39 @@ export default function Profile({ currency }) {
   return (
     <main className="page-shell profile-shell">
       <section className="profile-hero panel">
-        {profile?.avatarUrl ? (
-          <img src={profile.avatarUrl} alt={`${displayName} avatar`} className="profile-avatar-img" />
-        ) : (
-          <div className="profile-avatar" aria-hidden="true">{getInitial(displayName)}</div>
-        )}
-        <div className="profile-hero-copy">
-          <p className="eyebrow">Your account</p>
-          <h1>{displayName}</h1>
-          <p className="subcopy">
-            Your profile is powered by the backend and keeps your listings, location, and saved payment methods in one place.
-          </p>
-        </div>
-        <div style={{ marginLeft: 'auto' }}>
-          <button className="button button-secondary" type="button" onClick={() => navigate('/profile/edit')}>
-            Edit profile
-          </button>
+        <div className="profile-hero-content">
+          <div className="profile-avatar-wrapper">
+            {profile?.avatarUrl ? (
+              <img src={profile.avatarUrl} alt={`${displayName} avatar`} className="profile-avatar-img" />
+            ) : (
+              <div className="profile-avatar" aria-hidden="true">{getInitial(displayName)}</div>
+            )}
+          </div>
+          <div className="profile-hero-copy">
+            <p className="eyebrow">Your account</p>
+            <h1>{displayName}</h1>
+            <p className="subcopy">
+              Manage your marketplace profile, track your listings and purchases, and stay connected.
+            </p>
+          </div>
+          <div className="profile-hero-action">
+            <button className="button button-primary" type="button" onClick={() => navigate('/profile/edit')}>
+              ✎ Edit profile
+            </button>
+          </div>
         </div>
         <div className="profile-hero-meta">
-          <div>
-            <span className="profile-meta-label">Email</span>
+          <div className="meta-item">
+            <span className="profile-meta-label">📧 Email</span>
             <strong>{profile?.email || 'Not available'}</strong>
           </div>
-          <div>
-            <span className="profile-meta-label">Location</span>
+          <div className="meta-item">
+            <span className="profile-meta-label">📍 Location</span>
             <strong>{locationLabel}</strong>
           </div>
-          <div>
-            <span className="profile-meta-label">Saved payments</span>
-            <strong>{paymentMethods.length ? `${paymentMethods.length} method${paymentMethods.length > 1 ? 's' : ''}` : 'None'}</strong>
+          <div className="meta-item">
+            <span className="profile-meta-label">💳 Payment methods</span>
+            <strong>{paymentMethods.length ? `${paymentMethods.length} method${paymentMethods.length > 1 ? 's' : ''}` : 'None saved'}</strong>
           </div>
         </div>
       </section>
