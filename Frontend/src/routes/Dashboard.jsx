@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { apiRequest, createItem, fetchItems } from '../services/api'
-import { CATEGORIES } from '../constants/categories'
+import { CATEGORIES, getCategoryLabel } from '../constants/categories'
 import { convertDisplayPriceToUsd, formatPriceFromUsd, getPriceInputMeta } from '../services/currency'
 import { API_ORIGIN } from '../services/api'
 
@@ -542,7 +542,10 @@ export default function Dashboard({ currency }) {
                     )}
                   </div>
                   <div className="post-body">
-                    <div className="post-price">{formatPriceFromUsd(item.price, currency)}</div>
+                    <div className="post-meta">
+                      <span className="post-category">{getCategoryLabel(item.category)}</span>
+                      <div className="post-price">{formatPriceFromUsd(item.price, currency)}</div>
+                    </div>
                     <h2>{item.title}</h2>
                     <p>{item.description}</p>
                   </div>
