@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { apiRequest } from '../services/api'
 import { saveAuthSession } from '../services/auth'
+import { t } from '../services/i18n'
 
-export default function Login({ onAuthChange }) {
+export default function Login({ language = 'en', onAuthChange }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [showPassword, setShowPassword] = useState(false)
@@ -46,9 +47,9 @@ export default function Login({ onAuthChange }) {
   return (
     <main className="page-shell form-shell">
       <section className="panel auth-panel">
-        <p className="eyebrow">Welcome back</p>
-        <h1>Login</h1>
-        <p className="subcopy">Use the same campus email and password you created during signup.</p>
+        <p className="eyebrow">{t(language, 'login.welcome')}</p>
+        <h1>{t(language, 'login.title')}</h1>
+        <p className="subcopy">{t(language, 'login.subcopy')}</p>
 
         {submitStatus.message && (
           <p className={`form-message ${submitStatus.type}`} role="alert">
@@ -58,23 +59,23 @@ export default function Login({ onAuthChange }) {
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <label>
-            Email
+            {t(language, 'login.email')}
             <input
               type="email"
               name="email"
-              placeholder="student@office.uc.ac.kr"
+              placeholder={t(language, 'login.emailPlaceholder')}
               autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
           </label>
           <label>
-            Password
+            {t(language, 'login.password')}
             <div className="input-with-action">
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
-                placeholder="Enter your password"
+                placeholder={t(language, 'login.passwordPlaceholder')}
                 autoComplete="current-password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
@@ -85,12 +86,12 @@ export default function Login({ onAuthChange }) {
                 onClick={() => setShowPassword((prev) => !prev)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? 'Hide' : 'Show'}
+                {showPassword ? t(language, 'login.hide') : t(language, 'login.show')}
               </button>
             </div>
           </label>
           <button className="button button-primary" type="submit" disabled={isLoading}>
-            {isLoading ? 'Logging in…' : 'Login'}
+            {isLoading ? t(language, 'login.submitting') : t(language, 'login.submit')}
           </button>
         </form>
       </section>
