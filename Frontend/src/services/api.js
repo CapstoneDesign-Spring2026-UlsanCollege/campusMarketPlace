@@ -84,6 +84,11 @@ export async function fetchMessageThreads() {
   return apiRequest('/messages/threads')
 }
 
+export async function fetchUser(userId) {
+  if (!userId) throw new Error('userId required')
+  return apiRequest(`/users/${encodeURIComponent(userId)}`)
+}
+
 export async function openMessageThread(itemId) {
   return apiRequest('/messages/threads', {
     method: 'POST',

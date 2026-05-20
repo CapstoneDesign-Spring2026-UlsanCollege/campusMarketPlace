@@ -337,6 +337,28 @@ def serialize_item_document(item_doc):
         if dt_field in item_doc and hasattr(item_doc[dt_field], 'isoformat'):
             item_doc[dt_field] = item_doc[dt_field].isoformat()
 
+    # Attach seller avatar URL (public-facing) when possible so clients
+    # can render profile pictures without additional lookups.
+    try:
+        seller_id_str = item_doc.get('seller_id') or item_doc.get('sellerId')
+        if seller_id_str:
+            seller_oid = parse_object_id(seller_id_str)
+            if seller_oid:
+                seller_doc = users.find_one({'_id': seller_oid})
+                if seller_doc:
+                    avatar_val = seller_doc.get('avatar') or seller_doc.get('avatarUrl')
+                    if avatar_val:
+                        if isinstance(avatar_val, str) and avatar_val.strip():
+                            if re.match(r'^https?://', avatar_val):
+                                item_doc['sellerAvatarUrl'] = avatar_val
+                            elif has_request_context():
+                                item_doc['sellerAvatarUrl'] = f"{request.host_url.rstrip('/')}/api/uploads/{str(avatar_val).lstrip('/')}"
+                    else:
+                        item_doc['sellerAvatarUrl'] = ''
+    except Exception:
+        # Fail gracefully if lookups fail; don't block item serialization.
+        pass
+
     return item_doc
 
 
@@ -1342,6 +1364,35 @@ def get_item(item_id):
     item_doc = serialize_item_document(item_doc)
 
     return jsonify({'item': item_doc})
+
+
+@app.get('/api/users/<user_id>')
+def get_public_user(user_id):
+    """Fetch a user's public profile information (no auth required)."""
+    oid = parse_object_id(user_id)
+    if not oid:
+        return json_error('Invalid user id.', 400)
+
+    try:
+        user_doc = users.find_one({'_id': oid})
+    except Exception as exc:
+        return json_error(f'Failed to fetch user: {str(exc)}', 500)
+
+    if not user_doc:
+        return json_error('User not found.', 404)
+
+    payload = build_user_payload(user_doc)
+    avatar_val = user_doc.get('avatar') or user_doc.get('avatarUrl')
+    if avatar_val:
+        if isinstance(avatar_val, str) and avatar_val.strip():
+            if re.match(r'^https?://', avatar_val):
+                payload['avatarUrl'] = avatar_val
+            else:
+                payload['avatarUrl'] = f"{request.host_url.rstrip('/')}/api/uploads/{str(avatar_val).lstrip('/')}"
+    else:
+        payload['avatarUrl'] = ''
+
+    return jsonify({'user': payload})
 
 
 @app.post('/api/items')

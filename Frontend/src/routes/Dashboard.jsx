@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { apiRequest, createItem, fetchItems } from '../services/api'
+import { apiRequest, createItem, fetchItems, fetchUser } from '../services/api'
 import { CATEGORIES, getCategoryLabel } from '../constants/categories'
 import { getAuthUser, getAuthToken } from '../services/auth'
 import { convertDisplayPriceToUsd, formatPriceFromUsd, getPriceInputMeta } from '../services/currency'
@@ -78,6 +78,7 @@ export default function Dashboard({ currency }) {
   const [uploadedImages, setUploadedImages] = useState([])
 
   const [items, setItems] = useState([])
+  const [sellerAvatars, setSellerAvatars] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const currentUserId = user?.id || ''
@@ -165,6 +166,31 @@ export default function Dashboard({ currency }) {
       loadItems()
     }
   }, [mode, user])
+
+  useEffect(() => {
+    // For any items missing a sellerAvatarUrl, fetch the public user profile
+    // and cache the avatar so we can display it without changing server data.
+    if (!items || items.length === 0) return
+
+    items.forEach((item) => {
+      const sellerId = item.seller_id || item.sellerId || ''
+      if (!sellerId) return
+      if (item.sellerAvatarUrl) return
+      if (sellerAvatars[sellerId]) return
+
+      fetchUser(sellerId)
+        .then((res) => {
+          const userObj = res.user || {}
+          const avatar = userObj.avatarUrl || userObj.avatar || ''
+          if (avatar) {
+            setSellerAvatars((prev) => ({ ...prev, [sellerId]: avatar }))
+          }
+        })
+        .catch(() => {
+          // ignore fetch failures
+        })
+    })
+  }, [items])
 
   const firstName = user?.firstName || 'Student'
   const priceInputMeta = getPriceInputMeta(currency)
@@ -531,18 +557,20 @@ export default function Dashboard({ currency }) {
                 <article className="feed-panel post-card" key={item._id}>
                   <header className="post-header">
                     <div className="avatar-badge" aria-hidden="true">
-                      {(
-                        // Prefer seller avatar if available on the item document
-                        (item.sellerAvatarUrl || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url)
-                          ? (
+                      {(() => {
+                        const sellerId = item.seller_id || item.sellerId || ''
+                        const candidate =
+                          item.sellerAvatarUrl || sellerAvatars[sellerId] || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url || ''
+                        if (candidate) {
+                          return (
                             <img
-                              src={(item.sellerAvatarUrl || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url)}
+                              src={resolveImageUrl(candidate)}
                               alt={(item.sellerName || 'Seller')}
-                              style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }}
                             />
                           )
-                          : (item.sellerName || 'S').slice(0, 1)
-                      )}
+                        }
+                        return (item.sellerName || 'S').slice(0, 1)
+                      })()}
                     </div>
                     <div>
                       <strong>{item.sellerName || 'Seller'}</strong>
