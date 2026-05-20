@@ -30,7 +30,12 @@ jwt_secret_from_env = os.getenv('JWT_SECRET')
 app_env = os.getenv(
     'APP_ENV', os.getenv('FLASK_ENV', 'development')
 ).strip().lower()
-is_production = app_env == 'production'
+is_render_host = bool(
+    os.getenv('RENDER')
+    or os.getenv('RENDER_SERVICE_ID')
+    or os.getenv('RENDER_EXTERNAL_HOSTNAME')
+)
+is_production = app_env == 'production' or is_render_host
 
 if not jwt_secret_from_env:
     if is_production:
@@ -55,7 +60,11 @@ ADDITIONAL_FRONTEND_ORIGINS = os.getenv(
 )
 CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME', '').strip()
 CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY', '').strip()
-CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET', '').strip()
+# Accept the correct key and the common Render typo as a fallback.
+CLOUDINARY_API_SECRET = os.getenv(
+    'CLOUDINARY_API_SECRET',
+    os.getenv('CLOUDINARY_API_SECRECT', ''),
+).strip()
 CLOUDINARY_UPLOAD_FOLDER = os.getenv(
     'CLOUDINARY_UPLOAD_FOLDER',
     'campus-marketplace',
@@ -79,6 +88,12 @@ if use_cloudinary and cloudinary is not None:
         api_secret=CLOUDINARY_API_SECRET,
         secure=True,
     )
+elif is_production:
+    raise RuntimeError(
+        'Cloudinary must be configured in production so uploaded images do not disappear after Render restarts.'
+    )
+
+IMAGE_STORAGE_MODE = 'cloudinary' if use_cloudinary else 'local-disk'
 
 client = MongoClient(
     MONGODB_URI,
@@ -531,6 +546,12 @@ def upload_image_to_storage(uploaded_file, folder):
             'storage': 'cloudinary',
         }, None
 
+    if is_production:
+        return None, json_error(
+            'Image uploads require Cloudinary in production. Local disk storage on Render is ephemeral.',
+            500,
+        )
+
     stored_filename = f"{uuid4().hex}-{safe_filename}"
     stored_path = UPLOAD_FOLDER / stored_filename
     uploaded_file.save(stored_path)
@@ -721,7 +742,12 @@ def build_message_thread_payload(thread_doc, current_user_id=None):
 def health_check():
     try:
         client.admin.command('ping')
-        return jsonify({'ok': True, 'database': MONGODB_DB_NAME})
+        return jsonify({
+            'ok': True,
+            'database': MONGODB_DB_NAME,
+            'imageStorage': IMAGE_STORAGE_MODE,
+            'cloudinaryConfigured': use_cloudinary,
+        })
     except Exception as exc:  # pragma: no cover - simple connection diagnostic
         return json_error(f'Database connection failed: {exc}', 500)
 
@@ -1498,4 +1524,5 @@ def create_item():
 
 
 if __name__ == '__main__':
+    print(f'Image upload storage mode: {IMAGE_STORAGE_MODE}')
     app.run(host='0.0.0.0', port=int(os.getenv('PORT', '5050')), debug=True)

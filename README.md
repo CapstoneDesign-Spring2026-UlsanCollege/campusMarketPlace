@@ -59,6 +59,19 @@ Add these environment variables to enable it:
 
 When these variables are present, image uploads are stored in Cloudinary instead of local disk.
 
+Render note: the backend treats Render as production-like, so if Cloudinary is missing there, image uploads are rejected instead of being saved to ephemeral disk.
+
+### Render checklist
+
+Use this checklist after updating the Render service:
+
+1. Confirm `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` are set.
+2. Confirm `MONGODB_URI` and `JWT_SECRET` are set.
+3. Redeploy the backend service.
+4. Open `/api/health` and verify it returns `"cloudinaryConfigured": true` and `"imageStorage": "cloudinary"`.
+5. Upload a new image and confirm the response `storage` field is `cloudinary`.
+6. Re-upload any old items or avatars that were previously stored on local disk.
+
 Install dependencies after pulling this change:
 
 ```bash
