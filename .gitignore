@@ -5,3 +5,8 @@ __pycache__/
 uploads/
 .venv/
 .env
+node_modules/
+Frontend/node_modules/
+.vite/
+dist/
+.env
