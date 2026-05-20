@@ -5,6 +5,7 @@ import { CATEGORIES, getCategoryLabel } from '../constants/categories'
 import { getAuthUser, getAuthToken } from '../services/auth'
 import { convertDisplayPriceToUsd, formatPriceFromUsd, getPriceInputMeta } from '../services/currency'
 import { API_ORIGIN } from '../services/api'
+import { t } from '../services/i18n'
 
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024
 const MAX_IMAGE_COUNT = 5
@@ -84,7 +85,7 @@ function resolveImageUrl(imageUrl) {
   return new URL(imageUrl.replace(/^\/+/, ''), `${API_ORIGIN}/`).href
 }
 
-export default function Dashboard({ currency }) {
+export default function Dashboard({ currency, language = 'en' }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [user, setUser] = useState(null)
@@ -430,13 +431,13 @@ export default function Dashboard({ currency }) {
                   aria-label="Open post composer"
                   disabled={isSubmitting || isUploading}
                 >
-                  What's on your mind?
+                  {t(language, 'dashboard.prompt')}
                 </button>
                 <button
                   className="composer-icon-button composer-camera-right"
                   type="button"
                   onClick={handleImageUpload}
-                  aria-label="Upload image"
+                  aria-label={t(language, 'dashboard.uploadImage')}
                   disabled={isUploading || isSubmitting}
                 >
                   📷
@@ -449,7 +450,7 @@ export default function Dashboard({ currency }) {
                   name="location"
                   type="text"
                   list="location-options"
-                  placeholder="Select or write a location"
+                  placeholder={t(language, 'dashboard.locationPlaceholder')}
                   value={formData.location}
                   onChange={handleFormChange}
                   className="composer-text-input"
@@ -479,7 +480,7 @@ export default function Dashboard({ currency }) {
                   onChange={handleFormChange}
                   className="composer-text-input"
                 >
-                  <option value="">Select a category</option>
+                  <option value="">{t(language, 'dashboard.selectCategory')}</option>
                   {CATEGORIES.map((c) => (
                     <option key={c} value={c}>
                       {c}
@@ -494,14 +495,14 @@ export default function Dashboard({ currency }) {
                   onChange={handleFormChange}
                   className="composer-text-input"
                 >
-                  <option value="active">Active</option>
-                  <option value="draft">Draft</option>
+                  <option value="active">{t(language, 'dashboard.active')}</option>
+                  <option value="draft">{t(language, 'dashboard.draft')}</option>
                 </select>
                 {formErrors.status && <p className="composer-feedback is-error">{formErrors.status}</p>}
 
                 <textarea
                   name="description"
-                  placeholder="Description"
+                  placeholder={t(language, 'dashboard.description')}
                   value={formData.description}
                   onChange={handleFormChange}
                   className="composer-textarea"
@@ -562,7 +563,7 @@ export default function Dashboard({ currency }) {
                   )}
                   {uploadedImages.length > 0 && (
                     <button type="button" className="composer-clear-images" onClick={clearUploadedImages}>
-                      Clear images
+                      {t(language, 'dashboard.clearImages')}
                     </button>
                   )}
                 </div>
@@ -576,7 +577,7 @@ export default function Dashboard({ currency }) {
 
               {isComposerOpen && (
                 <button className="composer-submit" type="submit" disabled={isSubmitting || isUploading}>
-                  {isSubmitting ? 'Posting...' : 'Post Item'}
+                  {isSubmitting ? t(language, 'dashboard.posting') : t(language, 'dashboard.postItem')}
                 </button>
               )}
 
@@ -597,7 +598,7 @@ export default function Dashboard({ currency }) {
           <section className="feed-post-list" aria-label="Marketplace feed posts">
             {loading ? (
               <div className="loading-state">
-                <p>Loading marketplace items...</p>
+                <p>{t(language, 'dashboard.loading')}</p>
               </div>
             ) : error ? (
               <div className="error-state">
@@ -605,7 +606,7 @@ export default function Dashboard({ currency }) {
               </div>
             ) : items.length === 0 ? (
               <div className="empty-state">
-                <p>No items available yet.</p>
+                <p>{t(language, 'dashboard.noItems')}</p>
               </div>
             ) : (
               items.map((item) => (
@@ -628,8 +629,8 @@ export default function Dashboard({ currency }) {
                       })()}
                     </div>
                     <div>
-                      <strong>{item.sellerName || 'Seller'}</strong>
-                      <p>{item.location || 'Campus'}</p>
+                      <strong>{item.sellerName || t(language, 'dashboard.seller')}</strong>
+                      <p>{item.location || t(language, 'dashboard.campus')}</p>
                     </div>
                   </header>
                   <div className="post-image">
@@ -654,17 +655,17 @@ export default function Dashboard({ currency }) {
                     <p>{item.description}</p>
                   </div>
                   <footer className="post-actions" aria-label="Post actions">
-                    <button type="button">Like</button>
-                    <button type="button">Comment</button>
+                    <button type="button">{t(language, 'dashboard.like')}</button>
+                    <button type="button">{t(language, 'dashboard.comment')}</button>
                     {currentUserId && item.status === 'active' && item.seller_id && item.seller_id !== currentUserId ? (
                       <button type="button" onClick={() => openMessageThread(item._id)}>
-                        Message seller
+                        {t(language, 'dashboard.messageSeller')}
                       </button>
                     ) : (
                       <button type="button" disabled>
                         {currentUserId
-                          ? (item.status === 'active' ? 'Your listing' : 'Messaging unavailable')
-                          : 'Loading account...'}
+                          ? (item.status === 'active' ? t(language, 'dashboard.yourListing') : t(language, 'dashboard.messagingUnavailable'))
+                          : t(language, 'dashboard.loadingAccount')}
                       </button>
                     )}
                   </footer>

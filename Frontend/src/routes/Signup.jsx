@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiRequest } from '../services/api'
 import { saveAuthSession } from '../services/auth'
+import { t } from '../services/i18n'
 
 const REQUIRED_FIELDS = ['firstName', 'lastName', 'email', 'password', 'confirmPassword']
 
@@ -90,7 +91,7 @@ function validateAll(values) {
   }, {})
 }
 
-export default function Signup({ onAuthChange }) {
+export default function Signup({ language = 'en', onAuthChange }) {
   const navigate = useNavigate()
   const [formValues, setFormValues] = useState(initialValues)
   const [errors, setErrors] = useState({})
@@ -197,9 +198,9 @@ export default function Signup({ onAuthChange }) {
   return (
     <main className="page-shell form-shell">
       <section className="panel auth-panel">
-        <p className="eyebrow">Join the campus network</p>
-        <h1>Create Account</h1>
-        <p className="subcopy">Use your official campus email and a strong password.</p>
+        <p className="eyebrow">{t(language, 'signup.join')}</p>
+        <h1>{t(language, 'signup.title')}</h1>
+        <p className="subcopy">{t(language, 'signup.subcopy')}</p>
 
         {submitStatus.message && (
           <p className={`form-message ${submitStatus.type}`} role="alert">
@@ -209,11 +210,11 @@ export default function Signup({ onAuthChange }) {
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <label className={fieldError('firstName') ? 'has-error' : ''}>
-            First Name
+            {t(language, 'signup.firstName')}
             <input
               type="text"
               name="firstName"
-              placeholder="First Name *"
+              placeholder={t(language, 'signup.firstNamePlaceholder')}
               value={formValues.firstName}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -223,11 +224,11 @@ export default function Signup({ onAuthChange }) {
           </label>
 
           <label className={fieldError('middleName') ? 'has-error' : ''}>
-            Middle Name
+            {t(language, 'signup.middleName')}
             <input
               type="text"
               name="middleName"
-              placeholder="Middle Name (Optional)"
+              placeholder={t(language, 'signup.middleNamePlaceholder')}
               value={formValues.middleName}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -237,11 +238,11 @@ export default function Signup({ onAuthChange }) {
           </label>
 
           <label className={fieldError('lastName') ? 'has-error' : ''}>
-            Last Name
+            {t(language, 'signup.lastName')}
             <input
               type="text"
               name="lastName"
-              placeholder="Last Name *"
+              placeholder={t(language, 'signup.lastNamePlaceholder')}
               value={formValues.lastName}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -251,28 +252,28 @@ export default function Signup({ onAuthChange }) {
           </label>
 
           <label className={fieldError('email') ? 'has-error' : ''}>
-            Email
+            {t(language, 'signup.email')}
             <input
               type="email"
               name="email"
-              placeholder="yourname@office.uc.ac.kr"
+              placeholder={t(language, 'signup.emailPlaceholder')}
               value={formValues.email}
               onChange={handleChange}
               onBlur={handleBlur}
               aria-invalid={Boolean(fieldError('email'))}
               autoComplete="email"
             />
-            <span className="field-hint">Must end with @office.uc.ac.kr</span>
+            <span className="field-hint">{t(language, 'signup.emailHint')}</span>
             {fieldError('email') && <span className="field-error">{fieldError('email')}</span>}
           </label>
 
           <label className={fieldError('password') ? 'has-error' : ''}>
-            Password
+            {t(language, 'signup.password')}
             <div className="input-with-action">
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
-                placeholder="Password *"
+                placeholder={t(language, 'signup.passwordPlaceholder')}
                 value={formValues.password}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -285,7 +286,7 @@ export default function Signup({ onAuthChange }) {
                 onClick={() => setShowPassword((prev) => !prev)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? 'Hide' : 'Show'}
+                {showPassword ? t(language, 'signup.hide') : t(language, 'signup.show')}
               </button>
             </div>
             {fieldError('password') && <span className="field-error">{fieldError('password')}</span>}
@@ -303,12 +304,12 @@ export default function Signup({ onAuthChange }) {
           </label>
 
           <label className={fieldError('confirmPassword') ? 'has-error' : ''}>
-            Confirm Password
+            {t(language, 'signup.confirmPassword')}
             <div className="input-with-action">
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
                 name="confirmPassword"
-                placeholder="Confirm Password *"
+                placeholder={t(language, 'signup.confirmPasswordPlaceholder')}
                 value={formValues.confirmPassword}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -321,7 +322,7 @@ export default function Signup({ onAuthChange }) {
                 onClick={() => setShowConfirmPassword((prev) => !prev)}
                 aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
               >
-                {showConfirmPassword ? 'Hide' : 'Show'}
+                {showConfirmPassword ? t(language, 'signup.hide') : t(language, 'signup.show')}
               </button>
             </div>
             {fieldError('confirmPassword') && (
@@ -330,7 +331,7 @@ export default function Signup({ onAuthChange }) {
           </label>
 
           <button className="button button-primary" type="submit" disabled={isLoading}>
-            {isLoading ? 'Creating account…' : 'Sign Up'}
+            {isLoading ? t(language, 'signup.creatingAccount') : t(language, 'signup.createAccount')}
           </button>
         </form>
       </section>
