@@ -10,3 +10,16 @@ Frontend/node_modules/
 .vite/
 dist/
 .env
+# dependencies
+node_modules/
+Frontend/node_modules/
+
+# vite build cache
+.vite/
+Frontend/.vite/
+
+# environment files
+.env
+
+# build output
+dist/
