@@ -38,9 +38,62 @@ function resolveImageUrl(image) {
   return new URL(image.replace(/^\/+/, ''), `${API_ORIGIN}/`).href
 }
 
+function formatPostedTime(value) {
+  if (!value) {
+    return 'Recently'
+  }
+
+  const createdAt = new Date(value)
+  if (Number.isNaN(createdAt.getTime())) {
+    return 'Recently'
+  }
+
+  const diffHours = Math.max(1, Math.round((Date.now() - createdAt.getTime()) / (1000 * 60 * 60)))
+  if (diffHours < 24) {
+    return `${diffHours}h ago`
+  }
+
+  return `${Math.max(1, Math.round(diffHours / 24))}d ago`
+}
+
+function getConditionLabel(item) {
+  const raw = item?.condition || item?.itemCondition || item?.state || ''
+  const normalized = String(raw).trim()
+
+  if (normalized) {
+    return normalized
+  }
+
+  if (item?.status === 'sold') {
+    return 'Popular'
+  }
+
+  return 'Like New'
+}
+
+function getConditionTone(label) {
+  const normalized = String(label).toLowerCase()
+
+  if (normalized.includes('popular') || normalized.includes('hot')) {
+    return 'is-popular'
+  }
+
+  if (normalized.includes('like') || normalized.includes('new')) {
+    return 'is-hot'
+  }
+
+  return ''
+}
+
 export default function ItemCard({ item, currency, language = 'en' }) {
   const imageSrc = resolveImageUrl(getPrimaryImageValue(item))
   const formattedPrice = formatPriceFromUsd(item.price, currency)
+  const originalPriceValue = Number(item?.originalPrice ?? item?.compareAtPrice ?? item?.listPrice ?? item?.previousPrice)
+  const hasOriginalPrice = Number.isFinite(originalPriceValue) && originalPriceValue > Number(item.price)
+  const locationLabel = item?.location || 'Campus'
+  const sellerVerified = Boolean(item?.seller_verified || item?.sellerVerified)
+  const conditionLabel = getConditionLabel(item)
+  const conditionTone = getConditionTone(conditionLabel)
 
   return (
     <article className="item-card">
@@ -56,17 +109,29 @@ export default function ItemCard({ item, currency, language = 'en' }) {
             <span>{item.category?.slice(0, 1)?.toUpperCase() || 'I'}</span>
           </div>
         )}
+        <button className="favorite-button" type="button" aria-label={`Save ${item.title}`}>
+          ♡
+        </button>
       </div>
 
       <div className="item-card-body">
         <div className="item-card-topline">
           <span className="item-category">{item.category}</span>
-          <span className="item-price">{formattedPrice}</span>
+          <span className="item-posted">{formatPostedTime(item.createdAt)}</span>
         </div>
         <h2 className="item-title">{item.title}</h2>
-        <div className="item-seller-row" style={{display: 'flex', gap: 8, alignItems: 'center'}}>
+        <div className="listing-price-row">
+          <span className="item-price">{formattedPrice}</span>
+          {hasOriginalPrice ? <span className="item-original-price">{formatPriceFromUsd(originalPriceValue, currency)}</span> : null}
+        </div>
+        <div className="listing-meta">
+          <span className={`item-condition ${conditionTone}`}>{conditionLabel}</span>
+          <span className="item-location">{locationLabel}</span>
+        </div>
+        <div className="item-seller-row">
           <Avatar src={item.sellerAvatarUrl || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url} alt={item.sellerName || 'Seller'} size={36} />
-          <p className="item-seller" style={{margin: 0}}>{t(language, 'browse.soldBy')} {item.sellerName}</p>
+          <p className="item-seller">{t(language, 'browse.soldBy')} {item.sellerName}</p>
+          {sellerVerified ? <span className="badge badge-default">Verified</span> : null}
         </div>
       </div>
     </article>

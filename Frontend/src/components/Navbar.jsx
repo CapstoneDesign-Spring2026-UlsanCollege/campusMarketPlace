@@ -22,12 +22,34 @@ export default function Navbar({
   const location = useLocation()
   const navigate = useNavigate()
   const isDashboard = location.pathname === '/dashboard'
+  const dashboardMode = location.state?.mode
   // Show the authenticated (dashboard-style) nav when user is signed in
   const showAuthNav = isDashboard || isAuthenticated
   const [showSignOutModal, setShowSignOutModal] = useState(false)
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false)
   const [searchMenuOpen, setSearchMenuOpen] = useState(false)
   const currentLangLabel = LANGUAGE_OPTIONS.find((o) => o.value === language)?.label || language
+
+  const isDashboardHomeActive = isDashboard && !dashboardMode
+  const isBuyActive = isDashboard && dashboardMode === 'buy'
+  const isSellActive = isDashboard && dashboardMode === 'sell'
+  const isHomeActive = (!isAuthenticated && location.pathname === '/') || isDashboardHomeActive
+  const isMessagesActive = location.pathname === '/messages'
+  const isProfileActive = location.pathname === '/profile'
+  const isLoginActive = location.pathname === '/login'
+  const isSignupActive = location.pathname === '/signup'
+
+  const iconLabels = {
+    home: '⌂',
+    search: '⌕',
+    messages: '✉',
+    buy: '◌',
+    sell: '+',
+    profile: '◍',
+    login: '↪',
+    signup: '＋',
+    signout: '⇢',
+  }
 
   function handleHome() {
     if (isDashboard) {
@@ -83,116 +105,131 @@ export default function Navbar({
     setLanguageMenuOpen((s) => !s)
   }
 
+  function renderLabeledContent(icon, label) {
+    return (
+      <>
+        <span className="nav-action-icon" aria-hidden="true">{icon}</span>
+        <span className="nav-action-label">{label}</span>
+      </>
+    )
+  }
+
+  function renderActionButton({ className = 'nav-pill', icon, label, onClick, active = false }) {
+    return (
+      <button className={`${className}${active ? ' is-active' : ''}`} type="button" onClick={onClick} aria-label={label} aria-current={active ? 'page' : undefined}>
+        {renderLabeledContent(icon, label)}
+      </button>
+    )
+  }
+
+  function renderActionLink({ to, end, icon, label }) {
+    return (
+      <NavLink to={to} end={end} aria-label={label} className={({ isActive }) => `nav-link-item${isActive ? ' is-active' : ''}`}>
+        {renderLabeledContent(icon, label)}
+      </NavLink>
+    )
+  }
+
+  function renderPrimaryActions() {
+    return (
+      <>
+        {showAuthNav ? (
+          <>
+            {renderActionButton({ className: 'nav-pill', icon: iconLabels.home, label: t(language, 'navbar.home'), onClick: handleHome, active: isHomeActive })}
+            {renderActionButton({ className: 'nav-pill', icon: iconLabels.search, label: t(language, 'navbar.search'), onClick: handleSearch })}
+            {searchMenuOpen && (
+              <div className="search-menu" role="menu" aria-label="Quick categories">
+                {CATEGORIES.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className="currency-menu-item"
+                    onClick={() => {
+                      setSearchMenuOpen(false)
+                      navigate(`/browse?category=${encodeURIComponent(s)}`)
+                    }}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+            {isAuthenticated && (
+              renderActionButton({ className: 'nav-pill', icon: iconLabels.messages, label: t(language, 'navbar.messages'), onClick: () => navigate('/messages'), active: isMessagesActive })
+            )}
+            {renderActionButton({ className: 'nav-pill', icon: iconLabels.buy, label: t(language, 'navbar.buy'), onClick: () => navigate('/dashboard', { state: { mode: 'buy' } }), active: isBuyActive })}
+            {renderActionButton({ className: 'nav-pill', icon: iconLabels.sell, label: t(language, 'navbar.sell'), onClick: () => navigate('/dashboard', { state: { mode: 'sell' } }), active: isSellActive })}
+            {isAuthenticated && (
+              <button className={`nav-pill nav-profile-pill${isProfileActive ? ' is-active' : ''}`} type="button" onClick={handleProfile} aria-label={t(language, 'navbar.profile')} aria-current={isProfileActive ? 'page' : undefined}>
+                <Avatar src={authUser?.avatarUrl || authUser?.avatar} alt={authUser?.firstName || 'You'} size={28} />
+                <span className="nav-action-label">{t(language, 'navbar.profile')}</span>
+              </button>
+            )}
+            {renderActionButton({ className: 'nav-signout', icon: iconLabels.signout, label: t(language, 'navbar.signOut'), onClick: handleSignOut })}
+          </>
+        ) : (
+          <>
+            {renderActionLink({ to: '/', end: true, icon: iconLabels.home, label: t(language, 'navbar.home') })}
+            {isAuthenticated ? renderActionLink({ to: '/profile', icon: iconLabels.profile, label: t(language, 'navbar.profile') }) : renderActionLink({ to: '/login', icon: iconLabels.login, label: 'Login' })}
+            {!isAuthenticated ? renderActionLink({ to: '/signup', icon: iconLabels.signup, label: 'Sign Up' }) : null}
+            {isAuthenticated ? (
+              renderActionButton({ className: 'nav-signout', icon: iconLabels.signout, label: t(language, 'navbar.signOut'), onClick: handleSignOut })
+            ) : null}
+          </>
+        )}
+      </>
+    )
+  }
+
   return (
     <>
       <header className="topbar">
         <div className="brand-row" style={{ position: 'relative' }}>
           <Link className="brand" to="/">
-            UC Marketplace
+            UC Market
           </Link>
           <nav className="nav-links" aria-label="Primary">
-              <div className="currency-hamburger-wrapper" style={{position: 'absolute', right: 12, top: 12, display: 'flex', alignItems: 'center', gap: 8}}>
-                <button
-                  className="currency-hamburger"
-                  aria-label={t(language, 'navbar.language')}
-                  type="button"
-                  onClick={toggleLanguageMenu}
-                >
-                  <span aria-hidden style={{display: 'inline-block', marginRight: 6, fontSize: '0.82rem', fontWeight: 600}}>{t(language, 'navbar.language')}</span>
-                  <span aria-hidden style={{display: 'inline-flex', flexDirection: 'column', gap: 3}}>
-                    <span style={{display: 'block', width: 14, height: 2, background: 'currentColor'}} />
-                    <span style={{display: 'block', width: 14, height: 2, background: 'currentColor'}} />
-                    <span style={{display: 'block', width: 14, height: 2, background: 'currentColor'}} />
-                  </span>
-                </button>
-                <div className="language-indicator" aria-hidden style={{fontSize: '0.82rem', fontWeight: 600}}>{currentLangLabel}</div>
-
-                  {languageMenuOpen && (
-                  <div
-                    className="currency-menu"
-                    role="menu"
-                    aria-label={t(language, 'navbar.language')}
-                  >
-                    <div className="menu-section">
-                      <div className="menu-section-title">{t(language, 'navbar.language')}</div>
-                      {LANGUAGE_OPTIONS.map((option) => (
-                        <button
-                          key={option.value}
-                          className="currency-menu-item"
-                          type="button"
-                          onClick={() => handleLanguageSelect(option.value)}
-                          aria-pressed={language === option.value}
-                        >
-                          {option.label}
-                          {option.description ? ` (${option.description})` : ''}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+            <div className="currency-hamburger-wrapper">
+              <button
+                className="currency-hamburger"
+                aria-label={t(language, 'navbar.language')}
+                type="button"
+                onClick={toggleLanguageMenu}
+              >
+                <span aria-hidden style={{ display: 'inline-flex', flexDirection: 'column', gap: 3 }}>
+                  <span style={{ display: 'block', width: 14, height: 2, background: 'currentColor' }} />
+                  <span style={{ display: 'block', width: 14, height: 2, background: 'currentColor' }} />
+                  <span style={{ display: 'block', width: 14, height: 2, background: 'currentColor' }} />
+                </span>
+              </button>
+              <div className="language-indicator" aria-hidden>
+                {currentLangLabel}
               </div>
-            {showAuthNav ? (
-              <>
-                <button className="nav-pill" type="button" onClick={handleHome}>
-                  {t(language, 'navbar.home')}
-                </button>
-                <button className="nav-pill" type="button" onClick={handleSearch}>
-                  {t(language, 'navbar.search')}
-                </button>
-                {searchMenuOpen && (
-                  <div className="search-menu" role="menu" aria-label="Quick categories">
-                    {CATEGORIES.map((s) => (
+
+              {languageMenuOpen && (
+                <div className="currency-menu" role="menu" aria-label={t(language, 'navbar.language')}>
+                  <div className="menu-section">
+                    <div className="menu-section-title">{t(language, 'navbar.language')}</div>
+                    {LANGUAGE_OPTIONS.map((option) => (
                       <button
-                        key={s}
-                        type="button"
+                        key={option.value}
                         className="currency-menu-item"
-                        onClick={() => {
-                          setSearchMenuOpen(false)
-                          navigate(`/browse?category=${encodeURIComponent(s)}`)
-                        }}
+                        type="button"
+                        onClick={() => handleLanguageSelect(option.value)}
+                        aria-pressed={language === option.value}
                       >
-                        {s}
+                        {option.label}
+                        {option.description ? ` (${option.description})` : ''}
                       </button>
                     ))}
                   </div>
-                )}
-                {isAuthenticated && (
-                  <button className="nav-pill" type="button" onClick={() => navigate('/messages')}>
-                    {t(language, 'navbar.messages')}
-                  </button>
-                )}
-                <button className="nav-pill" type="button" onClick={() => navigate('/dashboard', { state: { mode: 'buy' } })}>
-                  {t(language, 'navbar.buy')}
-                </button>
-                <button className="nav-pill" type="button" onClick={() => navigate('/dashboard', { state: { mode: 'sell' } })}>
-                  {t(language, 'navbar.sell')}
-                </button>
-                {isAuthenticated && (
-                  <button className="nav-pill" type="button" onClick={handleProfile} style={{display: 'flex', alignItems: 'center', gap: 8}}>
-                    <Avatar src={authUser?.avatarUrl || authUser?.avatar} alt={authUser?.firstName || 'You'} size={28} />
-                    {t(language, 'navbar.profile')}
-                  </button>
-                )}
-                <button className="nav-signout" type="button" onClick={handleSignOut}>
-                  {t(language, 'navbar.signOut')}
-                </button>
-              </>
-            ) : (
-              <>
-                <NavLink to="/" end>
-                  {t(language, 'navbar.home')}
-                </NavLink>
-                {isAuthenticated ? <NavLink to="/profile">{t(language, 'navbar.profile')}</NavLink> : <NavLink to="/login">Login</NavLink>}
-                {!isAuthenticated ? <NavLink to="/signup">Sign Up</NavLink> : null}
-                {isAuthenticated ? (
-                  <button className="nav-signout" type="button" onClick={handleSignOut}>
-                    {t(language, 'navbar.signOut')}
-                  </button>
-                ) : null}
-              </>
-            )}
+                </div>
+              )}
+            </div>
+            {renderPrimaryActions()}
           </nav>
         </div>
+
       </header>
 
       {showSignOutModal && (

@@ -17,7 +17,21 @@ export default function Avatar({ src, alt = 'User', size = 40, className = '' })
 
   const initial = (alt || 'U').slice(0, 1).toUpperCase()
   return (
-    <div className={`avatar avatar-initial ${className}`} style={{ ...style, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: '#ddd', color: '#333' }}>
+    <div
+      className={`avatar avatar-initial ${className}`}
+      style={{
+        ...style,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#ddd',
+        color: '#333',
+        fontSize: Math.max(12, Math.round(size * 0.42)),
+        fontWeight: 800,
+        lineHeight: 1,
+        flexShrink: 0,
+      }}
+    >
       {initial}
     </div>
   )
