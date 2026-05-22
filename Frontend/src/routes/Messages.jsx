@@ -39,6 +39,7 @@ export default function Messages({ language = 'en' }) {
   const bottomRef = useRef(null)
 
   const itemId = searchParams.get('item') || ''
+  const draftFromItem = searchParams.get('draft') || ''
 
   const user = useMemo(() => {
     return getAuthUser()
@@ -81,6 +82,9 @@ export default function Messages({ language = 'en' }) {
             return
           }
           setMessages(Array.isArray(threadMessages?.messages) ? threadMessages.messages : [])
+          if (draftFromItem) {
+            setDraft(draftFromItem)
+          }
           // mark as read for the current user so unread count updates
           try {
             await markThreadRead(nextThread._id)
@@ -108,7 +112,7 @@ export default function Messages({ language = 'en' }) {
     return () => {
       isActive = false
     }
-  }, [navigate, itemId])
+  }, [navigate, itemId, draftFromItem])
 
   useEffect(() => {
     if (!activeThreadId) {
