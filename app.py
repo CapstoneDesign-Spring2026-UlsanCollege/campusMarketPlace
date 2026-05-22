@@ -502,7 +502,14 @@ allowed_origins.extend(
         if origin.strip()
     ]
 )
-CORS(app, resources={r'/api/*': {'origins': allowed_origins}})
+# For development, enable permissive CORS so local frontend dev servers
+# (different ports/hosts like localhost vs 127.0.0.1) can interact without
+# failing preflight checks. In production we continue to restrict to
+# configured frontend origins.
+if is_production:
+    CORS(app, resources={r'/api/*': {'origins': allowed_origins}})
+else:
+    CORS(app, resources={r'/api/*': {'origins': '*'}})
 
 
 def json_error(message, status_code):

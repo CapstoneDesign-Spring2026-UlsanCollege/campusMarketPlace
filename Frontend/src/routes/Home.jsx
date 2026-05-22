@@ -2,6 +2,18 @@ import { Link } from 'react-router-dom'
 import { t } from '../services/i18n'
 
 const features = ['feature1', 'feature2', 'feature3']
+const highlights = [
+  { label: 'Verified students', value: '100%' },
+  { label: 'Campus-safe trades', value: '24/7' },
+  { label: 'Live deal alerts', value: 'Fast' },
+]
+
+const spotlightCategories = [
+  { label: 'Textbooks', tone: 'lavender', icon: '📚' },
+  { label: 'Electronics', tone: 'blue', icon: '💻' },
+  { label: 'Dorm Deals', tone: 'peach', icon: '🛋️' },
+  { label: 'Bikes', tone: 'yellow', icon: '🚲' },
+]
 
 export default function Home({ language = 'en' }) {
   return (
@@ -20,8 +32,42 @@ export default function Home({ language = 'en' }) {
           ))}
         </div>
 
+        <div className="hero-stat-grid" aria-label="Marketplace highlights">
+          {highlights.map((item) => (
+            <article className="hero-stat-card" key={item.label}>
+              <span className="hero-stat-label">{item.label}</span>
+              <strong className="hero-stat-value">{item.value}</strong>
+            </article>
+          ))}
+        </div>
+
+        <div className="category-grid" aria-label="Popular student categories">
+          {spotlightCategories.map((category) => (
+            <article key={category.label} className={`category-card ${category.tone}`}>
+              <div className="category-card-icon" aria-hidden="true">{category.icon}</div>
+              <strong>{category.label}</strong>
+              <span className="subcopy">Browse trusted campus listings in a cleaner, calmer experience.</span>
+            </article>
+          ))}
+        </div>
+
+        <div className="trust-grid" aria-label="Trust and safety highlights">
+          <article className="trust-card">
+            <strong>Verified student-only access</strong>
+            <p className="subcopy">Campus accounts keep the marketplace safer and more relevant.</p>
+          </article>
+          <article className="trust-card">
+            <strong>On-campus meetups</strong>
+            <p className="subcopy">Trade in familiar places with clear pickup guidance.</p>
+          </article>
+          <article className="trust-card">
+            <strong>Fast mobile checkout flow</strong>
+            <p className="subcopy">Start from anywhere and keep the browsing experience fluid.</p>
+          </article>
+        </div>
+
         <div className="hero-actions">
-          <Link className="button button-primary" to="/signup">
+          <Link className="button button-primary home-cta-primary" to="/signup">
             {t(language, 'home.getStarted')}
           </Link>
           <Link className="button button-secondary" to="/login">

@@ -210,7 +210,7 @@ export default function Signup({ language = 'en', onAuthChange }) {
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <label className={fieldError('firstName') ? 'has-error' : ''}>
-            {t(language, 'signup.firstName')}
+            <span className="label-text">{t(language, 'signup.firstName')}</span>
             <input
               type="text"
               name="firstName"
@@ -224,7 +224,7 @@ export default function Signup({ language = 'en', onAuthChange }) {
           </label>
 
           <label className={fieldError('middleName') ? 'has-error' : ''}>
-            {t(language, 'signup.middleName')}
+            <span className="label-text">{t(language, 'signup.middleName')}</span>
             <input
               type="text"
               name="middleName"
@@ -238,7 +238,7 @@ export default function Signup({ language = 'en', onAuthChange }) {
           </label>
 
           <label className={fieldError('lastName') ? 'has-error' : ''}>
-            {t(language, 'signup.lastName')}
+            <span className="label-text">{t(language, 'signup.lastName')}</span>
             <input
               type="text"
               name="lastName"
@@ -252,7 +252,7 @@ export default function Signup({ language = 'en', onAuthChange }) {
           </label>
 
           <label className={fieldError('email') ? 'has-error' : ''}>
-            {t(language, 'signup.email')}
+            <span className="label-text">{t(language, 'signup.email')}</span>
             <input
               type="email"
               name="email"
@@ -268,7 +268,7 @@ export default function Signup({ language = 'en', onAuthChange }) {
           </label>
 
           <label className={fieldError('password') ? 'has-error' : ''}>
-            {t(language, 'signup.password')}
+            <span className="label-text">{t(language, 'signup.password')}</span>
             <div className="input-with-action">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -292,7 +292,10 @@ export default function Signup({ language = 'en', onAuthChange }) {
             {fieldError('password') && <span className="field-error">{fieldError('password')}</span>}
 
             <div className="password-meter" aria-hidden="true">
-              <div className="password-meter-bar" style={{ width: `${strengthPercent}%` }} />
+              <div
+                className="password-meter-cover"
+                style={{ width: `${100 - strengthPercent}%` }}
+              />
             </div>
             <ul className="password-rules" aria-label="Password requirements">
               {PASSWORD_RULES.map((rule) => (
@@ -304,7 +307,7 @@ export default function Signup({ language = 'en', onAuthChange }) {
           </label>
 
           <label className={fieldError('confirmPassword') ? 'has-error' : ''}>
-            {t(language, 'signup.confirmPassword')}
+            <span className="label-text">{t(language, 'signup.confirmPassword')}</span>
             <div className="input-with-action">
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
