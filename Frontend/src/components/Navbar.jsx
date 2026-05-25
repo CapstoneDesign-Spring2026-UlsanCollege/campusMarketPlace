@@ -52,7 +52,12 @@ export default function Navbar({
         <path d="M2 20c0-3.314 4.686-6 10-6s10 2.686 10 6v1H2v-1z" fill="currentColor"/>
       </svg>
     ),
-    signup: '＋',
+    signup: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+        <rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" opacity="0.06" />
+        <path d="M12 8v8M8 12h8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
     signout: '⇢',
   }
 
