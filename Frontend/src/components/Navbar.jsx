@@ -46,7 +46,12 @@ export default function Navbar({
     buy: '◌',
     sell: '+',
     profile: '◍',
-    login: '👤',
+    login: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+        <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5z" fill="currentColor"/>
+        <path d="M2 20c0-3.314 4.686-6 10-6s10 2.686 10 6v1H2v-1z" fill="currentColor"/>
+      </svg>
+    ),
     signup: '＋',
     signout: '⇢',
   }
