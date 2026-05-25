@@ -113,6 +113,14 @@ img { display: block; max-width: 100%; }
   border-color: rgba(0, 87, 102, 0.32);
   box-shadow: 0 18px 38px rgba(0, 87, 102, 0.18);
 }
+.nav-links a.signin, .nav-links a[href*="#/login"], .nav-signin {
+  /* Make topbar Sign In use the same prominent gradient as primary CTAs */
+  background: linear-gradient(135deg, var(--primary) 0%, #17894f 100%);
+  color: #fff; border-color: transparent; box-shadow: 0 12px 28px rgba(12,109,63,0.22);
+}
+.nav-links a.signin:hover, .nav-links a[href*="#/login"]:hover, .nav-signin:hover {
+  transform: translateY(-1px); box-shadow: 0 18px 38px rgba(12,109,63,0.3);
+}
 .nav-signout {
   border-color: rgba(220, 38, 38, 0.16);
   color: #b42318;
