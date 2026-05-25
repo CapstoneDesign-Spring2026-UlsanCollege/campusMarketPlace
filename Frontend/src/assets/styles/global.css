@@ -123,17 +123,17 @@ img { display: block; max-width: 100%; }
 }
 
 /* Make the hero's secondary Sign In button match the primary CTA */
-.hero-actions .button-secondary[href*="#/login"],
-.hero-actions a.button-secondary[href*="#/login"] {
-  background: linear-gradient(135deg, var(--primary) 0%, #17894f 100%);
-  color: #fff;
-  border-color: transparent;
-  box-shadow: 0 16px 36px rgba(12,109,63,0.28);
+.hero-actions .button.button-secondary[href*="#/login"],
+.hero-actions a.button.button-secondary[href*="#/login"] {
+  background: linear-gradient(135deg, var(--primary) 0%, #17894f 100%) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 16px 36px rgba(12,109,63,0.28) !important;
 }
-.hero-actions .button-secondary[href*="#/login"]:hover,
-.hero-actions a.button-secondary[href*="#/login"]:hover {
-  box-shadow: 0 20px 44px rgba(12,109,63,0.32);
-  transform: translateY(-1px);
+.hero-actions .button.button-secondary[href*="#/login"]:hover,
+.hero-actions a.button.button-secondary[href*="#/login"]:hover {
+  box-shadow: 0 20px 44px rgba(12,109,63,0.32) !important;
+  transform: translateY(-1px) !important;
 }
 .nav-signout {
   border-color: rgba(220, 38, 38, 0.16);
