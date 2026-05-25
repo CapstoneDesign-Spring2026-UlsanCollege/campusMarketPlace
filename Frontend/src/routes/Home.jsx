@@ -12,8 +12,18 @@ const spotlightCategories = [
   { label: 'Textbooks', tone: 'lavender', icon: '📚' },
   { label: 'Electronics', tone: 'blue', icon: '💻' },
   { label: 'Dorm Deals', tone: 'peach', icon: '🛋️' },
-  { label: 'Bikes', tone: 'yellow', icon: '🚲' },
+  { label: 'Tutor', tone: 'yellow', icon: '🎓' },
 ]
+
+function fallbackIcon(label) {
+  const map = {
+    Textbooks: '📚',
+    Electronics: '💻',
+    'Dorm Deals': '🛋️',
+    Tutor: '🎓',
+  }
+  return map[label] || '📦'
+}
 
 export default function Home({ language = 'en' }) {
   return (
@@ -44,7 +54,7 @@ export default function Home({ language = 'en' }) {
         <div className="category-grid" aria-label="Popular student categories">
           {spotlightCategories.map((category) => (
             <article key={category.label} className={`category-card ${category.tone}`}>
-              <div className="category-card-icon" aria-hidden="true">{category.icon}</div>
+              <div className="category-card-icon" aria-hidden="true">{category.icon || fallbackIcon(category.label)}</div>
               <strong>{category.label}</strong>
               <span className="subcopy">Browse trusted campus listings in a cleaner, calmer experience.</span>
             </article>
