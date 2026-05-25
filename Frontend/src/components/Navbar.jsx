@@ -122,10 +122,10 @@ export default function Navbar({
     )
   }
 
-  function renderActionLink({ to, end, icon, label }) {
+  function renderActionLink({ to, end, icon, label, noIcon = false }) {
     return (
       <NavLink to={to} end={end} aria-label={label} className={({ isActive }) => `nav-link-item${isActive ? ' is-active' : ''}`}>
-        {renderLabeledContent(icon, label)}
+        {noIcon ? <span className="nav-action-label">{label}</span> : renderLabeledContent(icon, label)}
       </NavLink>
     )
   }
@@ -170,8 +170,8 @@ export default function Navbar({
         ) : (
           <>
             {renderActionLink({ to: '/', end: true, icon: iconLabels.home, label: t(language, 'navbar.home') })}
-            {isAuthenticated ? renderActionLink({ to: '/profile', icon: iconLabels.profile, label: t(language, 'navbar.profile') }) : renderActionLink({ to: '/login', icon: iconLabels.login, label: 'Login' })}
-            {!isAuthenticated ? renderActionLink({ to: '/signup', icon: iconLabels.signup, label: 'Sign Up' }) : null}
+            {isAuthenticated ? renderActionLink({ to: '/profile', icon: iconLabels.profile, label: t(language, 'navbar.profile') }) : renderActionLink({ to: '/login', icon: iconLabels.login, label: 'Login', noIcon: true })}
+            {!isAuthenticated ? renderActionLink({ to: '/signup', icon: iconLabels.signup, label: 'Sign Up', noIcon: true }) : null}
             {isAuthenticated ? (
               renderActionButton({ className: 'nav-signout', icon: iconLabels.signout, label: t(language, 'navbar.signOut'), onClick: handleSignOut })
             ) : null}
