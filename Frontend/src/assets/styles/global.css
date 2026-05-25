@@ -121,6 +121,20 @@ img { display: block; max-width: 100%; }
 .nav-links a.signin:hover, .nav-links a[href*="#/login"]:hover, .nav-signin:hover {
   transform: translateY(-1px); box-shadow: 0 18px 38px rgba(12,109,63,0.3);
 }
+
+/* Make the hero's secondary Sign In button match the primary CTA */
+.hero-actions .button-secondary[href*="#/login"],
+.hero-actions a.button-secondary[href*="#/login"] {
+  background: linear-gradient(135deg, var(--primary) 0%, #17894f 100%);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 16px 36px rgba(12,109,63,0.28);
+}
+.hero-actions .button-secondary[href*="#/login"]:hover,
+.hero-actions a.button-secondary[href*="#/login"]:hover {
+  box-shadow: 0 20px 44px rgba(12,109,63,0.32);
+  transform: translateY(-1px);
+}
 .nav-signout {
   border-color: rgba(220, 38, 38, 0.16);
   color: #b42318;
