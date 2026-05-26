@@ -30,7 +30,7 @@ export default function Navbar({
   const [searchMenuOpen, setSearchMenuOpen] = useState(false)
   const currentLangLabel = LANGUAGE_OPTIONS.find((o) => o.value === language)?.label || language
 
-  const isDashboardHomeActive = isDashboard && !dashboardMode
+  const isDashboardHomeActive = isDashboard && (!dashboardMode || dashboardMode === 'home')
   const isBuyActive = isDashboard && dashboardMode === 'buy'
   const isSellActive = isDashboard && dashboardMode === 'sell'
   const isHomeActive = (!isAuthenticated && location.pathname === '/') || isDashboardHomeActive
@@ -62,15 +62,10 @@ export default function Navbar({
   }
 
   function handleHome() {
-    if (isDashboard) {
-      window.location.reload()
-      return
-    }
-
     // If the user is authenticated, keep them inside the authenticated
     // dashboard experience and show the full marketplace (home mode).
     if (isAuthenticated) {
-      navigate('/dashboard', { state: { mode: 'home' } })
+      navigate('/dashboard', { replace: isDashboard, state: { mode: 'home' } })
       return
     }
 
