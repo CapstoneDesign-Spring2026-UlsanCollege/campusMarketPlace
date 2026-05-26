@@ -145,7 +145,7 @@ export default function Navbar({
       <>
         {showAuthNav ? (
           <>
-            {renderActionButton({ className: 'nav-pill', icon: iconLabels.home, label: t(language, 'navbar.home'), onClick: handleHome, active: isHomeActive })}
+            {renderActionButton({ className: 'nav-pill nav-pill-home', icon: iconLabels.home, label: t(language, 'navbar.home'), onClick: handleHome, active: isHomeActive })}
             {renderActionButton({ className: 'nav-pill', icon: iconLabels.search, label: t(language, 'navbar.search'), onClick: handleSearch })}
             {searchMenuOpen && (
               <div className="search-menu" role="menu" aria-label="Quick categories">
@@ -168,7 +168,7 @@ export default function Navbar({
               renderActionButton({ className: 'nav-pill', icon: iconLabels.messages, label: t(language, 'navbar.messages'), onClick: () => navigate('/messages'), active: isMessagesActive })
             )}
             {renderActionButton({ className: 'nav-pill', icon: iconLabels.buy, label: t(language, 'navbar.buy'), onClick: () => navigate('/dashboard', { state: { mode: 'buy' } }), active: isBuyActive })}
-            {renderActionButton({ className: 'nav-pill', icon: iconLabels.sell, label: t(language, 'navbar.sell'), onClick: () => navigate('/dashboard', { state: { mode: 'sell' } }), active: isSellActive })}
+            {renderActionButton({ className: 'nav-pill nav-pill-sell', icon: iconLabels.sell, label: t(language, 'navbar.sell'), onClick: () => navigate('/dashboard', { state: { mode: 'sell' } }), active: isSellActive })}
             {isAuthenticated && (
               <button className={`nav-pill nav-profile-pill${isProfileActive ? ' is-active' : ''}`} type="button" onClick={handleProfile} aria-label={t(language, 'navbar.profile')} aria-current={isProfileActive ? 'page' : undefined}>
                 <Avatar src={authUser?.avatarUrl || authUser?.avatar} alt={authUser?.firstName || 'You'} size={28} />

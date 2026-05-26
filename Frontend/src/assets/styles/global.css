@@ -118,6 +118,10 @@ img { display: block; max-width: 100%; }
 .nav-links a[href*="#/signup"],
 .nav-links a[href="#/"],
 .nav-links a[href$="#/"],
+.nav-pill.nav-pill-home,
+.nav-pill.nav-pill-sell,
+.nav-pill.nav-pill-home.is-active,
+.nav-pill.nav-pill-sell.is-active,
 .nav-signin {
   /* Make topbar Sign In use the same prominent gradient as primary CTAs */
   background: linear-gradient(135deg, var(--primary) 0%, #17894f 100%);
@@ -128,6 +132,8 @@ img { display: block; max-width: 100%; }
 .nav-links a[href*="#/signup"]:hover,
 .nav-links a[href="#/"]:hover,
 .nav-links a[href$="#/"]:hover,
+.nav-pill.nav-pill-home:hover,
+.nav-pill.nav-pill-sell:hover,
 .nav-signin:hover {
   transform: translateY(-1px); box-shadow: 0 18px 38px rgba(12,109,63,0.3);
 }
