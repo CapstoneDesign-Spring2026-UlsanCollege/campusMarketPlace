@@ -142,9 +142,9 @@ export default function Navbar({
     )
   }
 
-  function renderActionButton({ className = 'nav-pill', icon, label, onClick, active = false }) {
+  function renderActionButton({ className = 'nav-pill', icon, label, ariaLabel = label, onClick, active = false }) {
     return (
-      <button className={`${className}${active ? ' is-active' : ''}`} type="button" onClick={onClick} aria-label={label} aria-current={active ? 'page' : undefined}>
+      <button className={`${className}${active ? ' is-active' : ''}`} type="button" onClick={onClick} aria-label={ariaLabel} aria-current={active ? 'page' : undefined}>
         {renderLabeledContent(icon, label)}
       </button>
     )
@@ -164,7 +164,18 @@ export default function Navbar({
         {showAuthNav ? (
           <>
             {renderActionButton({ className: 'nav-pill nav-pill-home', icon: iconLabels.home, label: t(language, 'navbar.home'), onClick: handleHome, active: isHomeActive })}
-            {renderActionButton({ className: 'nav-pill', icon: iconLabels.search, label: t(language, 'navbar.search'), onClick: handleSearch })}
+            {renderActionButton({
+              className: 'nav-pill',
+              icon: iconLabels.search,
+              ariaLabel: t(language, 'navbar.search'),
+              label: isAuthenticated ? (
+                <>
+                  <span>{t(language, 'navbar.search')}</span>
+                  <span className="nav-search-badge">{t(language, 'home.eyebrow')}</span>
+                </>
+              ) : t(language, 'navbar.search'),
+              onClick: handleSearch,
+            })}
             {searchMenuOpen && (
               <div className="search-menu" role="menu" aria-label="Quick categories">
                 {CATEGORIES.map((s) => (

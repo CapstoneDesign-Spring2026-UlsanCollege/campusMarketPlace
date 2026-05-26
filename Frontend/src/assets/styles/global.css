@@ -151,6 +151,20 @@ img { display: block; max-width: 100%; }
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 244, 244, 0.98) 100%);
 }
 .nav-pill { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; }
+.nav-search-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.55rem;
+  padding: 0.24rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary-strong);
+  background: var(--primary-soft);
+  border: 1px solid rgba(0, 87, 102, 0.18);
+}
 .nav-action-icon {
   display: none; align-items: center; justify-content: center; width: 1.55rem; height: 1.55rem;
   border-radius: 999px; font-size: 0.95rem; line-height: 1; color: #475569;
