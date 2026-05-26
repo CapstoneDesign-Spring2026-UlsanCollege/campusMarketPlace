@@ -19,6 +19,7 @@ const LANGUAGE_STORAGE_KEY = 'campusMarketplaceLanguage'
 
 export default function App() {
   const [authSession, setAuthSession] = useState(readAuthSession)
+  const [marketQuery, setMarketQuery] = useState('')
   const [currency, setCurrency] = useState(() => {
     const savedCurrency = localStorage.getItem(CURRENCY_STORAGE_KEY)
     if (savedCurrency === CURRENCY_OPTIONS.USD || savedCurrency === CURRENCY_OPTIONS.KRW) {
@@ -53,6 +54,8 @@ export default function App() {
         isAuthenticated={Boolean(authSession.token)}
         authUser={authSession.user}
         onAuthChange={refreshAuthSession}
+        marketQuery={marketQuery}
+        onMarketQueryChange={setMarketQuery}
       />
       <Routes>
         <Route path="/" element={authSession.token ? <Navigate to="/dashboard" replace /> : <Home language={language} />} />
@@ -64,7 +67,11 @@ export default function App() {
         <Route path="/signup" element={<Signup language={language} onAuthChange={refreshAuthSession} />} />
         <Route
           path="/dashboard"
-          element={authSession.token ? <Dashboard currency={currency} language={language} /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />}
+          element={authSession.token ? (
+            <Dashboard currency={currency} language={language} marketQuery={marketQuery} onMarketQueryChange={setMarketQuery} />
+          ) : (
+            <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />
+          )}
         />
         <Route
           path="/messages"

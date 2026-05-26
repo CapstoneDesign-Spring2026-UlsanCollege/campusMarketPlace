@@ -18,6 +18,8 @@ export default function Navbar({
   isAuthenticated,
   authUser,
   onAuthChange,
+  marketQuery = '',
+  onMarketQueryChange,
 }) {
   const location = useLocation()
   const navigate = useNavigate()
@@ -29,8 +31,9 @@ export default function Navbar({
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false)
   const [searchMenuOpen, setSearchMenuOpen] = useState(false)
   const currentLangLabel = LANGUAGE_OPTIONS.find((o) => o.value === language)?.label || language
+  const setMarketQuery = typeof onMarketQueryChange === 'function' ? onMarketQueryChange : () => {}
 
-  const isDashboardHomeActive = isDashboard && !dashboardMode
+  const isDashboardHomeActive = isDashboard && (!dashboardMode || dashboardMode === 'home')
   const isBuyActive = isDashboard && dashboardMode === 'buy'
   const isSellActive = isDashboard && dashboardMode === 'sell'
   const isHomeActive = (!isAuthenticated && location.pathname === '/') || isDashboardHomeActive
@@ -43,24 +46,52 @@ export default function Navbar({
     home: '⌂',
     search: '⌕',
     messages: '✉',
-    buy: '◌',
-    sell: '+',
-    profile: '◍',
-    login: '↪',
-    signup: '＋',
-    signout: '⇢',
+    buy: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+        <path d="M7 8V7a5 5 0 0 1 10 0v1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        <path d="M6.5 8h11l1 12H5.5l1-12z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+        <path d="M9 12v0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M15 12v0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    ),
+    sell: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+        <rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" opacity="0.06" />
+        <path d="M12 8v8M8 12h8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+    profile: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+        <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5z" fill="currentColor" />
+        <path d="M4 20c0-3.314 3.582-6 8-6s8 2.686 8 6v1H4v-1z" fill="currentColor" opacity="0.9" />
+      </svg>
+    ),
+    login: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+        <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5z" fill="currentColor"/>
+        <path d="M2 20c0-3.314 4.686-6 10-6s10 2.686 10 6v1H2v-1z" fill="currentColor"/>
+      </svg>
+    ),
+    signup: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+        <rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" opacity="0.06" />
+        <path d="M12 8v8M8 12h8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    signout: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+        <path d="M10 7V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        <path d="M3 12h9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        <path d="M8 8l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
   }
 
   function handleHome() {
-    if (isDashboard) {
-      window.location.reload()
-      return
-    }
-
     // If the user is authenticated, keep them inside the authenticated
     // dashboard experience and show the full marketplace (home mode).
     if (isAuthenticated) {
-      navigate('/dashboard', { state: { mode: 'home' } })
+      navigate('/dashboard', { replace: isDashboard, state: { mode: 'home' } })
       return
     }
 
@@ -135,32 +166,69 @@ export default function Navbar({
       <>
         {showAuthNav ? (
           <>
-            {renderActionButton({ className: 'nav-pill', icon: iconLabels.home, label: t(language, 'navbar.home'), onClick: handleHome, active: isHomeActive })}
+            {renderActionButton({ className: 'nav-pill nav-pill-home', icon: iconLabels.home, label: t(language, 'navbar.home'), onClick: handleHome, active: isHomeActive })}
             {renderActionButton({ className: 'nav-pill', icon: iconLabels.search, label: t(language, 'navbar.search'), onClick: handleSearch })}
             {searchMenuOpen && (
-              <div className="search-menu" role="menu" aria-label="Quick categories">
-                {CATEGORIES.map((s) => (
+              <div className="search-menu search-menu-panel" role="menu" aria-label="Marketplace search">
+                <p className="eyebrow">Verified students only</p>
+                <h2>Buy &amp; sell on campus safely</h2>
+                <p className="subcopy">
+                  Browse premium campus deals, list what you no longer need, and chat with verified students in a calmer, cleaner marketplace.
+                </p>
+
+                <div className="dashboard-search" role="search" aria-label="Marketplace search">
+                  <input
+                    value={marketQuery}
+                    onChange={(event) => setMarketQuery(event.target.value)}
+                    type="search"
+                    placeholder="Search textbooks, laptops, bikes..."
+                    aria-label="Search marketplace listings"
+                  />
+                  <span className="hero-search-tag">Live search</span>
+                </div>
+
+                <div className="category-chip-row" aria-label="Quick categories">
                   <button
-                    key={s}
                     type="button"
-                    className="currency-menu-item"
+                    className={`category-chip ${!marketQuery ? 'is-active' : ''}`}
+                    onClick={() => setMarketQuery('')}
+                  >
+                    All
+                  </button>
+                  {CATEGORIES.map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      className={`category-chip ${marketQuery.toLowerCase().includes(category.toLowerCase()) ? 'is-active' : ''}`}
+                      onClick={() => setMarketQuery(category)}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="search-menu-actions">
+                  <button
+                    className="button button-secondary"
+                    type="button"
                     onClick={() => {
                       setSearchMenuOpen(false)
-                      navigate(`/browse?category=${encodeURIComponent(s)}`)
+                      navigate('/browse')
                     }}
                   >
-                    {s}
+                    View all
                   </button>
-                ))}
+                </div>
               </div>
             )}
             {isAuthenticated && (
               renderActionButton({ className: 'nav-pill', icon: iconLabels.messages, label: t(language, 'navbar.messages'), onClick: () => navigate('/messages'), active: isMessagesActive })
             )}
             {renderActionButton({ className: 'nav-pill', icon: iconLabels.buy, label: t(language, 'navbar.buy'), onClick: () => navigate('/dashboard', { state: { mode: 'buy' } }), active: isBuyActive })}
-            {renderActionButton({ className: 'nav-pill', icon: iconLabels.sell, label: t(language, 'navbar.sell'), onClick: () => navigate('/dashboard', { state: { mode: 'sell' } }), active: isSellActive })}
+            {renderActionButton({ className: 'nav-pill nav-pill-sell', icon: iconLabels.sell, label: t(language, 'navbar.sell'), onClick: () => navigate('/dashboard', { state: { mode: 'sell' } }), active: isSellActive })}
             {isAuthenticated && (
               <button className={`nav-pill nav-profile-pill${isProfileActive ? ' is-active' : ''}`} type="button" onClick={handleProfile} aria-label={t(language, 'navbar.profile')} aria-current={isProfileActive ? 'page' : undefined}>
+                <span className="nav-action-icon" aria-hidden="true">{iconLabels.profile}</span>
                 <Avatar src={authUser?.avatarUrl || authUser?.avatar} alt={authUser?.firstName || 'You'} size={28} />
                 <span className="nav-action-label">{t(language, 'navbar.profile')}</span>
               </button>

@@ -86,12 +86,12 @@ function resolveImageUrl(imageUrl) {
   return new URL(imageUrl.replace(/^\/+/, ''), `${API_ORIGIN}/`).href
 }
 
-export default function Dashboard({ currency, language = 'en' }) {
+export default function Dashboard({ currency, language = 'en', marketQuery, onMarketQueryChange }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [user, setUser] = useState(null)
   const [mode, setMode] = useState(location.state?.mode || 'home')
-  const [marketQuery, setMarketQuery] = useState('')
+  const [internalMarketQuery, setInternalMarketQuery] = useState('')
 
   const [uploadPreviewUrl, setUploadPreviewUrl] = useState('')
   const [uploadMessage, setUploadMessage] = useState('')
@@ -122,7 +122,9 @@ export default function Dashboard({ currency, language = 'en' }) {
 
   const imageInputRef = useRef(null)
   const previewObjectUrlRef = useRef('')
-  const normalizedQuery = marketQuery.trim().toLowerCase()
+  const effectiveMarketQuery = typeof marketQuery === 'string' ? marketQuery : internalMarketQuery
+  const setMarketQuery = typeof onMarketQueryChange === 'function' ? onMarketQueryChange : setInternalMarketQuery
+  const normalizedQuery = effectiveMarketQuery.trim().toLowerCase()
   const visibleItems = normalizedQuery
     ? items.filter((item) => {
         const haystack = [item.title, item.category, item.description, item.location, item.sellerName]
@@ -452,71 +454,6 @@ export default function Dashboard({ currency, language = 'en' }) {
     <main className="page-shell marketplace-shell">
       <section className="feed-layout">
         <section className="feed-main-col">
-          <section className="panel marketplace-hero" aria-label="Campus marketplace hero">
-            <p className="eyebrow">Verified students only</p>
-            <h1>Buy &amp; sell on campus safely</h1>
-            <p className="subcopy">
-              Browse premium campus deals, list what you no longer need, and chat with verified students in a calmer, cleaner marketplace.
-            </p>
-
-            <div className="dashboard-search" role="search" aria-label="Marketplace search">
-              <input
-                value={marketQuery}
-                onChange={(event) => setMarketQuery(event.target.value)}
-                type="search"
-                placeholder="Search textbooks, laptops, bikes..."
-                aria-label="Search marketplace listings"
-              />
-              <span className="hero-search-tag">Live search</span>
-            </div>
-
-            <div className="category-chip-row" aria-label="Quick categories">
-              <button type="button" className={`category-chip ${!marketQuery ? 'is-active' : ''}`} onClick={() => setMarketQuery('')}>
-                All
-              </button>
-              {CATEGORIES.map((category) => (
-                <button
-                  key={category}
-                  type="button"
-                  className={`category-chip ${marketQuery.toLowerCase().includes(category.toLowerCase()) ? 'is-active' : ''}`}
-                  onClick={() => setMarketQuery(category)}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-
-            <div className="hero-stat-grid">
-              <article className="hero-stat-card">
-                <span className="hero-stat-label">Active listings</span>
-                <strong className="hero-stat-value">{visibleItems.length.toLocaleString()}</strong>
-              </article>
-              <article className="hero-stat-card">
-                <span className="hero-stat-label">Trades today</span>
-                <strong className="hero-stat-value">{items.filter((item) => item.status === 'active').length.toLocaleString()}</strong>
-              </article>
-              <article className="hero-stat-card">
-                <span className="hero-stat-label">Avg. rating</span>
-                <strong className="hero-stat-value">4.9★</strong>
-              </article>
-            </div>
-
-            <div className="trust-grid" aria-label="Campus trust highlights">
-              <article className="trust-card">
-                <strong>Verified student-only access</strong>
-                <p className="subcopy">Only authenticated campus accounts can list and chat.</p>
-              </article>
-              <article className="trust-card">
-                <strong>Safe meetup guidance</strong>
-                <p className="subcopy">Use on-campus pickup spots and trusted public locations.</p>
-              </article>
-              <article className="trust-card">
-                <strong>Fast, friendly chat</strong>
-                <p className="subcopy">Message sellers directly without leaving the app flow.</p>
-              </article>
-            </div>
-          </section>
-
           <section className="browse-section" aria-label="Near you">
             <div className="browse-toolbar">
               <div>
