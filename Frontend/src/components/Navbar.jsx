@@ -43,9 +43,26 @@ export default function Navbar({
     home: '⌂',
     search: '⌕',
     messages: '✉',
-    buy: '◌',
-    sell: '+',
-    profile: '◍',
+    buy: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+        <path d="M7 8V7a5 5 0 0 1 10 0v1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        <path d="M6.5 8h11l1 12H5.5l1-12z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+        <path d="M9 12v0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M15 12v0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    ),
+    sell: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+        <rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" opacity="0.06" />
+        <path d="M12 8v8M8 12h8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+    profile: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+        <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5z" fill="currentColor" />
+        <path d="M4 20c0-3.314 3.582-6 8-6s8 2.686 8 6v1H4v-1z" fill="currentColor" opacity="0.9" />
+      </svg>
+    ),
     login: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
         <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5z" fill="currentColor"/>
@@ -58,7 +75,13 @@ export default function Navbar({
         <path d="M12 8v8M8 12h8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
-    signout: '⇢',
+    signout: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+        <path d="M10 7V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        <path d="M3 12h9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        <path d="M8 8l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
   }
 
   function handleHome() {
@@ -166,6 +189,7 @@ export default function Navbar({
             {renderActionButton({ className: 'nav-pill nav-pill-sell', icon: iconLabels.sell, label: t(language, 'navbar.sell'), onClick: () => navigate('/dashboard', { state: { mode: 'sell' } }), active: isSellActive })}
             {isAuthenticated && (
               <button className={`nav-pill nav-profile-pill${isProfileActive ? ' is-active' : ''}`} type="button" onClick={handleProfile} aria-label={t(language, 'navbar.profile')} aria-current={isProfileActive ? 'page' : undefined}>
+                <span className="nav-action-icon" aria-hidden="true">{iconLabels.profile}</span>
                 <Avatar src={authUser?.avatarUrl || authUser?.avatar} alt={authUser?.firstName || 'You'} size={28} />
                 <span className="nav-action-label">{t(language, 'navbar.profile')}</span>
               </button>
