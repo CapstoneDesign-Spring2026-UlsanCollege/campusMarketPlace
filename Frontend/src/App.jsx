@@ -4,6 +4,7 @@ import Footer from './components/Footer'
 import Navbar from './components/Navbar'
 import Home from './routes/Home'
 import Browse from './routes/Browse'
+import Search from './routes/Search'
 import Login from './routes/Login'
 import Signup from './routes/Signup'
 import Dashboard from './routes/Dashboard'
@@ -54,14 +55,16 @@ export default function App() {
         isAuthenticated={Boolean(authSession.token)}
         authUser={authSession.user}
         onAuthChange={refreshAuthSession}
-        marketQuery={marketQuery}
-        onMarketQueryChange={setMarketQuery}
       />
       <Routes>
         <Route path="/" element={authSession.token ? <Navigate to="/dashboard" replace /> : <Home language={language} />} />
         <Route
           path="/browse"
           element={authSession.token ? <Browse currency={currency} language={language} /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />}
+        />
+        <Route
+          path="/search"
+          element={authSession.token ? <Search currency={currency} language={language} marketQuery={marketQuery} onMarketQueryChange={setMarketQuery} /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />}
         />
         <Route path="/login" element={<Login language={language} onAuthChange={refreshAuthSession} />} />
         <Route path="/signup" element={<Signup language={language} onAuthChange={refreshAuthSession} />} />
