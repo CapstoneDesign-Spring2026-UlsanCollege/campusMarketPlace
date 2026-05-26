@@ -18,6 +18,8 @@ export default function Navbar({
   isAuthenticated,
   authUser,
   onAuthChange,
+  marketQuery = '',
+  onMarketQueryChange,
 }) {
   const location = useLocation()
   const navigate = useNavigate()
@@ -29,6 +31,7 @@ export default function Navbar({
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false)
   const [searchMenuOpen, setSearchMenuOpen] = useState(false)
   const currentLangLabel = LANGUAGE_OPTIONS.find((o) => o.value === language)?.label || language
+  const setMarketQuery = typeof onMarketQueryChange === 'function' ? onMarketQueryChange : () => {}
 
   const isDashboardHomeActive = isDashboard && (!dashboardMode || dashboardMode === 'home')
   const isBuyActive = isDashboard && dashboardMode === 'buy'
@@ -142,9 +145,9 @@ export default function Navbar({
     )
   }
 
-  function renderActionButton({ className = 'nav-pill', icon, label, ariaLabel = label, onClick, active = false }) {
+  function renderActionButton({ className = 'nav-pill', icon, label, onClick, active = false }) {
     return (
-      <button className={`${className}${active ? ' is-active' : ''}`} type="button" onClick={onClick} aria-label={ariaLabel} aria-current={active ? 'page' : undefined}>
+      <button className={`${className}${active ? ' is-active' : ''}`} type="button" onClick={onClick} aria-label={label} aria-current={active ? 'page' : undefined}>
         {renderLabeledContent(icon, label)}
       </button>
     )
@@ -164,33 +167,58 @@ export default function Navbar({
         {showAuthNav ? (
           <>
             {renderActionButton({ className: 'nav-pill nav-pill-home', icon: iconLabels.home, label: t(language, 'navbar.home'), onClick: handleHome, active: isHomeActive })}
-            {renderActionButton({
-              className: 'nav-pill',
-              icon: iconLabels.search,
-              ariaLabel: t(language, 'navbar.search'),
-              label: isAuthenticated ? (
-                <>
-                  <span>{t(language, 'navbar.search')}</span>
-                  <span className="nav-search-badge">{t(language, 'home.eyebrow')}</span>
-                </>
-              ) : t(language, 'navbar.search'),
-              onClick: handleSearch,
-            })}
+            {renderActionButton({ className: 'nav-pill', icon: iconLabels.search, label: t(language, 'navbar.search'), onClick: handleSearch })}
             {searchMenuOpen && (
-              <div className="search-menu" role="menu" aria-label="Quick categories">
-                {CATEGORIES.map((s) => (
+              <div className="search-menu search-menu-panel" role="menu" aria-label="Marketplace search">
+                <p className="eyebrow">Verified students only</p>
+                <h2>Buy &amp; sell on campus safely</h2>
+                <p className="subcopy">
+                  Browse premium campus deals, list what you no longer need, and chat with verified students in a calmer, cleaner marketplace.
+                </p>
+
+                <div className="dashboard-search" role="search" aria-label="Marketplace search">
+                  <input
+                    value={marketQuery}
+                    onChange={(event) => setMarketQuery(event.target.value)}
+                    type="search"
+                    placeholder="Search textbooks, laptops, bikes..."
+                    aria-label="Search marketplace listings"
+                  />
+                  <span className="hero-search-tag">Live search</span>
+                </div>
+
+                <div className="category-chip-row" aria-label="Quick categories">
                   <button
-                    key={s}
                     type="button"
-                    className="currency-menu-item"
+                    className={`category-chip ${!marketQuery ? 'is-active' : ''}`}
+                    onClick={() => setMarketQuery('')}
+                  >
+                    All
+                  </button>
+                  {CATEGORIES.map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      className={`category-chip ${marketQuery.toLowerCase().includes(category.toLowerCase()) ? 'is-active' : ''}`}
+                      onClick={() => setMarketQuery(category)}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="search-menu-actions">
+                  <button
+                    className="button button-secondary"
+                    type="button"
                     onClick={() => {
                       setSearchMenuOpen(false)
-                      navigate(`/browse?category=${encodeURIComponent(s)}`)
+                      navigate('/browse')
                     }}
                   >
-                    {s}
+                    View all
                   </button>
-                ))}
+                </div>
               </div>
             )}
             {isAuthenticated && (
