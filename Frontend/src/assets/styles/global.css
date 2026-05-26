@@ -478,7 +478,20 @@ h2 { font-size: clamp(1.4rem, 2.2vw, 2rem); line-height: 1.1; }
 .hero-stat-card, .trust-card, .category-card, .near-you-card { padding: 1rem; border-radius: 22px; }
 .hero-stat-label { color: var(--muted); font-size: 0.76rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; }
 .category-card { display: grid; gap: 0.7rem; place-items: start; text-align: left; transition: transform 160ms ease, box-shadow 160ms ease; }
-.category-card-icon { width: 3.4rem; height: 3.4rem; border-radius: 18px; display: grid; place-items: center; font-size: 1.55rem; background: linear-gradient(135deg, rgba(15, 123, 69, 0.1), rgba(255, 255, 255, 0.92)); }
+.category-card-icon {
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 1.55rem;
+  color: var(--primary-strong);
+  background: linear-gradient(135deg, rgba(15, 123, 69, 0.1), rgba(255, 255, 255, 0.92));
+}
+.category-card-icon svg {
+  width: 1.85rem;
+  height: 1.85rem;
+}
 .category-card.lavender .category-card-icon { background: linear-gradient(135deg, rgba(230, 240, 251, 0.95), rgba(255, 255, 255, 0.94)); }
 .category-card.peach .category-card-icon { background: linear-gradient(135deg, rgba(255, 233, 221, 0.95), rgba(255, 255, 255, 0.94)); }
 .category-card.blue .category-card-icon { background: linear-gradient(135deg, rgba(234, 244, 255, 0.95), rgba(255, 255, 255, 0.94)); }
