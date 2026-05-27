@@ -536,6 +536,7 @@ h2 { font-size: clamp(1.4rem, 2.2vw, 2rem); line-height: 1.1; }
 .item-status-feedback.error { color: var(--danger); }
 .profile-item-status-editor { margin-top: 0.6rem; }
 .profile-activity-actions { display: inline-flex; align-items: center; gap: 0.55rem; justify-content: flex-end; flex-wrap: wrap; }
+.profile-favorite-item { align-items: center; }
 .item-price { font-size: 1.05rem; }
 .item-original-price, .original-price { color: var(--muted); text-decoration: line-through; font-size: 0.85rem; }
 .item-actions-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.2rem; }
@@ -547,7 +548,7 @@ h2 { font-size: clamp(1.4rem, 2.2vw, 2rem); line-height: 1.1; }
 .item-action-button:hover { transform: translateY(-1px); border-color: rgba(15, 123, 69, 0.18); box-shadow: 0 10px 22px rgba(8, 33, 27, 0.06); }
 .item-action-button strong { font-weight: 900; font-size: 0.9em; }
 .item-action-button.is-active, .item-action-message { background: linear-gradient(135deg, rgba(15, 123, 69, 0.1), rgba(255, 255, 255, 0.96)); color: var(--primary-strong); border-color: rgba(15, 123, 69, 0.18); }
-.item-action-like.is-active { background: linear-gradient(135deg, rgba(224, 86, 91, 0.11), rgba(255, 255, 255, 0.96)); color: #b42318; border-color: rgba(224, 86, 91, 0.18); }
+.item-action-love.is-active { background: linear-gradient(135deg, rgba(224, 86, 91, 0.11), rgba(255, 255, 255, 0.96)); color: #b42318; border-color: rgba(224, 86, 91, 0.18); }
 .item-action-comment.is-active { background: linear-gradient(135deg, rgba(232, 242, 255, 0.92), rgba(255, 255, 255, 0.96)); color: #1f4f86; border-color: rgba(71, 123, 196, 0.24); }
 .item-comment-compose {
   display: grid; gap: 0.7rem; margin-top: 0.55rem; padding: 0.85rem; border-radius: 20px; border: 1px solid rgba(15, 123, 69, 0.14);

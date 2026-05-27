@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchProfile, updateItem } from '../services/api'
+import { fetchProfile, toggleItemFavorite, updateItem } from '../services/api'
 import { formatPriceFromUsd } from '../services/currency'
 import { getAuthToken } from '../services/auth'
 import { t } from '../services/i18n'
@@ -149,7 +149,7 @@ function PaymentMethodList({ paymentMethods }) {
   )
 }
 
-function ActivityList({ items, currency, emptyMessage }) {
+function ActivityList({ items, currency, emptyMessage, onStatusUpdated }) {
   if (!items.length) {
     return (
       <div className="profile-empty-state">
@@ -163,7 +163,45 @@ function ActivityList({ items, currency, emptyMessage }) {
   return (
     <div className="profile-list">
       {items.map((item) => (
-        <ListingStatusEditor key={item._id} item={item} currency={currency} />
+        <ListingStatusEditor key={item._id} item={item} currency={currency} onStatusUpdated={onStatusUpdated} />
+      ))}
+    </div>
+  )
+}
+
+function FavoriteItemsList({ items, currency, onRemoveFavorite }) {
+  if (!items.length) {
+    return (
+      <div className="profile-empty-state">
+        <div className="empty-state-icon">♡</div>
+        <p><strong>No favorites yet</strong></p>
+        <p className="empty-state-hint">Tap the love button on any listing to save it here.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="profile-list">
+      {items.map((item) => (
+        <article className="profile-list-item profile-favorite-item" key={item._id}>
+          <div className="activity-info">
+            <strong className="activity-title">{item.title}</strong>
+            <p className="activity-meta">
+              <span className="category-badge">{item.category || 'Listing'}</span>
+              <span className={`status-badge status-${(item.status || 'active').toLowerCase()}`}>{item.status || 'active'}</span>
+            </p>
+          </div>
+          <div className="profile-activity-actions">
+            <span className="activity-price">{formatPriceFromUsd(item.price, currency)}</span>
+            <button
+              type="button"
+              className="button button-secondary button-small"
+              onClick={() => onRemoveFavorite(item._id)}
+            >
+              Remove
+            </button>
+          </div>
+        </article>
       ))}
     </div>
   )
@@ -201,9 +239,11 @@ export default function Profile({ currency, language = 'en' }) {
   const [profile, setProfile] = useState(null)
   const [buyHistory, setBuyHistory] = useState([])
   const [sellHistory, setSellHistory] = useState([])
+  const [favoriteItems, setFavoriteItems] = useState([])
   const [listingFilter, setListingFilter] = useState('all')
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
+  const [favoriteError, setFavoriteError] = useState('')
 
   useEffect(() => {
     const token = getAuthToken()
@@ -227,6 +267,7 @@ export default function Profile({ currency, language = 'en' }) {
         setProfile(data?.user || null)
         setBuyHistory(Array.isArray(data?.buyHistory) ? data.buyHistory : [])
         setSellHistory(Array.isArray(data?.sellHistory) ? data.sellHistory : [])
+        setFavoriteItems(Array.isArray(data?.favoriteItems) ? data.favoriteItems : [])
       } catch (error) {
         if (!isActive) {
           return
@@ -287,6 +328,28 @@ export default function Profile({ currency, language = 'en' }) {
         return { ...item, status: normalizedStatus }
       }),
     )
+  }
+
+  async function handleFavoriteToggle(itemId) {
+    try {
+      setFavoriteError('')
+      const response = await toggleItemFavorite(itemId)
+      const isLoved = Boolean(response?.isLoved)
+
+      setFavoriteItems((current) => {
+        if (isLoved) {
+          const favoriteItem = response?.item || current.find((item) => item._id === itemId)
+          if (!favoriteItem) {
+            return current
+          }
+          return [favoriteItem, ...current.filter((item) => item._id !== itemId)]
+        }
+
+        return current.filter((item) => item._id !== itemId)
+      })
+    } catch (error) {
+      setFavoriteError(error instanceof Error ? error.message : 'Unable to update favorites right now.')
+    }
   }
 
   return (
@@ -371,6 +434,30 @@ export default function Profile({ currency, language = 'en' }) {
               currency={currency}
               emptyMessage={t(language, 'profile.noListingsPosted')}
               onStatusUpdated={handleListingStatusUpdated}
+            />
+          )}
+        </article>
+
+        <article className="profile-card panel">
+          <div className="profile-card-header">
+            <div>
+              <p className="eyebrow">Favorites</p>
+              <h2>Your loved items</h2>
+            </div>
+          </div>
+          {isLoading ? (
+            <div className="profile-empty-state">
+              <p>Loading favorites...</p>
+            </div>
+          ) : favoriteError ? (
+            <div className="profile-empty-state">
+              <p>{favoriteError}</p>
+            </div>
+          ) : (
+            <FavoriteItemsList
+              items={favoriteItems}
+              currency={currency}
+              onRemoveFavorite={handleFavoriteToggle}
             />
           )}
         </article>

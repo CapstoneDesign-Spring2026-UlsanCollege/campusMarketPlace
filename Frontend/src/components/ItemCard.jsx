@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_ORIGIN, updateItem } from '../services/api'
+import { toggleItemFavorite } from '../services/api'
 import Avatar from './Avatar'
 import { t } from '../services/i18n'
 import { formatPriceFromUsd } from '../services/currency'
@@ -118,9 +119,9 @@ export default function ItemCard({ item, currency, language = 'en' }) {
     { value: 'reserved', label: 'Reserved' },
     { value: 'sold', label: 'Sold' },
   ]
-  const initialLikeCount = Number.isFinite(Number(item?.favoritesCount)) ? Math.max(0, Number(item.favoritesCount)) : 0
-  const [isLiked, setIsLiked] = useState(Boolean(item?.isLiked || item?.liked))
-  const [likeCount, setLikeCount] = useState(initialLikeCount)
+  const initialLoveCount = Number.isFinite(Number(item?.favoritesCount)) ? Math.max(0, Number(item.favoritesCount)) : 0
+  const [isLoved, setIsLoved] = useState(Boolean(item?.isLoved || item?.isFavorited || item?.isLiked || item?.liked))
+  const [loveCount, setLoveCount] = useState(initialLoveCount)
   const [commentDraft, setCommentDraft] = useState('')
   const [isCommentOpen, setIsCommentOpen] = useState(false)
   const [isEditingStatus, setIsEditingStatus] = useState(false)
@@ -128,6 +129,7 @@ export default function ItemCard({ item, currency, language = 'en' }) {
   const [statusMessage, setStatusMessage] = useState('')
   const [statusError, setStatusError] = useState('')
   const [isSavingStatus, setIsSavingStatus] = useState(false)
+  const [isSavingLove, setIsSavingLove] = useState(false)
 
   useEffect(() => {
     const nextStatus = String(item?.status || 'active').toLowerCase()
@@ -150,6 +152,34 @@ export default function ItemCard({ item, currency, language = 'en' }) {
   function handleCommentOpen() {
     setIsCommentOpen((current) => !current)
     setCommentDraft((current) => current || suggestedComment)
+  }
+
+  async function handleLoveToggle() {
+    if (isSavingLove) {
+      return
+    }
+
+    const nextLoved = !isLoved
+    const nextCount = Math.max(0, loveCount + (nextLoved ? 1 : -1))
+    setIsSavingLove(true)
+    setIsLoved(nextLoved)
+    setLoveCount(nextCount)
+
+    try {
+      const response = await toggleItemFavorite(item._id)
+      const updatedItem = response?.item || {}
+      const confirmedLoved = Boolean(updatedItem?.isLoved || updatedItem?.isFavorited || response?.isLoved)
+      setIsLoved(confirmedLoved)
+      if (Number.isFinite(Number(updatedItem?.favoritesCount))) {
+        setLoveCount(Math.max(0, Number(updatedItem.favoritesCount)))
+      }
+    } catch (error) {
+      setIsLoved(!nextLoved)
+      setLoveCount(loveCount)
+      setStatusError(error instanceof Error ? error.message : 'Unable to update favorites.')
+    } finally {
+      setIsSavingLove(false)
+    }
   }
 
   function handleMessageSeller() {
@@ -206,9 +236,6 @@ export default function ItemCard({ item, currency, language = 'en' }) {
             <span>{item.category?.slice(0, 1)?.toUpperCase() || 'I'}</span>
           </div>
         )}
-        <button className="favorite-button" type="button" aria-label={`Save ${item.title}`}>
-          ♡
-        </button>
       </div>
 
       <div className="item-card-body">
@@ -283,12 +310,13 @@ export default function ItemCard({ item, currency, language = 'en' }) {
         <div className="item-actions-row" aria-label="Buyer actions">
           <button
             type="button"
-            className={`item-action-button item-action-like ${isLiked ? 'is-active' : ''}`}
-            onClick={handleLikeToggle}
-            aria-pressed={isLiked}
+            className={`item-action-button item-action-love ${isLoved ? 'is-active' : ''}`}
+            onClick={handleLoveToggle}
+            aria-pressed={isLoved}
+            disabled={isSavingLove}
           >
-            <span>{t(language, 'dashboard.like')}</span>
-            <strong>{likeCount}</strong>
+            <span>♥ {t(language, 'dashboard.love')}</span>
+            <strong>{loveCount}</strong>
           </button>
 
           <button

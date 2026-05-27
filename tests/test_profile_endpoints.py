@@ -79,6 +79,47 @@ def test_item_status_can_be_updated_by_owner(client):
     assert updated_item['status'] == 'reserved'
 
 
+def test_item_can_be_loved_and_saved_to_profile(client):
+    email = 'favorite-owner@example.com'
+    password = 'Test1234!'
+
+    signup = client.post('/api/auth/signup', json={'firstName': 'Love', 'lastName': 'Owner', 'email': email, 'password': password})
+    assert signup.status_code == 201
+    token = signup.get_json()['token']
+
+    created = client.post(
+        '/api/items',
+        json={
+            'title': 'Desk Lamp',
+            'description': 'Warm light lamp',
+            'price': 15,
+            'category': 'Home',
+            'status': 'active',
+            'image': 'https://example.com/lamp.jpg',
+            'images': ['https://example.com/lamp.jpg'],
+        },
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert created.status_code == 201
+    item_id = created.get_json()['item']['_id']
+
+    loved = client.post(
+        f'/api/items/{item_id}/favorite',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert loved.status_code == 200
+    loved_data = loved.get_json()
+    assert loved_data['isLoved'] is True
+    assert item_id in loved_data['favoriteItemIds']
+
+    profile = client.get('/api/profile', headers={'Authorization': f'Bearer {token}'})
+    assert profile.status_code == 200
+    profile_data = profile.get_json()
+    assert profile_data['user']['favoriteItemIds'] == [item_id]
+    assert len(profile_data['favoriteItems']) == 1
+    assert profile_data['favoriteItems'][0]['_id'] == item_id
+
+
 # Note: To run these tests locally, create a conftest.py fixture that creates
 # a Flask test client and configures the app to use TEST_MONGODB_URI. This
 # file intentionally leaves those details out to avoid assumptions about your
