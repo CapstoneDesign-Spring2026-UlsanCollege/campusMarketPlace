@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { API_ORIGIN, updateItem } from '../services/api'
 import { toggleItemFavorite } from '../services/api'
 import Avatar from './Avatar'
@@ -122,8 +122,7 @@ export default function ItemCard({ item, currency, language = 'en' }) {
   const initialLoveCount = Number.isFinite(Number(item?.favoritesCount)) ? Math.max(0, Number(item.favoritesCount)) : 0
   const [isLoved, setIsLoved] = useState(Boolean(item?.isLoved || item?.isFavorited || item?.isLiked || item?.liked))
   const [loveCount, setLoveCount] = useState(initialLoveCount)
-  const [commentDraft, setCommentDraft] = useState('')
-  const [isCommentOpen, setIsCommentOpen] = useState(false)
+  // comment UI removed per design — keep messaging only
   const [isEditingStatus, setIsEditingStatus] = useState(false)
   const [statusDraft, setStatusDraft] = useState(initialListingStatus)
   const [statusMessage, setStatusMessage] = useState('')
@@ -137,22 +136,7 @@ export default function ItemCard({ item, currency, language = 'en' }) {
     setStatusDraft(nextStatus)
   }, [item?.status])
 
-  const suggestedComment = useMemo(() => {
-    return `Hi ${sellerName}, I’m interested in ${item.title}. Is it still available?`
-  }, [item.title, sellerName])
 
-  function handleLikeToggle() {
-    setIsLiked((current) => {
-      const nextLiked = !current
-      setLikeCount((currentCount) => Math.max(0, currentCount + (nextLiked ? 1 : -1)))
-      return nextLiked
-    })
-  }
-
-  function handleCommentOpen() {
-    setIsCommentOpen((current) => !current)
-    setCommentDraft((current) => current || suggestedComment)
-  }
 
   async function handleLoveToggle() {
     if (isSavingLove) {
@@ -184,13 +168,6 @@ export default function ItemCard({ item, currency, language = 'en' }) {
 
   function handleMessageSeller() {
     const query = new URLSearchParams({ item: String(item._id) })
-    navigate(`/messages?${query.toString()}`)
-  }
-
-  function handleSendComment(event) {
-    event.preventDefault()
-    const draft = commentDraft.trim() || suggestedComment
-    const query = new URLSearchParams({ item: String(item._id), draft })
     navigate(`/messages?${query.toString()}`)
   }
 
@@ -253,14 +230,16 @@ export default function ItemCard({ item, currency, language = 'en' }) {
           <span className="item-location">{locationLabel}</span>
         </div>
         <div className="item-seller-row">
-          <Avatar src={item.sellerAvatarUrl || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url} alt={sellerName} size={36} />
+          <Link to={`/profile/${sellerId}`} className="seller-avatar-link">
+            <Avatar src={item.sellerAvatarUrl || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url} alt={sellerName} size={36} />
+          </Link>
           <div className="item-seller-copy">
-            <p className="item-seller">{sellerLabel} {sellerName}</p>
+            {/* seller name removed from inline copy per design — avatar links to profile */}
             {isSeller ? <p className="item-seller-hint">You can update this listing when it is reserved or sold.</p> : null}
           </div>
           <div className="item-seller-actions">
-            <span className={`status-badge status-${listingStatus}`}>{listingStatus}</span>
-            {sellerVerified ? <span className="badge badge-default">Verified</span> : null}
+            {/* show friendly status label instead of raw status and remove verified badge */}
+            <span className={`status-badge status-${listingStatus}`}>{(statusOptions.find(o => o.value === listingStatus) || { label: 'On sale' }).label}</span>
           </div>
         </div>
         {isSeller ? (
@@ -321,39 +300,13 @@ export default function ItemCard({ item, currency, language = 'en' }) {
 
           <button
             type="button"
-            className={`item-action-button item-action-comment ${isCommentOpen ? 'is-active' : ''}`}
-            onClick={handleCommentOpen}
-            aria-expanded={isCommentOpen}
-          >
-            <span>{t(language, 'dashboard.comment')}</span>
-          </button>
-
-          <button
-            type="button"
             className="item-action-button item-action-message"
             onClick={handleMessageSeller}
           >
             <span>{t(language, 'dashboard.messageSeller')}</span>
           </button>
         </div>
-
-        {isCommentOpen ? (
-          <form className="item-comment-compose" onSubmit={handleSendComment}>
-            <label className="sr-only" htmlFor={`item-comment-${item._id}`}>{t(language, 'dashboard.comment')}</label>
-            <textarea
-              id={`item-comment-${item._id}`}
-              className="item-comment-input"
-              rows={3}
-              value={commentDraft}
-              onChange={(event) => setCommentDraft(event.target.value)}
-              placeholder={suggestedComment}
-            />
-            <div className="item-comment-actions">
-              <span className="item-comment-hint">Drafts jump straight into Messages for a faster reply.</span>
-              <button type="submit" className="button button-primary button-small">Send</button>
-            </div>
-          </form>
-        ) : null}
+        {/* comment compose removed; messaging flows through Messages page */}
       </div>
     </article>
   )
