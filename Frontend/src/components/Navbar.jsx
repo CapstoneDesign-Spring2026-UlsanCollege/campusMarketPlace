@@ -254,7 +254,7 @@ export default function Navbar({
               <button className="button button-secondary" type="button" onClick={cancelSignOut}>
                 {t(language, 'navbar.stay')}
               </button>
-              <button className="button button-primary" type="button" onClick={confirmSignOut}>
+              <button className="button button-primary signout-confirm-button" type="button" onClick={confirmSignOut}>
                 {t(language, 'navbar.confirmSignOut')}
               </button>
             </div>

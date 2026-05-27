@@ -193,7 +193,7 @@ export default function EditProfile({ language = 'en' }) {
                 {t(language, 'editProfile.changePassword')}
               </button>
 
-              <button className="button button-primary" type="submit" disabled={isSaving || !isDirty} style={{ marginLeft: 'auto' }}>
+              <button className="button button-primary profile-save-button" type="submit" disabled={isSaving || !isDirty} style={{ marginLeft: 'auto' }}>
                 {isSaving ? t(language, 'editProfile.saving') : t(language, 'editProfile.saveChanges')}
               </button>
             </div>

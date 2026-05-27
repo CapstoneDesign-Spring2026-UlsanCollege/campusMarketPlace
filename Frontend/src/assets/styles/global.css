@@ -437,6 +437,19 @@ h2 { font-size: clamp(1.4rem, 2.2vw, 2rem); line-height: 1.1; }
   border-color: rgba(0, 87, 102, 0.24);
   box-shadow: 0 18px 34px rgba(6, 24, 19, 0.14), 0 0 0 1px rgba(0, 87, 102, 0.05);
 }
+.profile-save-button,
+.signout-confirm-button {
+  color: #21312c;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(238, 244, 242, 0.98) 100%);
+  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 28px rgba(6, 24, 19, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+.profile-save-button:hover,
+.signout-confirm-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 87, 102, 0.24);
+  box-shadow: 0 18px 34px rgba(6, 24, 19, 0.14), 0 0 0 1px rgba(0, 87, 102, 0.05);
+}
 .profile-avatar-wrapper { position: relative; }
 .profile-avatar, .profile-avatar-img, .avatar, .avatar-initial { width: 100px; height: 100px; border-radius: 28px; object-fit: cover; border: 1px solid rgba(15, 123, 69, 0.16); box-shadow: var(--shadow-sm); }
 .profile-avatar, .avatar-initial { display: grid; place-items: center; font-size: 2.5rem; font-weight: 900; color: var(--primary-strong); background: linear-gradient(135deg, #edfdf4, #d8f5e6); }
