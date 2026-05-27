@@ -161,7 +161,7 @@ export default function Profile({ currency, language = 'en' }) {
             <p className="subcopy">{t(language, 'profile.yourAccount')} — {t(language, 'profile.storedLocationNote')}</p>
           </div>
           <div className="profile-hero-action">
-            <button className="button button-primary" type="button" onClick={() => navigate('/profile/edit')}>
+            <button className="button button-primary profile-edit-button" type="button" onClick={() => navigate('/profile/edit')}>
               ✎ Edit profile
             </button>
           </div>
