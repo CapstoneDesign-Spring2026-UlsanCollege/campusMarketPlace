@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { fetchProfile } from '../services/api'
 import { formatPriceFromUsd } from '../services/currency'
 import { getAuthToken } from '../services/auth'
+import { t } from '../services/i18n'
 
 function getInitial(value) {
   return (value || 'Student').trim().charAt(0).toUpperCase() || 'S'
@@ -88,7 +89,7 @@ function ActivityList({ items, currency, emptyMessage }) {
   )
 }
 
-export default function Profile({ currency }) {
+export default function Profile({ currency, language = 'en' }) {
   const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
   const [buyHistory, setBuyHistory] = useState([])
@@ -155,11 +156,9 @@ export default function Profile({ currency }) {
             {!profile?.avatarUrl ? <div className="profile-avatar" aria-hidden="true">{getInitial(displayName)}</div> : null}
           </div>
           <div className="profile-hero-copy">
-            <p className="eyebrow">Your account</p>
+            <p className="eyebrow">{t(language, 'profile.yourAccount')}</p>
             <h1>{displayName}</h1>
-            <p className="subcopy">
-              Manage your marketplace profile, track your listings and purchases, and stay connected.
-            </p>
+            <p className="subcopy">{t(language, 'profile.yourAccount')} — {t(language, 'profile.storedLocationNote')}</p>
           </div>
           <div className="profile-hero-action">
             <button className="button button-primary" type="button" onClick={() => navigate('/profile/edit')}>
@@ -185,15 +184,15 @@ export default function Profile({ currency }) {
 
       <section className="profile-grid" aria-label="Account sections">
         <article className="profile-card panel">
-          <div className="profile-card-header">
+            <div className="profile-card-header">
             <div>
-              <p className="eyebrow">Buy history</p>
-              <h2>Purchases</h2>
+              <p className="eyebrow">{t(language, 'profile.buyHistory')}</p>
+              <h2>{t(language, 'profile.purchases')}</h2>
             </div>
           </div>
           {isLoading ? (
             <div className="profile-empty-state">
-              <p>Loading purchase history...</p>
+              <p>{t(language, 'profile.loadingPurchaseHistory')}</p>
             </div>
           ) : loadError ? (
             <div className="profile-empty-state">
@@ -203,7 +202,7 @@ export default function Profile({ currency }) {
             <ActivityList
               items={buyHistory}
               currency={currency}
-              emptyMessage="No purchase history yet."
+              emptyMessage={t(language, 'profile.noPurchaseHistory')}
             />
           )}
         </article>
@@ -211,13 +210,13 @@ export default function Profile({ currency }) {
         <article className="profile-card panel">
           <div className="profile-card-header">
             <div>
-              <p className="eyebrow">Sell history</p>
-              <h2>Your listings</h2>
+              <p className="eyebrow">{t(language, 'profile.sellHistory')}</p>
+              <h2>{t(language, 'profile.yourListings')}</h2>
             </div>
           </div>
           {isLoading ? (
             <div className="profile-empty-state">
-              <p>Loading listing history...</p>
+              <p>{t(language, 'profile.loadingListingHistory')}</p>
             </div>
           ) : loadError ? (
             <div className="profile-empty-state">
@@ -227,7 +226,7 @@ export default function Profile({ currency }) {
             <ActivityList
               items={sellHistory}
               currency={currency}
-              emptyMessage="No listings posted yet."
+              emptyMessage={t(language, 'profile.noListingsPosted')}
             />
           )}
         </article>
@@ -240,8 +239,8 @@ export default function Profile({ currency }) {
             </div>
           </div>
           <div className="profile-detail-box">
-            <p>Primary location: {locationLabel}</p>
-            <p>Stored from the account record so future edits can update this in one place.</p>
+            <p>{t(language, 'profile.primaryLocation')}: {locationLabel}</p>
+            <p>{t(language, 'profile.storedLocationNote')}</p>
           </div>
         </article>
 

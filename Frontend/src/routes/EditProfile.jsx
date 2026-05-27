@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchProfile, updateProfile, uploadProfileAvatar, updateEmail } from '../services/api'
+import { t } from '../services/i18n'
 
-export default function EditProfile() {
+export default function EditProfile({ language = 'en' }) {
   const navigate = useNavigate()
   const [form, setForm] = useState({ firstName: '', lastName: '', location: '' })
   const [email, setEmail] = useState('')
@@ -144,9 +145,9 @@ export default function EditProfile() {
     <main className="page-shell profile-shell">
       <section className="profile-hero panel">
         <div>
-          <p className="eyebrow">Edit profile</p>
-          <h1>Edit your account</h1>
-          <p className="subcopy">Update your name and pickup location.</p>
+          <p className="eyebrow">{t(language, 'editProfile.title')}</p>
+          <h1>{t(language, 'editProfile.heading')}</h1>
+          <p className="subcopy">{t(language, 'editProfile.subcopy')}</p>
         </div>
       </section>
 
@@ -154,7 +155,7 @@ export default function EditProfile() {
         <article className="profile-card panel">
           <form onSubmit={onSave}>
             <div style={{ marginBottom: 12 }}>
-              <label style={{ display: 'block', marginBottom: 6 }}>Avatar</label>
+              <label style={{ display: 'block', marginBottom: 6 }}>{t(language, 'editProfile.avatar')}</label>
               {avatarPreview ? (
                 <img src={avatarPreview} alt="avatar preview" style={{ width: 72, height: 72, borderRadius: 8, objectFit: 'cover', display: 'block', marginBottom: 6 }} />
               ) : (
@@ -163,37 +164,37 @@ export default function EditProfile() {
               <input type="file" accept="image/*" onChange={onAvatarSelect} />
             </div>
             <label>
-              First name
+              {t(language, 'editProfile.firstName')}
               <input name="firstName" value={form.firstName} onChange={onChange} />
             </label>
 
             <label>
-              Last name
+              {t(language, 'editProfile.lastName')}
               <input name="lastName" value={form.lastName} onChange={onChange} />
             </label>
 
             <label>
-              Email
+              {t(language, 'editProfile.email')}
               <input name="email" value={email} onChange={(e) => { setEmail(e.target.value); setIsDirty(true) }} />
             </label>
 
             <label>
-              Location
+              {t(language, 'editProfile.location')}
               <input name="location" value={form.location} onChange={onChange} />
             </label>
 
             {error ? <div className="profile-empty-state">{error}</div> : null}
             <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'center' }}>
               <button className="button button-secondary" type="button" onClick={() => navigate('/profile')} disabled={isSaving}>
-                Cancel
+                {t(language, 'editProfile.cancel')}
               </button>
 
               <button className="button" type="button" onClick={() => navigate('/profile/change-password')} style={{ marginLeft: 8 }}>
-                Change password
+                {t(language, 'editProfile.changePassword')}
               </button>
 
               <button className="button button-primary" type="submit" disabled={isSaving || !isDirty} style={{ marginLeft: 'auto' }}>
-                {isSaving ? 'Saving…' : 'Save changes'}
+                {isSaving ? t(language, 'editProfile.saving') : t(language, 'editProfile.saveChanges')}
               </button>
             </div>
             {submitStatus.message && (

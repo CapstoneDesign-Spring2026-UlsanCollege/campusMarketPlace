@@ -1,32 +1,33 @@
 import ItemCard from './ItemCard'
 import { CATEGORIES, getCategoryLabel } from '../constants/categories'
+import { t } from '../services/i18n'
 
-function LoadingState() {
+function LoadingState({ language = 'en' }) {
   return (
     <div className="state-card" role="status" aria-live="polite">
-      <p className="state-title">Loading items</p>
-      <p className="state-copy">Fetching the latest marketplace listings…</p>
+      <p className="state-title">{t(language, 'browse.loadingItems')}</p>
+      <p className="state-copy">{t(language, 'browse.fetchingLatest')}</p>
     </div>
   )
 }
 
-function ErrorState({ error, onRetry }) {
+function ErrorState({ error, onRetry, language = 'en' }) {
   return (
     <div className="state-card state-card-error" role="alert">
-      <p className="state-title">Could not load items</p>
+      <p className="state-title">{t(language, 'browse.couldNotLoad')}</p>
       <p className="state-copy">{error}</p>
       <button className="button button-primary" type="button" onClick={onRetry}>
-        Try again
+        {t(language, 'browse.tryAgain')}
       </button>
     </div>
   )
 }
 
-function EmptyState() {
+function EmptyState({ language = 'en' }) {
   return (
     <div className="state-card" role="status">
-      <p className="state-title">No items yet</p>
-      <p className="state-copy">Be the first to post something for the campus marketplace.</p>
+      <p className="state-title">{t(language, 'browse.noItemsYet')}</p>
+      <p className="state-copy">{t(language, 'browse.beFirst')}</p>
     </div>
   )
 }
@@ -41,6 +42,7 @@ export default function ItemGrid({
   onCategoryChange,
   onPageChange,
   onRetry,
+  language = 'en',
 }) {
   const page = pagination?.page || 1
   const pages = pagination?.pages || 1
@@ -50,15 +52,15 @@ export default function ItemGrid({
   const end = total === 0 ? 0 : Math.min(page * limit, total)
 
   return (
-    <section className="browse-section" aria-label="Marketplace items">
+    <section className="browse-section" aria-label={t(language, 'browse.title')}>
       <div className="browse-toolbar">
         <div>
-          <p className="eyebrow">Browse listings</p>
-          <h2>Explore items across campus</h2>
+          <p className="eyebrow">{t(language, 'browse.browseListings')}</p>
+          <h2>{t(language, 'browse.exploreItems')}</h2>
           <p className="browse-summary">
             {total > 0
-              ? `Showing ${start}-${end} of ${total} items${currentCategory ? ` in ${getCategoryLabel(currentCategory)}` : ''}`
-              : 'Browse the latest listings from students.'}
+              ? `${t(language, 'browse.showing')} ${start}-${end} ${t(language, 'browse.of')} ${total} ${t(language, 'browse.items')}${currentCategory ? ` ${t(language, 'browse.in')} ${getCategoryLabel(currentCategory)}` : ''}`
+              : t(language, 'browse.latestListings')}
           </p>
         </div>
 
@@ -70,7 +72,7 @@ export default function ItemGrid({
             disabled={isLoading}
             aria-label="Filter by category"
           >
-            <option value="">Select category</option>
+            <option value="">{t(language, 'browse.selectCategory')}</option>
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>
                 {cat}
@@ -80,7 +82,7 @@ export default function ItemGrid({
 
           <div className="pagination-summary" aria-label="Pagination summary">
             <span>
-              Page {page} of {pages}
+              {t(language, 'browse.page')} {page} {t(language, 'browse.of')} {pages}
             </span>
             <div className="pagination-actions">
               <button
@@ -89,7 +91,7 @@ export default function ItemGrid({
                 onClick={() => onPageChange(Math.max(1, page - 1))}
                 disabled={isLoading || page <= 1}
               >
-                Previous
+                {t(language, 'browse.previous')}
               </button>
               <button
                 className="button button-secondary"
@@ -97,7 +99,7 @@ export default function ItemGrid({
                 onClick={() => onPageChange(Math.min(pages, page + 1))}
                 disabled={isLoading || page >= pages}
               >
-                Next
+                {t(language, 'browse.next')}
               </button>
             </div>
           </div>
@@ -105,15 +107,15 @@ export default function ItemGrid({
       </div>
 
       {isLoading ? (
-        <LoadingState />
+        <LoadingState language={language} />
       ) : error ? (
-        <ErrorState error={error} onRetry={onRetry} />
+        <ErrorState error={error} onRetry={onRetry} language={language} />
       ) : items.length === 0 ? (
-        <EmptyState />
+        <EmptyState language={language} />
       ) : (
         <div className="item-grid" aria-busy={isLoading ? 'true' : 'false'}>
           {items.map((item) => (
-            <ItemCard key={item._id} item={item} currency={currency} />
+            <ItemCard key={item._id} item={item} currency={currency} language={language} />
           ))}
         </div>
       )}

@@ -4,3 +4,7 @@ __pycache__/
 *.pyc
 uploads/
 .venv/
+.env
+Frontend/.env
+.env.local
+Frontend/.env.local

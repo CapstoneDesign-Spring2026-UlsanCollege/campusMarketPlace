@@ -383,33 +383,187 @@ All code merged to `main` this sprint must:
 ### Receipt Template
 
 ```
-## Contribution Receipts - [Name]
+# Contribution Receipts - Sprint 3 (Week 9-11)
+
+---
+
+## Contribution Receipts - Sob Sagar
 
 ### Week 9
-- PR: [PR link] — [Brief description of work]
-- Issue: [Issue link] — [What was fixed/implemented]
-- Review: [PR review link] — [Feedback provided]
+- PR: [#55](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/55) — Backend auth flow stabilization and validation hardening
+- Issue: [Login validation improvements](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/projects) — Verified JWT behavior and fixed malformed JWT subject issue
+- Review: Peer review of login state management integration — Approved auth connectivity fixes
 
 ### Week 10
-- PR: [PR link] — [Feature/fix added]
-- Documentation: [Link to doc update] — [What was documented]
+- PR: [#57](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/57) — Core API validation and consistency improvements
+- Documentation: [Sprint 3 Board State](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/docs/Sprint_Packet/SPRINT_3.md#current-board-state) — Documented integration testing findings
 
 ### Week 11
-- PR: [PR link] — [Final feature or bug fix]
-- Testing: [Evidence of testing] — [What was verified]
+- PR: [#59](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/59) — Item listing endpoints (GET /api/items, GET /api/items/<id>)
+- PR: [#62](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/62) — Email verification gate enforced on login + JWT bug fixes
+- Testing: Tested all API endpoints via curl/Postman — Verified item schema validation and MongoDB indexes working correctly
 
 ### Ownership Summary
-I own the [area: e.g., "item API endpoints" / "auth forms" / "database schema"] and can explain:
-- How [component] works
-- Why [design decision] was made
-- How to test [feature]
+I own the **backend auth + item API (app.py routes)** and can explain:
+- How the email verification gate blocks unverified users with 403 response
+- Why we enforce JWT validation before item operations
+- How to test item endpoints with valid/invalid payloads via Postman
 
 ### AI Use This Sprint
-- AI tool: [Copilot/ChatGPT/Other]
-- Helped with: [specific task]
-- I personally: [verified/changed/tested this]
-- One thing I still do not fully understand: [learning gap]
-```
+- AI tool: GitHub Copilot
+- Helped with: Boilerplate code for item schema validation and MongoDB index setup
+- I personally: Tested and debugged all API behaviors manually; fixed JWT subject issue independently
+- One thing I still do not fully understand: Email provider integration flow and OTP tying to `isVerified` flag
+
+---
+
+## Contribution Receipts - Rai Sudarshan
+
+### Week 9
+- PR: [#29](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/29) — Flask backend architecture and requirements.txt setup
+- Issue: [CI/GitHub Actions configuration](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/projects) — Initialized deployment pipeline
+- Documentation: [Backend README](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/README.md) — Documented project structure
+
+### Week 10
+- PR: [#29](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/29) (ongoing) — CI/CD pipeline configuration continued
+- Documentation: [GitHub Actions Workflow](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/actions) — Verified GitHub Pages auto-deploy setup
+
+### Week 11
+- PR: [#29](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/29) — Final CI setup for automated testing preparation
+- Documentation: [requirements.txt updated](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/requirements.txt) — Added dependencies for Week 12 pytest
+
+### Ownership Summary
+I own the **Flask backend setup + CI/GitHub Actions pipeline** and can explain:
+- How Flask application entry point (app.py) is configured
+- Why GitHub Actions triggers on pull requests and how it deploys to GitHub Pages
+- How to add new Python dependencies and ensure they're installed
+
+### AI Use This Sprint
+- AI tool: ChatGPT
+- Helped with: GitHub Actions workflow YAML syntax and Python dependency management best practices
+- I personally: Reviewed and adjusted workflow to match project needs; tested deployment manually
+- One thing I still do not fully understand: How to integrate pytest into CI pipeline and enforce test passing before merge
+
+---
+
+## Contribution Receipts - Ananda Tamang
+
+### Week 9
+- PR: [#29](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/29) — MongoDB database schema design and collection initialization
+- Issue: [Database structure for User collection](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/projects) — Defined user fields (email, password, isVerified, firstName, lastName)
+- Review: Peer review of schema — Approved structure for item collection with seller info
+
+### Week 10
+- PR: [#29](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/29) (ongoing) — Item collection schema refinement
+- Documentation: [MongoDB indexing strategy](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/docs/Sprint_Packet/SPRINT_3.md) — Documented why indexes improve query performance
+
+### Week 11
+- PR: [#60](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/60) — Item schema validation with MongoDB indexes merged
+- Testing: Verified MongoDB index creation on startup — Confirmed queries execute within acceptable latency
+- Documentation: [Schema fields finalized](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/models/item.py) — Documented all item fields and validation rules
+
+### Ownership Summary
+I own the **MongoDB database layer and schema design** and can explain:
+- How user schema validates email format and stores password hashed
+- Why item schema includes seller info and supports multiple images
+- How MongoDB indexes are created and why they matter for query performance
+
+### AI Use This Sprint
+- AI tool: GitHub Copilot + ChatGPT
+- Helped with: PyMongo syntax for schema validation and index creation
+- I personally: Reviewed schema fields to match product requirements; tested index performance; decided on field naming conventions
+- One thing I still do not fully understand: How to design and integrate email verification token storage alongside `isVerified` flag
+
+
+### Scribe/PM Responsibilities
+I maintained documentation of:
+- All weekly demos and demo scripts (backup plans included)
+- PR evidence links for shipped work (PRs #55-#62)
+- Team ownership clarity and honest assessment of confusion areas
+- Risk tracking with mitigation strategies
+- Definition of Done and engineering practices
+- Individual contribution tracking (this receipt document)
+- Week 12 planning and transition handoff
+
+### Ownership Summary
+As **PM & Scribe**, I own:
+- **Sprint documentation and evidence trail** — Every shipped item has a PR link; every risk has a mitigation; every team member has ownership mapped
+- **Week 9-11 narrative** — Demo scripts, weekly summaries, what shipped/broke/risks
+- **Team coordination** — Defined roles, ownership, and planning for post-sprint work
+
+### AI Use This Sprint
+- AI tool: ChatGPT + Claude
+- Helped with: Sprint packet structure, risk categorization, documentation drafting, and receipt template
+- I personally: Reviewed all AI suggestions for accuracy; verified every PR link works; interviews team for ownership clarity; edited and finalized all documentation
+- One thing I still do not fully understand: Email OTP implementation flow and how to design email verification tokens for future sprints
+
+**PM Impact:**  
+Sprint 3 documentation complete and consolidated. All team contributions tracked with evidence. Ready for Week 12 QA handoff and final evaluation.
+
+---
+
+## Contribution Receipts - Rai Aayuska
+
+### Week 9
+- PR: [#26](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/26) — Bootstrap 5 frontend framework and responsive design foundation
+- Issue: [Navbar component responsive layout](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/projects) — Implemented mobile-first design
+- Review: Peer review of component styling — Approved consistent spacing and color scheme
+
+### Week 10
+- PR: [#26](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/26) (ongoing) — Component library expansion with form styles
+- Documentation: [UI/UX design guidelines](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/docs/WIREFRAME.md) — Updated wireframes to reflect implemented designs
+
+### Week 11
+- PR: [#26](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/26) — Final responsive design polish for MVP
+- Testing: Cross-browser testing on mobile and desktop — Verified responsive breakpoints working correctly
+- Documentation: [Component library documented](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/Frontend/src/components/) — Added component usage examples
+
+### Ownership Summary
+I own the **UI/UX design and responsive frontend foundation** and can explain:
+- How Bootstrap 5 grid system enables mobile-first design
+- Why we chose specific breakpoints for tablet/mobile views
+- How to add new styled components following the established patterns
+
+### AI Use This Sprint
+- AI tool: GitHub Copilot
+- Helped with: Bootstrap utility classes and CSS media query suggestions
+- I personally: Reviewed all AI suggestions for design consistency; tested on real devices; adjusted spacing/colors for accessibility
+- One thing I still do not fully understand: How forms validate and connect to backend API (defer to Gayatri for implementation details)
+
+---
+
+## Contribution Receipts - Gayatri K. Bhandari
+
+### Week 9
+- PR: [#55](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/55) — Signup/Login form UI components and initial API integration
+- Issue: [Form validation and error states](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/projects) — Implemented campus email format validation on frontend
+- Review: Peer review of login state management — Approved handling of verified/unverified user states
+
+### Week 10
+- PR: [#57](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/57) — Form validation improvements and API response error handling
+- Documentation: [Form component API contract](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/blob/main/Frontend/src/routes/Login.jsx) — Documented expected API responses
+- Testing: End-to-end signup/login flow on localhost — Verified form submission lifecycle and state transitions
+
+### Week 11
+- PR: [#61](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/61) — Post item composer form fully integrated with backend API
+- PR: [#62](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/62) — Mock data replaced with real API calls
+- Testing: Verified form submissions create items in MongoDB — Confirmed item appears in GET /api/items response
+
+### Ownership Summary
+I own the **frontend forms + API integration and state management** and can explain:
+- How signup/login forms validate input and handle backend responses
+- Why we store JWT token in localStorage and include it in item posting requests
+- How to test form submissions end-to-end from UI to database
+
+### AI Use This Sprint
+- AI tool: GitHub Copilot + ChatGPT
+- Helped with: React form state management patterns and API fetch error handling
+- I personally: Tested all form flows manually; debugged signup state persistence issues; verified API payload correctness
+- One thing I still do not fully understand: How to build and optimize the item listings page component for browsing many items
+---
+
+**All receipts submitted:** May 21, 2026  
+**Ready for instructor review:** 
 
 ---
 
