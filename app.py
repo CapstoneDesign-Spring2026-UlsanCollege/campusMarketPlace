@@ -1084,11 +1084,12 @@ def signup():
         return json_error('A verification request already exists for this email.', 409)
 
     saved_pending = pending_signups.find_one({'email': email})
-    # Send OTP to the user's email (best-effort)
-    try:
-        send_verification_otp(email, saved_pending.get('emailOtp'))
-    except Exception:
-        pass
+    otp_sent = send_verification_otp(email, saved_pending.get('emailOtp'))
+    if not otp_sent:
+        return json_error(
+            'Verification code could not be sent. Check SendGrid/SMTP settings and the verified sender address.',
+            502,
+        )
 
     resend_available_at = format_resend_available_at(
         saved_pending.get('emailOtpSentAt')
@@ -1224,10 +1225,12 @@ def resend_email_otp():
         {'$set': update_fields},
     )
 
-    try:
-        send_verification_otp(email, otp)
-    except Exception:
-        pass
+    otp_sent = send_verification_otp(email, otp)
+    if not otp_sent:
+        return json_error(
+            'Verification code could not be resent. Check SendGrid/SMTP settings and the verified sender address.',
+            502,
+        )
 
     resend_available_at = format_resend_available_at(now)
     return jsonify({'message': 'Verification code resent.', 'resendAvailableAt': resend_available_at})
