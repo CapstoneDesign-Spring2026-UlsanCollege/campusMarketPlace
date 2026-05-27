@@ -3,11 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { changePassword } from '../services/api'
 import { t } from '../services/i18n'
 
-export default function ChangePassword() {
-  const { language = 'en' } = props;
+export default function ChangePassword({ language = 'en' }) {
   const navigate = useNavigate()
   const [currentPassword, setCurrentPassword] = useState('')
-  const [password, setPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
@@ -24,24 +23,23 @@ export default function ChangePassword() {
       return
     }
 
-    if (!password) {
+    if (!newPassword) {
       setMessage({ type: 'error', text: 'New password is required.' })
       return
     }
 
-    if (password !== confirmPassword) {
+    if (newPassword !== confirmPassword) {
       setMessage({ type: 'error', text: 'Passwords do not match.' })
       return
     }
 
     setIsLoading(true)
     try {
-      await changePassword(password, currentPassword)
+      await changePassword(currentPassword, newPassword)
       setMessage({ type: 'success', text: t(language, 'changePassword.success') })
       setCurrentPassword('')
-      setPassword('')
+      setNewPassword('')
       setConfirmPassword('')
-      // optionally navigate back to profile after short delay
       setTimeout(() => navigate('/profile'), 900)
     } catch (err) {
       setMessage({ type: 'error', text: err?.message || 'Unable to change password.' })
@@ -76,7 +74,7 @@ export default function ChangePassword() {
           <label>
             {t(language, 'changePassword.newPassword')}
             <div className="input-with-action">
-              <input type={showNewPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
+              <input type={showNewPassword ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} autoComplete="new-password" />
               <button type="button" className="toggle-visibility" onClick={() => setShowNewPassword((s) => !s)} aria-label={showNewPassword ? 'Hide password' : 'Show password'}>
                 {showNewPassword ? 'Hide' : 'Show'}
               </button>
