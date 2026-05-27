@@ -45,6 +45,40 @@ def test_signup_login_and_avatar_upload(client):
     assert rv2.status_code == 200
 
 
+def test_item_status_can_be_updated_by_owner(client):
+    email = 'item-owner@example.com'
+    password = 'Test1234!'
+
+    signup = client.post('/api/auth/signup', json={'firstName': 'Item', 'lastName': 'Owner', 'email': email, 'password': password})
+    assert signup.status_code == 201
+    token = signup.get_json()['token']
+
+    created = client.post(
+        '/api/items',
+        json={
+            'title': 'Textbook',
+            'description': 'Calculus book',
+            'price': 10,
+            'category': 'Books',
+            'status': 'active',
+            'image': 'https://example.com/book.jpg',
+            'images': ['https://example.com/book.jpg'],
+        },
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert created.status_code == 201
+    item_id = created.get_json()['item']['_id']
+
+    updated = client.put(
+        f'/api/items/{item_id}',
+        json={'status': 'reserved'},
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert updated.status_code == 200
+    updated_item = updated.get_json()['item']
+    assert updated_item['status'] == 'reserved'
+
+
 # Note: To run these tests locally, create a conftest.py fixture that creates
 # a Flask test client and configures the app to use TEST_MONGODB_URI. This
 # file intentionally leaves those details out to avoid assumptions about your

@@ -123,7 +123,7 @@ items = db.items
 message_threads = db.message_threads
 message_messages = db.message_messages
 # Adopt richer status values for listings
-ITEM_STATUSES = {'draft', 'active', 'sold', 'removed'}
+ITEM_STATUSES = {'draft', 'active', 'reserved', 'sold', 'removed'}
 
 
 def ensure_items_collection_schema():
@@ -1828,6 +1828,93 @@ def create_item():
         }), 201
     except Exception as exc:
         return json_error(f'Failed to create item: {str(exc)}', 500)
+
+
+@app.put('/api/items/<item_id>')
+def update_item(item_id):
+    """Update an existing marketplace item owned by the current seller."""
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return json_error('Missing bearer token.', 401)
+
+    token = auth_header.removeprefix('Bearer ').strip()
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.PyJWTError:
+        return json_error('Invalid or expired token.', 401)
+
+    seller_id = parse_object_id(payload.get('sub'))
+    item_oid = parse_object_id(item_id)
+    if not seller_id or not item_oid:
+        return json_error('Invalid item id.', 400)
+
+    item_doc = items.find_one({'_id': item_oid})
+    if not item_doc:
+        return json_error('Item not found.', 404)
+
+    item_seller_id = item_doc.get('seller_id') or item_doc.get('sellerId')
+    if str(item_seller_id) != str(seller_id):
+        return json_error('You can only edit your own listings.', 403)
+
+    data = request.get_json(silent=True) or {}
+    updates = {}
+
+    if 'status' in data:
+        status = str(data.get('status', '')).strip().lower()
+        if status not in ITEM_STATUSES:
+            return json_error(
+                'Status must be one of: draft, active, reserved, sold, removed.',
+                400,
+            )
+        updates['status'] = status
+        updates['soldAt'] = datetime.now(timezone.utc) if status == 'sold' else None
+
+    for field in ('title', 'description', 'category', 'location', 'meeting_notes'):
+        if field in data:
+            value = str(data.get(field, '')).strip()
+            if field in {'title', 'description', 'category'} and not value:
+                return json_error(f'{field} is required.', 400)
+            updates[field] = value or None
+
+    if 'price' in data:
+        try:
+            price = float(data['price'])
+            if price < 0:
+                return json_error('Price must be a positive number.', 400)
+        except (ValueError, TypeError):
+            return json_error('Price must be a valid number.', 400)
+        updates['price'] = price
+
+    if 'image' in data or 'images' in data:
+        raw_images = data.get('images')
+        images = []
+        if isinstance(raw_images, list):
+            images = [str(url).strip() for url in raw_images if str(url).strip()]
+        elif isinstance(raw_images, str) and raw_images.strip():
+            images = [raw_images.strip()]
+
+        primary_image = str(data.get('image', '')).strip()
+        if primary_image and primary_image not in images:
+            images.insert(0, primary_image)
+
+        if images:
+            updates['images'] = images
+            updates['image'] = images[0]
+
+    if not updates:
+        return json_error('No updates provided.', 400)
+
+    updates['updatedAt'] = datetime.now(timezone.utc)
+
+    try:
+        items.update_one({'_id': item_oid}, {'$set': updates})
+        updated_item = items.find_one({'_id': item_oid})
+        return jsonify({
+            'message': 'Item updated successfully.',
+            'item': serialize_item_document(updated_item),
+        })
+    except Exception as exc:
+        return json_error(f'Failed to update item: {str(exc)}', 500)
 
 
 if __name__ == '__main__':
