@@ -1360,6 +1360,44 @@ def update_profile():
     return jsonify({'user': build_user_payload(updated_user_doc)})
 
 
+@app.put('/api/profile/password')
+def update_profile_password():
+    user_id, user_doc, auth_error = get_current_user_from_request()
+    if auth_error:
+        return auth_error
+
+    data = request.get_json(silent=True) or {}
+    current_password = str(data.get('currentPassword', '')).strip()
+    new_password = str(data.get('password') or data.get('newPassword') or '').strip()
+
+    if not current_password:
+        return json_error('Current password is required.', 400)
+    if not new_password:
+        return json_error('New password is required.', 400)
+
+    if not check_password_hash(user_doc['passwordHash'], current_password):
+        return json_error('Current password is incorrect.', 400)
+
+    is_valid, error_msg = is_strong_password(new_password)
+    if not is_valid:
+        return json_error(error_msg, 400)
+
+    try:
+        users.update_one(
+            {'_id': user_id},
+            {
+                '$set': {
+                    'passwordHash': generate_password_hash(new_password),
+                    'updatedAt': datetime.now(timezone.utc),
+                }
+            },
+        )
+    except Exception as exc:
+        return json_error(f'Failed to update password: {str(exc)}', 500)
+
+    return jsonify({'message': 'Password updated successfully.'})
+
+
 @app.get('/api/messages/threads')
 def get_message_threads():
     user_id, _user_doc, auth_error = get_current_user_from_request()

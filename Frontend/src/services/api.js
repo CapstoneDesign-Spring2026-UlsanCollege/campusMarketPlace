@@ -130,9 +130,9 @@ export async function updateEmail(email) {
   })
 }
 
-export async function changePassword(password, currentPassword = '') {
+export async function changePassword(currentPassword, newPassword) {
   return apiRequest('/profile/password', {
     method: 'PUT',
-    body: JSON.stringify({ password, currentPassword }),
+    body: JSON.stringify({ currentPassword, password: newPassword }),
   })
 }
