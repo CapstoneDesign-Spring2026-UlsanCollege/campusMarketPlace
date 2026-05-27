@@ -37,6 +37,40 @@ npm run dev
 
 Open the local URL shown by Vite (usually `http://localhost:5173`).
 
+### Email (SendGrid) setup for OTP delivery
+
+The app supports SendGrid (recommended) or an SMTP server for sending email OTPs during signup.
+
+1. Create a `.env` file at the project root (or copy `.env.example`) and set one of the following:
+
+	 - SendGrid (preferred):
+
+		 - `SENDGRID_API_KEY=SG.xxxxx` (create an API key in your SendGrid dashboard)
+		 - `SENDGRID_FROM=you@yourdomain.com` (optional, falls back to `EMAIL_FROM`)
+
+	 - SMTP fallback:
+
+		 - `SMTP_HOST=smtp.example.com`
+		 - `SMTP_PORT=587`
+		 - `SMTP_USER=smtp-user`
+		 - `SMTP_PASS=smtp-pass`
+		 - `EMAIL_FROM=you@yourdomain.com`
+
+2. Install dependencies and restart the backend:
+
+```bash
+pip install -r requirements.txt
+source .venv/bin/activate
+export FLASK_APP=app.py
+export FLASK_ENV=development
+flask run --port 5050
+```
+
+3. Signup using a `@office.uc.ac.kr` email. If SendGrid/SMTP is configured correctly, the OTP will be delivered to the user's inbox. If not configured, the OTP is printed in the backend console for local testing.
+
+If you need a quick SendGrid test, you can generate an API key in the SendGrid dashboard, set `SENDGRID_API_KEY` in `.env`, and restart the backend.
+
+
 ## Image Upload Storage (Important)
 
 Uploaded listing images are written to the backend upload directory.

@@ -18,8 +18,6 @@ export default function Navbar({
   isAuthenticated,
   authUser,
   onAuthChange,
-  marketQuery = '',
-  onMarketQueryChange,
 }) {
   const location = useLocation()
   const navigate = useNavigate()
@@ -29,14 +27,13 @@ export default function Navbar({
   const showAuthNav = isDashboard || isAuthenticated
   const [showSignOutModal, setShowSignOutModal] = useState(false)
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false)
-  const [searchMenuOpen, setSearchMenuOpen] = useState(false)
   const currentLangLabel = LANGUAGE_OPTIONS.find((o) => o.value === language)?.label || language
-  const setMarketQuery = typeof onMarketQueryChange === 'function' ? onMarketQueryChange : () => {}
 
   const isDashboardHomeActive = isDashboard && (!dashboardMode || dashboardMode === 'home')
   const isBuyActive = isDashboard && dashboardMode === 'buy'
   const isSellActive = isDashboard && dashboardMode === 'sell'
   const isHomeActive = (!isAuthenticated && location.pathname === '/') || isDashboardHomeActive
+  const isSearchActive = location.pathname === '/search'
   const isMessagesActive = location.pathname === '/messages'
   const isProfileActive = location.pathname === '/profile'
   const isLoginActive = location.pathname === '/login'
@@ -103,8 +100,7 @@ export default function Navbar({
   }
 
   function handleSearch() {
-    // Toggle the search/story menu instead of focusing the composer directly
-    setSearchMenuOpen((s) => !s)
+    navigate('/search')
   }
 
   function handleSignOut() {
@@ -167,60 +163,7 @@ export default function Navbar({
         {showAuthNav ? (
           <>
             {renderActionButton({ className: 'nav-pill nav-pill-home', icon: iconLabels.home, label: t(language, 'navbar.home'), onClick: handleHome, active: isHomeActive })}
-            {renderActionButton({ className: 'nav-pill', icon: iconLabels.search, label: t(language, 'navbar.search'), onClick: handleSearch })}
-            {searchMenuOpen && (
-              <div className="search-menu search-menu-panel" role="menu" aria-label="Marketplace search">
-                <p className="eyebrow">Verified students only</p>
-                <h2>Buy &amp; sell on campus safely</h2>
-                <p className="subcopy">
-                  Browse premium campus deals, list what you no longer need, and chat with verified students in a calmer, cleaner marketplace.
-                </p>
-
-                <div className="dashboard-search" role="search" aria-label="Marketplace search">
-                  <input
-                    value={marketQuery}
-                    onChange={(event) => setMarketQuery(event.target.value)}
-                    type="search"
-                    placeholder="Search textbooks, laptops, bikes..."
-                    aria-label="Search marketplace listings"
-                  />
-                  <span className="hero-search-tag">Live search</span>
-                </div>
-
-                <div className="category-chip-row" aria-label="Quick categories">
-                  <button
-                    type="button"
-                    className={`category-chip ${!marketQuery ? 'is-active' : ''}`}
-                    onClick={() => setMarketQuery('')}
-                  >
-                    All
-                  </button>
-                  {CATEGORIES.map((category) => (
-                    <button
-                      key={category}
-                      type="button"
-                      className={`category-chip ${marketQuery.toLowerCase().includes(category.toLowerCase()) ? 'is-active' : ''}`}
-                      onClick={() => setMarketQuery(category)}
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="search-menu-actions">
-                  <button
-                    className="button button-secondary"
-                    type="button"
-                    onClick={() => {
-                      setSearchMenuOpen(false)
-                      navigate('/browse')
-                    }}
-                  >
-                    View all
-                  </button>
-                </div>
-              </div>
-            )}
+            {renderActionButton({ className: 'nav-pill', icon: iconLabels.search, label: t(language, 'navbar.search'), onClick: handleSearch, active: isSearchActive })}
             {isAuthenticated && (
               renderActionButton({ className: 'nav-pill', icon: iconLabels.messages, label: t(language, 'navbar.messages'), onClick: () => navigate('/messages'), active: isMessagesActive })
             )}

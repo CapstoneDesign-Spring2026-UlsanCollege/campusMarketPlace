@@ -6,6 +6,10 @@ from datetime import datetime, timedelta, timezone
 import certifi
 import jwt
 from bson import ObjectId
+import smtplib
+import ssl
+from email.message import EmailMessage
+import requests
 try:
     import cloudinary
     import cloudinary.uploader
@@ -21,7 +25,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).resolve().parent / '.env')
 
 
 MONGODB_URI = os.getenv('MONGODB_URI')
@@ -95,6 +99,17 @@ elif is_production:
 
 IMAGE_STORAGE_MODE = 'cloudinary' if use_cloudinary else 'local-disk'
 
+# Email / SMTP settings for sending OTPs
+SMTP_HOST = os.getenv('SMTP_HOST', '').strip()
+SMTP_PORT = int(os.getenv('SMTP_PORT', '587'))
+SMTP_USER = os.getenv('SMTP_USER', '').strip()
+SMTP_PASS = os.getenv('SMTP_PASS', '').strip()
+EMAIL_FROM = os.getenv('EMAIL_FROM', SMTP_USER).strip()
+OTP_TTL_SECONDS = int(os.getenv('OTP_TTL_SECONDS', '600'))  # 10 minutes by default
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '').strip()
+SENDGRID_FROM = os.getenv('SENDGRID_FROM', EMAIL_FROM).strip()
+RESEND_COOLDOWN_SECONDS = int(os.getenv('RESEND_COOLDOWN_SECONDS', '120'))  # 2 minutes default
+
 client = MongoClient(
     MONGODB_URI,
     serverSelectionTimeoutMS=8000,
@@ -103,6 +118,7 @@ client = MongoClient(
 )
 db = client[MONGODB_DB_NAME]
 users = db.users
+pending_signups = db.pending_signups
 items = db.items
 message_threads = db.message_threads
 message_messages = db.message_messages
@@ -180,6 +196,80 @@ def ensure_items_collection_schema():
             },
         }
     }
+
+
+def generate_otp(length=6):
+    from random import randint
+
+    # Generate a zero-padded numeric OTP
+    max_val = 10 ** length - 1
+    val = randint(0, max_val)
+    return str(val).zfill(length)
+
+
+def send_email(to_address, subject, body_text, body_html=None):
+    """Send a simple email using SMTP if configured. In development, logs to console."""
+    # Prefer SendGrid API when configured
+    if SENDGRID_API_KEY:
+        payload = {
+            'personalizations': [{'to': [{'email': to_address}], 'subject': subject}],
+            'from': {'email': SENDGRID_FROM or EMAIL_FROM},
+            'content': [{'type': 'text/plain', 'value': body_text}],
+        }
+        if body_html:
+            payload['content'] = [
+                {'type': 'text/plain', 'value': body_text},
+                {'type': 'text/html', 'value': body_html},
+            ]
+
+        try:
+            resp = requests.post(
+                'https://api.sendgrid.com/v3/mail/send',
+                headers={
+                    'Authorization': f'Bearer {SENDGRID_API_KEY}',
+                    'Content-Type': 'application/json',
+                },
+                json=payload,
+                timeout=10,
+            )
+            if resp.status_code >= 200 and resp.status_code < 300:
+                return True
+            print('SendGrid send failed:', resp.status_code, resp.text)
+        except Exception as exc:
+            print('SendGrid exception:', exc)
+
+    # Fallback to SMTP if configured
+    if SMTP_HOST and SMTP_USER and SMTP_PASS:
+        msg = EmailMessage()
+        msg['Subject'] = subject
+        msg['From'] = EMAIL_FROM
+        msg['To'] = to_address
+        msg.set_content(body_text)
+        if body_html:
+            msg.add_alternative(body_html, subtype='html')
+
+        try:
+            context = ssl.create_default_context()
+            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
+                server.starttls(context=context)
+                server.login(SMTP_USER, SMTP_PASS)
+                server.send_message(msg)
+            return True
+        except Exception as exc:
+            print('Failed to send email via SMTP:', exc)
+
+    # Development fallback: log message
+    print('Email not sent (no provider configured). To:', to_address)
+    print('Subject:', subject)
+    print('Body:', body_text)
+    return False
+
+
+def send_verification_otp(user_email, otp_code):
+    subject = 'Your Campus Marketplace verification code'
+    body = f'Your verification code is: {otp_code}\n\nIt will expire in {OTP_TTL_SECONDS // 60} minutes.'
+    html = f'<p>Your verification code is: <strong>{otp_code}</strong></p><p>It will expire in {OTP_TTL_SECONDS // 60} minutes.</p>'
+    return send_email(user_email, subject, body, html)
 
     collection_names = db.list_collection_names()
     if 'items' in collection_names:
@@ -415,6 +505,10 @@ def serialize_message_document(message_doc):
 try:
     client.admin.command('ping')
     users.create_index('email', unique=True)
+    try:
+        pending_signups.create_index('email', unique=True)
+    except Exception:
+        pass
     ensure_items_collection_schema()
     ensure_messages_collection_schema()
     items = db.items
@@ -579,6 +673,35 @@ def handle_request_too_large(_error):
 
 def normalize_email(email):
     return email.strip().lower()
+
+
+def ensure_utc_datetime(value):
+    if not isinstance(value, datetime):
+        return None
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
+
+def get_verification_record(email):
+    pending_doc = pending_signups.find_one({'email': email})
+    if pending_doc:
+        return pending_doc, pending_signups
+
+    user_doc = users.find_one({'email': email})
+    if user_doc and not user_doc.get('isVerified'):
+        return user_doc, users
+
+    return None, None
+
+
+def format_resend_available_at(sent_at):
+    sent_at = ensure_utc_datetime(sent_at)
+    if not sent_at:
+        return None
+    return (
+        sent_at + timedelta(seconds=RESEND_COOLDOWN_SECONDS)
+    ).isoformat()
 
 
 def build_user_payload(user_doc):
@@ -919,33 +1042,63 @@ def signup():
             400,
         )
 
-    if users.find_one({'email': email}):
+    existing_user = users.find_one({'email': email})
+    if existing_user and existing_user.get('isVerified'):
         return json_error('An account with this email already exists.', 409)
 
-    user_doc = {
+    otp = generate_otp()
+    now = datetime.now(timezone.utc)
+    pending_doc = {
         'firstName': first_name,
         'middleName': middle_name,
         'lastName': last_name,
         'email': email,
         'passwordHash': generate_password_hash(password),
-        # There is no verification flow in the app, so new accounts are usable immediately.
-        'isVerified': True,
-        'createdAt': datetime.now(timezone.utc),
-        'updatedAt': datetime.now(timezone.utc),
+        'emailOtp': otp,
+        'emailOtpExpiresAt': now + timedelta(seconds=OTP_TTL_SECONDS),
+        'emailOtpSentAt': now,
+        'createdAt': now,
+        'updatedAt': now,
     }
 
     try:
-        result = users.insert_one(user_doc)
+        pending_signups.update_one(
+            {'email': email},
+            {
+                '$set': {
+                    'firstName': first_name,
+                    'middleName': middle_name,
+                    'lastName': last_name,
+                    'email': email,
+                    'passwordHash': pending_doc['passwordHash'],
+                    'emailOtp': otp,
+                    'emailOtpExpiresAt': pending_doc['emailOtpExpiresAt'],
+                    'emailOtpSentAt': now,
+                    'updatedAt': now,
+                },
+                '$setOnInsert': {'createdAt': now},
+            },
+            upsert=True,
+        )
     except DuplicateKeyError:
-        return json_error('An account with this email already exists.', 409)
+        return json_error('A verification request already exists for this email.', 409)
 
-    saved_user = users.find_one({'_id': result.inserted_id})
-    token = issue_token(saved_user)
+    saved_pending = pending_signups.find_one({'email': email})
+    # Send OTP to the user's email (best-effort)
+    try:
+        send_verification_otp(email, saved_pending.get('emailOtp'))
+    except Exception:
+        pass
+
+    resend_available_at = format_resend_available_at(
+        saved_pending.get('emailOtpSentAt')
+    )
 
     return jsonify({
-        'message': 'Account created successfully.',
-        'token': token,
-        'user': build_user_payload(saved_user),
+        'message': 'Verification code sent. Your account will be created after OTP verification.',
+        'requiresVerification': True,
+        'email': email,
+        'resendAvailableAt': resend_available_at,
     }), 201
 
 
@@ -972,6 +1125,112 @@ def login():
         'token': token,
         'user': build_user_payload(user_doc),
     })
+
+
+
+@app.post('/api/auth/verify-email-otp')
+def verify_email_otp():
+    data = request.get_json(silent=True) or {}
+    email = normalize_email(str(data.get('email', '')))
+    otp = str(data.get('otp', '')).strip()
+
+    if not email or not otp:
+        return json_error('Email and OTP are required.', 400)
+
+    signup_doc, signup_collection = get_verification_record(email)
+    if not signup_doc:
+        return json_error('Invalid email or OTP.', 400)
+
+    if signup_collection is users and signup_doc.get('isVerified'):
+        return json_error('Email already verified.', 400)
+
+    stored_otp = signup_doc.get('emailOtp')
+    expires_at = ensure_utc_datetime(signup_doc.get('emailOtpExpiresAt'))
+    now = datetime.now(timezone.utc)
+
+    if not stored_otp or not expires_at or now > expires_at:
+        return json_error('OTP expired or not found. Request a new code.', 400)
+
+    if otp != stored_otp:
+        return json_error('Invalid OTP.', 400)
+
+    if signup_collection is pending_signups:
+        created_user = {
+            'firstName': signup_doc['firstName'],
+            'middleName': signup_doc.get('middleName', ''),
+            'lastName': signup_doc['lastName'],
+            'email': signup_doc['email'],
+            'passwordHash': signup_doc['passwordHash'],
+            'isVerified': True,
+            'createdAt': now,
+            'updatedAt': now,
+        }
+        users.insert_one(created_user)
+        pending_signups.delete_one({'_id': signup_doc['_id']})
+        user_doc = users.find_one({'email': email})
+    else:
+        # Legacy path for older unverified users already stored in users.
+        users.update_one(
+            {'_id': signup_doc['_id']},
+            {
+                '$set': {'isVerified': True, 'updatedAt': now},
+                '$unset': {'emailOtp': '', 'emailOtpExpiresAt': '', 'emailOtpSentAt': ''},
+            },
+        )
+        user_doc = users.find_one({'_id': signup_doc['_id']})
+    token = issue_token(user_doc)
+
+    return jsonify({
+        'message': 'Email verified.',
+        'token': token,
+        'user': build_user_payload(user_doc),
+    })
+
+
+@app.post('/api/auth/resend-email-otp')
+def resend_email_otp():
+    data = request.get_json(silent=True) or {}
+    email = normalize_email(str(data.get('email', '')))
+
+    if not email:
+        return json_error('Email is required.', 400)
+
+    signup_doc, signup_collection = get_verification_record(email)
+    if not signup_doc:
+        return json_error('No account found for that email.', 404)
+
+    if signup_collection is users and signup_doc.get('isVerified'):
+        return json_error('Account already verified.', 400)
+
+    now = datetime.now(timezone.utc)
+    last_sent = ensure_utc_datetime(signup_doc.get('emailOtpSentAt'))
+    if last_sent:
+        elapsed = (now - last_sent).total_seconds()
+        if elapsed < RESEND_COOLDOWN_SECONDS:
+            retry_after = int(RESEND_COOLDOWN_SECONDS - elapsed)
+            return json_error(f'Please wait {retry_after} seconds before requesting a new code.', 429)
+
+    otp = generate_otp()
+    expires_at = now + timedelta(seconds=OTP_TTL_SECONDS)
+
+    update_fields = {
+        'emailOtp': otp,
+        'emailOtpExpiresAt': expires_at,
+        'emailOtpSentAt': now,
+        'updatedAt': now,
+    }
+    signup_collection.update_one(
+        {'_id': signup_doc['_id']},
+        {'$set': update_fields},
+    )
+
+    try:
+        send_verification_otp(email, otp)
+    except Exception:
+        pass
+
+    resend_available_at = format_resend_available_at(now)
+    return jsonify({'message': 'Verification code resent.', 'resendAvailableAt': resend_available_at})
 
 
 @app.get('/api/auth/me')
