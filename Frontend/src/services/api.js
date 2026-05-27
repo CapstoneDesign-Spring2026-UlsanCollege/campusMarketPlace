@@ -69,6 +69,19 @@ export async function createItem(itemData) {
   })
 }
 
+export async function updateItem(itemId, itemData) {
+  return apiRequest(`/items/${encodeURIComponent(itemId)}`, {
+    method: 'PUT',
+    body: JSON.stringify(itemData),
+  })
+}
+
+export async function toggleItemFavorite(itemId) {
+  return apiRequest(`/items/${encodeURIComponent(itemId)}/favorite`, {
+    method: 'POST',
+  })
+}
+
 export async function fetchProfile() {
   return apiRequest('/profile')
 }

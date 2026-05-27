@@ -123,7 +123,7 @@ items = db.items
 message_threads = db.message_threads
 message_messages = db.message_messages
 # Adopt richer status values for listings
-ITEM_STATUSES = {'draft', 'active', 'sold', 'removed'}
+ITEM_STATUSES = {'draft', 'active', 'reserved', 'sold', 'removed'}
 
 
 def ensure_items_collection_schema():
@@ -709,6 +709,16 @@ def build_user_payload(user_doc):
     if not isinstance(payment_methods, list):
         payment_methods = []
 
+    favorite_item_ids = user_doc.get('favoriteItemIds', [])
+    if not isinstance(favorite_item_ids, list):
+        favorite_item_ids = []
+
+    normalized_favorite_item_ids = []
+    for item_id in favorite_item_ids:
+        item_id_str = str(item_id).strip()
+        if item_id_str and item_id_str not in normalized_favorite_item_ids:
+            normalized_favorite_item_ids.append(item_id_str)
+
     return {
         'id': str(user_doc['_id']),
         'firstName': user_doc['firstName'],
@@ -719,7 +729,32 @@ def build_user_payload(user_doc):
         'location': user_doc.get('location', ''),
         'avatar': user_doc.get('avatar', ''),
         'paymentMethods': payment_methods,
+        'favoriteItemIds': normalized_favorite_item_ids,
     }
+
+
+def get_favorite_item_ids(user_doc):
+    favorite_item_ids = user_doc.get('favoriteItemIds', [])
+    if not isinstance(favorite_item_ids, list):
+        return []
+
+    normalized = []
+    for item_id in favorite_item_ids:
+        item_id_str = str(item_id).strip()
+        if item_id_str and item_id_str not in normalized:
+            normalized.append(item_id_str)
+
+    return normalized
+
+
+def annotate_item_favorite_state(item_doc, favorite_item_ids):
+    item_id = str(item_doc.get('_id'))
+    is_favorite = item_id in favorite_item_ids
+    item_doc['isLoved'] = is_favorite
+    item_doc['isFavorited'] = is_favorite
+    item_doc['isLiked'] = is_favorite
+    item_doc['liked'] = is_favorite
+    return item_doc
 
 
 def get_safe_payment_methods(user_doc):
@@ -765,6 +800,28 @@ def fetch_user_activity(user_id):
     }
 
 
+def fetch_favorite_items(user_doc):
+    favorite_item_ids = get_favorite_item_ids(user_doc)
+    if not favorite_item_ids:
+        return []
+
+    favorite_item_oids = [
+        item_oid for item_oid in (parse_object_id(item_id) for item_id in favorite_item_ids)
+        if item_oid
+    ]
+    if not favorite_item_oids:
+        return []
+
+    favorite_items = list(items.find({'_id': {'$in': favorite_item_oids}}))
+    favorite_lookup = {str(item['_id']): item for item in favorite_items}
+    ordered_items = [
+        favorite_lookup[item_id]
+        for item_id in favorite_item_ids
+        if item_id in favorite_lookup
+    ]
+    return [serialize_item_document(item) for item in ordered_items]
+
+
 def parse_object_id(value):
     try:
         return ObjectId(value)
@@ -806,6 +863,28 @@ def get_current_user_from_request():
     auth_header = request.headers.get('Authorization', '')
     if not auth_header.startswith('Bearer '):
         return None, None, json_error('Missing bearer token.', 401)
+
+    token = auth_header.removeprefix('Bearer ').strip()
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.PyJWTError:
+        return None, None, json_error('Invalid or expired token.', 401)
+
+    user_id = parse_object_id(payload.get('sub'))
+    if not user_id:
+        return None, None, json_error('Invalid or expired token.', 401)
+
+    user_doc = users.find_one({'_id': user_id})
+    if not user_doc:
+        return None, None, json_error('Invalid or expired token.', 401)
+
+    return user_id, user_doc, None
+
+
+def get_optional_current_user_from_request():
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return None, None, None
 
     token = auth_header.removeprefix('Bearer ').strip()
     try:
@@ -1163,6 +1242,7 @@ def verify_email_otp():
             'email': signup_doc['email'],
             'passwordHash': signup_doc['passwordHash'],
             'isVerified': True,
+            'favoriteItemIds': [],
             'createdAt': now,
             'updatedAt': now,
         }
@@ -1282,6 +1362,8 @@ def profile_summary():
     activity = fetch_user_activity(user_id)
     user_payload = build_user_payload(user_doc)
     user_payload['paymentMethods'] = get_safe_payment_methods(user_doc)
+    user_payload['favoriteItemIds'] = get_favorite_item_ids(user_doc)
+    favorite_items = fetch_favorite_items(user_doc)
 
     # Expose avatarUrl as an absolute URL when available so frontend can load it.
     avatar_val = user_doc.get('avatar') or user_doc.get('avatarUrl')
@@ -1301,9 +1383,11 @@ def profile_summary():
             'paymentMethods': get_safe_payment_methods(user_doc),
             'sellCount': len(activity['sellHistory']),
             'buyCount': len(activity['buyHistory']),
+            'favoriteCount': len(favorite_items),
         },
         'buyHistory': activity['buyHistory'],
         'sellHistory': activity['sellHistory'],
+        'favoriteItems': favorite_items,
     })
 
 
@@ -1630,6 +1714,10 @@ def send_message(thread_id):
 def get_items():
     """Fetch all marketplace items with pagination and filtering."""
     try:
+        _current_user_id, current_user_doc, auth_error = get_optional_current_user_from_request()
+        if auth_error:
+            return auth_error
+
         page = request.args.get('page', 1, type=int)
         skip = request.args.get('skip', None, type=int)
         limit = request.args.get('limit', 20, type=int)
@@ -1662,7 +1750,11 @@ def get_items():
             .limit(limit)
         )
         # Convert ObjectIds/dates and preserve legacy response fields.
-        items_list = [serialize_item_document(item) for item in items_list]
+        favorite_item_ids = set(get_favorite_item_ids(current_user_doc)) if current_user_doc else set()
+        items_list = [
+            annotate_item_favorite_state(serialize_item_document(item), favorite_item_ids)
+            for item in items_list
+        ]
         total = items.count_documents(query_filter)
         return jsonify({
             'items': items_list,
@@ -1685,6 +1777,10 @@ def get_item(item_id):
     if not oid:
         return json_error('Invalid item id.', 400)
 
+    _current_user_id, current_user_doc, auth_error = get_optional_current_user_from_request()
+    if auth_error:
+        return auth_error
+
     try:
         item_doc = items.find_one({'_id': oid})
     except Exception as exc:
@@ -1695,8 +1791,73 @@ def get_item(item_id):
 
     # Normalize for JSON consumption.
     item_doc = serialize_item_document(item_doc)
+    favorite_item_ids = set(get_favorite_item_ids(current_user_doc)) if current_user_doc else set()
+    item_doc = annotate_item_favorite_state(item_doc, favorite_item_ids)
 
     return jsonify({'item': item_doc})
+
+
+@app.post('/api/items/<item_id>/favorite')
+def toggle_item_favorite(item_id):
+    """Toggle the current user's favorite state for an item."""
+    user_id, user_doc, auth_error = get_current_user_from_request()
+    if auth_error:
+        return auth_error
+
+    item_oid = parse_object_id(item_id)
+    if not item_oid:
+        return json_error('Invalid item id.', 400)
+
+    item_doc = items.find_one({'_id': item_oid})
+    if not item_doc:
+        return json_error('Item not found.', 404)
+
+    favorite_item_ids = get_favorite_item_ids(user_doc)
+    item_id_str = str(item_oid)
+    is_favorited = item_id_str in favorite_item_ids
+    now = datetime.now(timezone.utc)
+
+    if is_favorited:
+        updated_favorites = [fav_id for fav_id in favorite_item_ids if fav_id != item_id_str]
+        next_count = max(0, int(item_doc.get('favoritesCount', 0) or 0) - 1)
+    else:
+        updated_favorites = favorite_item_ids + [item_id_str]
+        next_count = max(0, int(item_doc.get('favoritesCount', 0) or 0) + 1)
+
+    try:
+        users.update_one(
+            {'_id': user_id},
+            {
+                '$set': {
+                    'favoriteItemIds': updated_favorites,
+                    'updatedAt': now,
+                },
+            },
+        )
+        items.update_one(
+            {'_id': item_oid},
+            {
+                '$set': {
+                    'favoritesCount': next_count,
+                    'updatedAt': now,
+                },
+            },
+        )
+    except Exception as exc:
+        return json_error(f'Failed to update favorites: {str(exc)}', 500)
+
+    refreshed_item = items.find_one({'_id': item_oid})
+    refreshed_item = annotate_item_favorite_state(
+        serialize_item_document(refreshed_item),
+        set(updated_favorites),
+    )
+
+    return jsonify({
+        'message': 'Favorite updated successfully.',
+        'item': refreshed_item,
+        'isLoved': not is_favorited,
+        'favoriteItemIds': updated_favorites,
+    })
 
 
 @app.get('/api/users/<user_id>')
@@ -1828,6 +1989,93 @@ def create_item():
         }), 201
     except Exception as exc:
         return json_error(f'Failed to create item: {str(exc)}', 500)
+
+
+@app.put('/api/items/<item_id>')
+def update_item(item_id):
+    """Update an existing marketplace item owned by the current seller."""
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return json_error('Missing bearer token.', 401)
+
+    token = auth_header.removeprefix('Bearer ').strip()
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.PyJWTError:
+        return json_error('Invalid or expired token.', 401)
+
+    seller_id = parse_object_id(payload.get('sub'))
+    item_oid = parse_object_id(item_id)
+    if not seller_id or not item_oid:
+        return json_error('Invalid item id.', 400)
+
+    item_doc = items.find_one({'_id': item_oid})
+    if not item_doc:
+        return json_error('Item not found.', 404)
+
+    item_seller_id = item_doc.get('seller_id') or item_doc.get('sellerId')
+    if str(item_seller_id) != str(seller_id):
+        return json_error('You can only edit your own listings.', 403)
+
+    data = request.get_json(silent=True) or {}
+    updates = {}
+
+    if 'status' in data:
+        status = str(data.get('status', '')).strip().lower()
+        if status not in ITEM_STATUSES:
+            return json_error(
+                'Status must be one of: draft, active, reserved, sold, removed.',
+                400,
+            )
+        updates['status'] = status
+        updates['soldAt'] = datetime.now(timezone.utc) if status == 'sold' else None
+
+    for field in ('title', 'description', 'category', 'location', 'meeting_notes'):
+        if field in data:
+            value = str(data.get(field, '')).strip()
+            if field in {'title', 'description', 'category'} and not value:
+                return json_error(f'{field} is required.', 400)
+            updates[field] = value or None
+
+    if 'price' in data:
+        try:
+            price = float(data['price'])
+            if price < 0:
+                return json_error('Price must be a positive number.', 400)
+        except (ValueError, TypeError):
+            return json_error('Price must be a valid number.', 400)
+        updates['price'] = price
+
+    if 'image' in data or 'images' in data:
+        raw_images = data.get('images')
+        images = []
+        if isinstance(raw_images, list):
+            images = [str(url).strip() for url in raw_images if str(url).strip()]
+        elif isinstance(raw_images, str) and raw_images.strip():
+            images = [raw_images.strip()]
+
+        primary_image = str(data.get('image', '')).strip()
+        if primary_image and primary_image not in images:
+            images.insert(0, primary_image)
+
+        if images:
+            updates['images'] = images
+            updates['image'] = images[0]
+
+    if not updates:
+        return json_error('No updates provided.', 400)
+
+    updates['updatedAt'] = datetime.now(timezone.utc)
+
+    try:
+        items.update_one({'_id': item_oid}, {'$set': updates})
+        updated_item = items.find_one({'_id': item_oid})
+        return jsonify({
+            'message': 'Item updated successfully.',
+            'item': serialize_item_document(updated_item),
+        })
+    except Exception as exc:
+        return json_error(f'Failed to update item: {str(exc)}', 500)
 
 
 if __name__ == '__main__':

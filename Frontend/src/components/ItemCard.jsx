@@ -1,9 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { API_ORIGIN } from '../services/api'
+import { API_ORIGIN, updateItem } from '../services/api'
+import { toggleItemFavorite } from '../services/api'
 import Avatar from './Avatar'
 import { t } from '../services/i18n'
 import { formatPriceFromUsd } from '../services/currency'
+import { getAuthUser } from '../services/auth'
 
 function getPrimaryImageValue(item) {
   if (item?.image) {
@@ -89,6 +91,8 @@ function getConditionTone(label) {
 
 export default function ItemCard({ item, currency, language = 'en' }) {
   const navigate = useNavigate()
+  const currentUser = getAuthUser()
+  const currentUserId = currentUser?.id || currentUser?._id || currentUser?.userId || ''
   const imageSrc = resolveImageUrl(getPrimaryImageValue(item))
   const formattedPrice = formatPriceFromUsd(item.price, currency)
   const originalPriceValue = Number(item?.originalPrice ?? item?.compareAtPrice ?? item?.listPrice ?? item?.previousPrice)
@@ -98,11 +102,40 @@ export default function ItemCard({ item, currency, language = 'en' }) {
   const conditionLabel = getConditionLabel(item)
   const conditionTone = getConditionTone(conditionLabel)
   const sellerName = item.sellerName || 'Seller'
-  const initialLikeCount = Number.isFinite(Number(item?.favoritesCount)) ? Math.max(0, Number(item.favoritesCount)) : 0
-  const [isLiked, setIsLiked] = useState(Boolean(item?.isLiked || item?.liked))
-  const [likeCount, setLikeCount] = useState(initialLikeCount)
+  const sellerId = item?.seller_id || item?.sellerId || ''
+  const isSeller = Boolean(currentUserId && sellerId && String(currentUserId) === String(sellerId))
+  const initialListingStatus = String(item?.status || 'active').toLowerCase()
+  const [listingStatus, setListingStatus] = useState(initialListingStatus)
+  const sellerLabelMap = {
+    active: 'On sale by',
+    reserved: 'Reserved by',
+    sold: 'Sold by',
+    removed: 'On sale by',
+    draft: 'On sale by',
+  }
+  const sellerLabel = sellerLabelMap[listingStatus] || 'On sale by'
+  const statusOptions = [
+    { value: 'active', label: 'On sale' },
+    { value: 'reserved', label: 'Reserved' },
+    { value: 'sold', label: 'Sold' },
+  ]
+  const initialLoveCount = Number.isFinite(Number(item?.favoritesCount)) ? Math.max(0, Number(item.favoritesCount)) : 0
+  const [isLoved, setIsLoved] = useState(Boolean(item?.isLoved || item?.isFavorited || item?.isLiked || item?.liked))
+  const [loveCount, setLoveCount] = useState(initialLoveCount)
   const [commentDraft, setCommentDraft] = useState('')
   const [isCommentOpen, setIsCommentOpen] = useState(false)
+  const [isEditingStatus, setIsEditingStatus] = useState(false)
+  const [statusDraft, setStatusDraft] = useState(initialListingStatus)
+  const [statusMessage, setStatusMessage] = useState('')
+  const [statusError, setStatusError] = useState('')
+  const [isSavingStatus, setIsSavingStatus] = useState(false)
+  const [isSavingLove, setIsSavingLove] = useState(false)
+
+  useEffect(() => {
+    const nextStatus = String(item?.status || 'active').toLowerCase()
+    setListingStatus(nextStatus)
+    setStatusDraft(nextStatus)
+  }, [item?.status])
 
   const suggestedComment = useMemo(() => {
     return `Hi ${sellerName}, I’m interested in ${item.title}. Is it still available?`
@@ -121,6 +154,34 @@ export default function ItemCard({ item, currency, language = 'en' }) {
     setCommentDraft((current) => current || suggestedComment)
   }
 
+  async function handleLoveToggle() {
+    if (isSavingLove) {
+      return
+    }
+
+    const nextLoved = !isLoved
+    const nextCount = Math.max(0, loveCount + (nextLoved ? 1 : -1))
+    setIsSavingLove(true)
+    setIsLoved(nextLoved)
+    setLoveCount(nextCount)
+
+    try {
+      const response = await toggleItemFavorite(item._id)
+      const updatedItem = response?.item || {}
+      const confirmedLoved = Boolean(updatedItem?.isLoved || updatedItem?.isFavorited || response?.isLoved)
+      setIsLoved(confirmedLoved)
+      if (Number.isFinite(Number(updatedItem?.favoritesCount))) {
+        setLoveCount(Math.max(0, Number(updatedItem.favoritesCount)))
+      }
+    } catch (error) {
+      setIsLoved(!nextLoved)
+      setLoveCount(loveCount)
+      setStatusError(error instanceof Error ? error.message : 'Unable to update favorites.')
+    } finally {
+      setIsSavingLove(false)
+    }
+  }
+
   function handleMessageSeller() {
     const query = new URLSearchParams({ item: String(item._id) })
     navigate(`/messages?${query.toString()}`)
@@ -131,6 +192,34 @@ export default function ItemCard({ item, currency, language = 'en' }) {
     const draft = commentDraft.trim() || suggestedComment
     const query = new URLSearchParams({ item: String(item._id), draft })
     navigate(`/messages?${query.toString()}`)
+  }
+
+  function openStatusEditor() {
+    setStatusDraft(listingStatus)
+    setStatusError('')
+    setStatusMessage('')
+    setIsEditingStatus((current) => !current)
+  }
+
+  async function handleSaveStatus() {
+    if (!isSeller) {
+      return
+    }
+
+    setIsSavingStatus(true)
+    setStatusError('')
+    setStatusMessage('')
+
+    try {
+      await updateItem(item._id, { status: statusDraft })
+      setListingStatus(statusDraft)
+      setStatusMessage('Listing status updated.')
+      setIsEditingStatus(false)
+    } catch (error) {
+      setStatusError(error instanceof Error ? error.message : 'Unable to update listing status.')
+    } finally {
+      setIsSavingStatus(false)
+    }
   }
 
   return (
@@ -147,9 +236,6 @@ export default function ItemCard({ item, currency, language = 'en' }) {
             <span>{item.category?.slice(0, 1)?.toUpperCase() || 'I'}</span>
           </div>
         )}
-        <button className="favorite-button" type="button" aria-label={`Save ${item.title}`}>
-          ♡
-        </button>
       </div>
 
       <div className="item-card-body">
@@ -169,19 +255,68 @@ export default function ItemCard({ item, currency, language = 'en' }) {
         <div className="item-seller-row">
           <Avatar src={item.sellerAvatarUrl || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url} alt={sellerName} size={36} />
           <div className="item-seller-copy">
-            <p className="item-seller">{t(language, 'browse.soldBy')} {sellerName}</p>
+            <p className="item-seller">{sellerLabel} {sellerName}</p>
+            {isSeller ? <p className="item-seller-hint">You can update this listing when it is reserved or sold.</p> : null}
           </div>
-          {sellerVerified ? <span className="badge badge-default">Verified</span> : null}
+          <div className="item-seller-actions">
+            <span className={`status-badge status-${listingStatus}`}>{listingStatus}</span>
+            {sellerVerified ? <span className="badge badge-default">Verified</span> : null}
+          </div>
         </div>
+        {isSeller ? (
+          <div className="item-status-editor">
+            {isEditingStatus ? (
+              <>
+                <label className="item-status-label" htmlFor={`status-${item._id}`}>Status</label>
+                <div className="item-status-controls">
+                  <select
+                    id={`status-${item._id}`}
+                    className="category-filter item-status-select"
+                    value={statusDraft}
+                    onChange={(event) => setStatusDraft(event.target.value)}
+                    disabled={isSavingStatus}
+                  >
+                    {statusOptions.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    className="button button-primary button-small"
+                    onClick={handleSaveStatus}
+                    disabled={isSavingStatus}
+                  >
+                    {isSavingStatus ? 'Saving…' : 'Save status'}
+                  </button>
+                  <button
+                    type="button"
+                    className="button button-secondary button-small"
+                    onClick={() => setIsEditingStatus(false)}
+                    disabled={isSavingStatus}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : (
+              <button type="button" className="button button-secondary button-small" onClick={openStatusEditor}>
+                Edit status
+              </button>
+            )}
+            {statusMessage ? <p className="item-status-feedback success">{statusMessage}</p> : null}
+            {statusError ? <p className="item-status-feedback error">{statusError}</p> : null}
+          </div>
+        ) : null}
         <div className="item-actions-row" aria-label="Buyer actions">
           <button
             type="button"
-            className={`item-action-button item-action-like ${isLiked ? 'is-active' : ''}`}
-            onClick={handleLikeToggle}
-            aria-pressed={isLiked}
+            className={`item-action-button item-action-love ${isLoved ? 'is-active' : ''}`}
+            onClick={handleLoveToggle}
+            aria-pressed={isLoved}
+            disabled={isSavingLove}
           >
-            <span>{t(language, 'dashboard.like')}</span>
-            <strong>{likeCount}</strong>
+            <span>♥ {t(language, 'dashboard.love')}</span>
+            <strong>{loveCount}</strong>
           </button>
 
           <button
