@@ -86,6 +86,11 @@ export async function fetchProfile() {
   return apiRequest('/profile')
 }
 
+export async function fetchUserActivity(userId) {
+  if (!userId) throw new Error('userId required')
+  return apiRequest(`/users/${encodeURIComponent(userId)}/activity`)
+}
+
 export async function updateProfile(data) {
   return apiRequest('/profile', {
     method: 'PUT',
