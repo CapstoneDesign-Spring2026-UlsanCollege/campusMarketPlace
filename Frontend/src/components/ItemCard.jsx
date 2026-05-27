@@ -43,21 +43,23 @@ function resolveImageUrl(image) {
 }
 
 function formatPostedTime(value) {
-  if (!value) {
-    return 'Recently'
-  }
+  if (!value) return 'Just now'
 
   const createdAt = new Date(value)
-  if (Number.isNaN(createdAt.getTime())) {
-    return 'Recently'
-  }
+  if (Number.isNaN(createdAt.getTime())) return 'Just now'
 
-  const diffHours = Math.max(1, Math.round((Date.now() - createdAt.getTime()) / (1000 * 60 * 60)))
-  if (diffHours < 24) {
-    return `${diffHours}h ago`
-  }
+  const diffMs = Date.now() - createdAt.getTime()
+  const diffSeconds = Math.floor(diffMs / 1000)
+  if (diffSeconds < 60) return 'Just now'
 
-  return `${Math.max(1, Math.round(diffHours / 24))}d ago`
+  const diffMinutes = Math.floor(diffSeconds / 60)
+  if (diffMinutes < 60) return `${diffMinutes}m ago`
+
+  const diffHours = Math.floor(diffMinutes / 60)
+  if (diffHours < 24) return `${diffHours}h ago`
+
+  const diffDays = Math.floor(diffHours / 24)
+  return `${diffDays}d ago`
 }
 
 function getConditionLabel(item) {
@@ -226,7 +228,6 @@ export default function ItemCard({ item, currency, language = 'en' }) {
           {hasOriginalPrice ? <span className="item-original-price">{formatPriceFromUsd(originalPriceValue, currency)}</span> : null}
         </div>
         <div className="listing-meta">
-          <span className={`item-condition ${conditionTone}`}>{conditionLabel}</span>
           <span className="item-location">{locationLabel}</span>
         </div>
         <div className="item-seller-row">
