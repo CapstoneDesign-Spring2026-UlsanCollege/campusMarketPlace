@@ -230,7 +230,7 @@ export default function ItemCard({ item, currency, language = 'en' }) {
           <span className="item-location">{locationLabel}</span>
         </div>
         <div className="item-seller-row">
-          <Link to={`/profile/${sellerId}`} className="seller-avatar-link">
+          <Link to={`/profile/${sellerId}`} className="seller-avatar-link" target="_blank" rel="noopener noreferrer">
             <Avatar src={item.sellerAvatarUrl || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url} alt={sellerName} size={36} />
           </Link>
           <div className="item-seller-copy">

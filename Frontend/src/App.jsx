@@ -10,6 +10,7 @@ import Signup from './routes/Signup'
 import Dashboard from './routes/Dashboard'
 import Messages from './routes/Messages'
 import Profile from './routes/Profile'
+import PublicProfile from './routes/PublicProfile'
 import EditProfile from './routes/EditProfile'
 import ChangePassword from './routes/ChangePassword'
 import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from './services/currency'
@@ -80,6 +81,7 @@ export default function App() {
           path="/messages"
           element={authSession.token ? <Messages language={language} /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />}
         />
+        <Route path="/profile/:id" element={<PublicProfile currency={currency} language={language} />} />
         <Route
           path="/profile"
           element={
