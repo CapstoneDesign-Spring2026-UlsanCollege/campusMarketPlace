@@ -24,23 +24,9 @@ const ALLOWED_IMAGE_TYPES = new Set([
 ])
 const DEFAULT_ITEM_LOCATION = 'Campus'
 const LOCATION_OPTIONS = [
-  'Cafeteria',
-  'Hall',
-  'Study Cafe',
-  'Library',
-  'Floor No. 1',
-  'Floor No. 2',
-  'Floor No. 3',
-  'Floor No. 4',
-  'Floor No. 5',
-  'Canteen',
-  'Dorm',
-  'Football Ground',
-  'Building No. 1',
-  'Building No. 2',
-  'Building No. 3',
-  'Building No. 4',
-  'Building No. 5',
+  'cafetria',
+  'study cafe',
+  'library',
 ]
 
 const STORIES = [
@@ -454,62 +440,6 @@ export default function Dashboard({ currency, language = 'en', marketQuery, onMa
     <main className="page-shell marketplace-shell">
       <section className="feed-layout">
         <section className="feed-main-col">
-          <section className="browse-section" aria-label="Near you">
-            <div className="browse-toolbar">
-              <div>
-                <p className="eyebrow">Near you</p>
-                <h2>Campus picks nearby</h2>
-                <p className="browse-summary">A quick swipe through items that already feel close to home.</p>
-              </div>
-              <button className="button button-secondary" type="button" onClick={() => navigate('/browse')}>
-                View all
-              </button>
-            </div>
-
-            {loading ? (
-              <div className="loading-state">
-                <p>{t(language, 'dashboard.loading')}</p>
-              </div>
-            ) : error ? (
-              <div className="error-state">
-                <p>Error: {error}</p>
-              </div>
-            ) : spotlightItems.length === 0 ? (
-              <div className="empty-state">
-                <p>{t(language, 'dashboard.noItems')}</p>
-              </div>
-            ) : (
-              <div className="near-you-grid">
-                {spotlightItems.map((item, index) => (
-                  <article className="near-you-card" key={item._id}>
-                    <div className="post-image">
-                      {getItemImageSrc(item) ? (
-                        <img
-                          src={getItemImageSrc(item)}
-                          alt={item.title ? `${item.title} listing` : 'Marketplace listing'}
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="post-image-fallback" aria-hidden="true">
-                          <span>{(item.category || 'Item').slice(0, 1).toUpperCase()}</span>
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <p className="eyebrow" style={{ marginBottom: '0.35rem' }}>{item.category || 'Nearby'}</p>
-                      <strong>{item.title}</strong>
-                      <div className="listing-price-row">
-                        <span className="item-price">{formatPriceFromUsd(item.price, currency)}</span>
-                        <span className="distance-chip">{index + 1} stop</span>
-                      </div>
-                      <span className="mini-location">{item.location || t(language, 'dashboard.campus')}</span>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
-
           {mode !== 'buy' && (
             <section className="feed-panel composer" aria-label="Post composer">
               <form className="composer-form" onSubmit={handlePostItemSubmit} noValidate>

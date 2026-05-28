@@ -201,8 +201,23 @@ export default function ItemCard({ item, currency, language = 'en' }) {
     }
   }
 
+  function openItemDetail() {
+    navigate(`/item/${item._id}`, { state: { item } })
+  }
+
   return (
-    <article className="item-card">
+    <article
+      className="item-card"
+      role="button"
+      tabIndex={0}
+      onClick={openItemDetail}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          openItemDetail()
+        }
+      }}
+    >
       <div className="item-thumb">
         {imageSrc ? (
           <img
@@ -217,97 +232,48 @@ export default function ItemCard({ item, currency, language = 'en' }) {
         )}
       </div>
 
-      <div className="item-card-body">
-        <div className="item-card-topline">
-          <span className="item-category">{item.category}</span>
-          <span className="item-posted">{formatPostedTime(item.createdAt)}</span>
+      <div className="item-card-body item-card-compact">
+        <div className="item-card-header">
+          <div className="item-card-header-left">
+            <div className="item-compact-avatar">
+              <Link
+                to={`/profile/${sellerId}`}
+                state={{ seller: { id: sellerId, firstName: sellerName, avatarUrl: item.sellerAvatarUrl || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url, location: item.location || '' } }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Avatar src={item.sellerAvatarUrl || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url} alt={sellerName} size={40} />
+              </Link>
+            </div>
+            {/* Hide title in the compact header when it's just the meeting spot/location */}
+            {String(item.title || '').trim() && String(item.title || '').trim() !== String(locationLabel || '').trim() ? (
+              <h2 className="item-title">{item.title}</h2>
+            ) : null}
+          </div>
+          <div className="item-card-header-right">
+            <span className="item-category-pill">{item.category || ''}</span>
+          </div>
         </div>
-        <h2 className="item-title">{item.title}</h2>
         <div className="listing-price-row">
           <span className="item-price">{formattedPrice}</span>
-          {hasOriginalPrice ? <span className="item-original-price">{formatPriceFromUsd(originalPriceValue, currency)}</span> : null}
+          <span className={`status-badge status-${listingStatus}`}>
+            {(statusOptions.find(o => o.value === listingStatus) || { label: 'On sale' }).label}
+          </span>
         </div>
-        <div className="listing-meta">
-          <span className="item-location">{locationLabel}</span>
+        <div className="item-compact-meta">
+          {/* keep meta area for price/other small bits; status moved to header right */}
         </div>
-        <div className="item-seller-row">
-          <Link to={`/profile/${sellerId}`} className="seller-avatar-link" target="_blank" rel="noopener noreferrer">
-            <Avatar src={item.sellerAvatarUrl || item.sellerAvatar || item.seller_avatar || item.seller_avatar_url} alt={sellerName} size={36} />
-          </Link>
-          <div className="item-seller-copy">
-            {/* seller name removed from inline copy per design — avatar links to profile */}
-            {isSeller ? <p className="item-seller-hint">You can update this listing when it is reserved or sold.</p> : null}
-          </div>
-          <div className="item-seller-actions">
-            {/* show friendly status label instead of raw status and remove verified badge */}
-            <span className={`status-badge status-${listingStatus}`}>{(statusOptions.find(o => o.value === listingStatus) || { label: 'On sale' }).label}</span>
-          </div>
-        </div>
-        {isSeller ? (
-          <div className="item-status-editor">
-            {isEditingStatus ? (
-              <>
-                <label className="item-status-label" htmlFor={`status-${item._id}`}>Status</label>
-                <div className="item-status-controls">
-                  <select
-                    id={`status-${item._id}`}
-                    className="category-filter item-status-select"
-                    value={statusDraft}
-                    onChange={(event) => setStatusDraft(event.target.value)}
-                    disabled={isSavingStatus}
-                  >
-                    {statusOptions.map((option) => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    className="button button-primary button-small"
-                    onClick={handleSaveStatus}
-                    disabled={isSavingStatus}
-                  >
-                    {isSavingStatus ? 'Saving…' : 'Save status'}
-                  </button>
-                  <button
-                    type="button"
-                    className="button button-secondary button-small"
-                    onClick={() => setIsEditingStatus(false)}
-                    disabled={isSavingStatus}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </>
-            ) : (
-              <button type="button" className="button button-secondary button-small" onClick={openStatusEditor}>
-                Edit status
-              </button>
-            )}
-            {statusMessage ? <p className="item-status-feedback success">{statusMessage}</p> : null}
-            {statusError ? <p className="item-status-feedback error">{statusError}</p> : null}
-          </div>
-        ) : null}
-        <div className="item-actions-row" aria-label="Buyer actions">
+        <div className="item-actions-row compact-actions" aria-label="Buyer actions">
           <button
             type="button"
-            className={`item-action-button item-action-love ${isLoved ? 'is-active' : ''}`}
-            onClick={handleLoveToggle}
-            aria-pressed={isLoved}
-            disabled={isSavingLove}
-          >
-            <span>♥ {t(language, 'dashboard.love')}</span>
-            <strong>{loveCount}</strong>
-          </button>
-
-          <button
-            type="button"
-            className="item-action-button item-action-message"
-            onClick={handleMessageSeller}
+            className="item-action-button item-action-message button button-primary"
+            onClick={(event) => {
+              event.stopPropagation()
+              handleMessageSeller()
+            }}
           >
             <span>{t(language, 'dashboard.messageSeller')}</span>
           </button>
         </div>
-        {/* comment compose removed; messaging flows through Messages page */}
       </div>
     </article>
   )
