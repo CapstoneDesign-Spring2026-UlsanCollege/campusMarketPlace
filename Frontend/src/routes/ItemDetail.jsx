@@ -260,6 +260,15 @@ export default function ItemDetail({ currency, language = 'en' }) {
         </div>
 
         <div className="detail-hero">
+          <div className="detail-header">
+            <p className="eyebrow">Listing preview</p>
+            <div className="detail-trail">
+              {categoryTrail.map((part) => (
+                <span key={part} className="detail-trail-pill">{part}</span>
+              ))}
+            </div>
+          </div>
+
           <div className="detail-gallery-card">
             <div className="detail-gallery">
               {activeImageSrc ? (
@@ -299,15 +308,6 @@ export default function ItemDetail({ currency, language = 'en' }) {
           </div>
 
           <aside className="detail-sidebar">
-            <div className="detail-header">
-              <p className="eyebrow">Listing preview</p>
-              <div className="detail-trail">
-                {categoryTrail.map((part) => (
-                  <span key={part} className="detail-trail-pill">{part}</span>
-                ))}
-              </div>
-            </div>
-
             <h1 className="detail-title">{item.title}</h1>
             <div className="detail-price-row">
               <strong className="detail-price">{formatPriceFromUsd(item.price, currency)}</strong>
