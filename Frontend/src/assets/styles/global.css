@@ -158,13 +158,6 @@ img { display: block; max-width: 100%; }
   border: 1px solid rgba(15, 23, 42, 0.08); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 .nav-action-label { display: inline-flex; align-items: center; white-space: nowrap; }
-.nav-profile-pill { gap: 0.55rem; padding-right: 0.95rem; }
-.nav-profile-pill .nav-action-label { font-weight: 700; letter-spacing: -0.01em; }
-.nav-profile-pill .nav-action-icon { display: none; }
-.nav-profile-pill .avatar {
-  flex: 0 0 auto;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 10px 20px rgba(15, 23, 42, 0.08);
-}
 .currency-hamburger-wrapper {
   position: static; transform: none; z-index: 40;
   display: inline-flex; align-items: center; gap: 0.45rem; margin-left: 0.15rem;
@@ -755,21 +748,8 @@ h2 { font-size: clamp(1.4rem, 2.2vw, 2rem); line-height: 1.1; }
   .nav-action-label {
     display: none;
   }
-  .nav-profile-pill {
-    padding-inline: 0.55rem;
-    gap: 0.4rem;
-  }
-  .nav-profile-pill .avatar {
-    display: none !important;
-  }
   .nav-action-icon {
     display: inline-flex;
-  }
-  .nav-profile-pill .nav-action-icon {
-    display: inline-flex;
-  }
-  .nav-profile-pill .nav-action-label {
-    display: none;
   }
 }
 

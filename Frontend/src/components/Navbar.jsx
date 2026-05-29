@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import Avatar from './Avatar'
 import { CATEGORIES } from '../constants/categories'
 import { clearAuthSession } from '../services/auth'
 import { t } from '../services/i18n'
@@ -170,22 +169,10 @@ export default function Navbar({
             {renderActionButton({ className: 'nav-pill', icon: iconLabels.buy, label: t(language, 'navbar.buy'), onClick: () => navigate('/dashboard', { state: { mode: 'buy' } }), active: isBuyActive })}
             {renderActionButton({ className: 'nav-pill nav-pill-sell', icon: iconLabels.sell, label: t(language, 'navbar.sell'), onClick: () => navigate('/dashboard', { state: { mode: 'sell' } }), active: isSellActive })}
             {isAuthenticated && (
-              <button className={`nav-pill nav-profile-pill${isProfileActive ? ' is-active' : ''}`} type="button" onClick={handleProfile} aria-label={t(language, 'navbar.profile')} aria-current={isProfileActive ? 'page' : undefined}>
-                <span className="nav-action-icon" aria-hidden="true">{iconLabels.profile}</span>
-                <Avatar src={authUser?.avatarUrl || authUser?.avatar} alt={authUser?.firstName || 'You'} size={28} />
-                <span className="nav-profile-copy">
-                  <span className="nav-profile-name">{authUser?.firstName || t(language, 'navbar.profile')}</span>
-                  <span className="nav-profile-subtitle">{t(language, 'navbar.profile')}</span>
-                </span>
-              </button>
+              renderActionButton({ className: 'nav-pill', icon: iconLabels.profile, label: t(language, 'navbar.profile'), onClick: handleProfile, active: isProfileActive })
             )}
             {renderActionButton({ className: 'nav-signout', icon: iconLabels.signout, label: t(language, 'navbar.signOut'), onClick: handleSignOut })}
           </>
-        ) : (
-          <>
-            {renderActionLink({ to: '/', end: true, icon: iconLabels.home, label: t(language, 'navbar.home') })}
-            {isAuthenticated ? renderActionLink({ to: '/profile', icon: iconLabels.profile, label: t(language, 'navbar.profile') }) : renderActionLink({ to: '/login', icon: iconLabels.login, label: 'Login' })}
-            {!isAuthenticated ? renderActionLink({ to: '/signup', icon: iconLabels.signup, label: 'Sign Up' }) : null}
             {isAuthenticated ? (
               renderActionButton({ className: 'nav-signout', icon: iconLabels.signout, label: t(language, 'navbar.signOut'), onClick: handleSignOut })
             ) : null}
