@@ -514,6 +514,13 @@ h2 { font-size: clamp(1.4rem, 2.2vw, 2rem); line-height: 1.1; }
 .item-card-body, .post-body { padding: 1rem; }
 .item-card-topline, .post-meta, .listing-price-row { justify-content: space-between; }
 .item-card-topline { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.2rem; }
+
+/* Item card header layout: keep avatar and category inline */
+.item-card-header { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
+.item-card-header-left { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+.item-card-header-left .item-compact-avatar { margin-right: 0.25rem; display: flex; align-items: center; }
+.item-card-header-right { display: flex; align-items: center; gap: 0.45rem; margin-left: auto; }
+.item-category-pill { display: inline-block; padding: 0.22rem 0.6rem; border-radius: 999px; background: rgba(255,255,255,0.94); border: 1px solid var(--border); font-weight: 800; font-size: 0.82rem; color: var(--muted-strong); white-space: nowrap; }
 .item-title, .post-body h2, .activity-title, .thread-item strong { font-size: 1.06rem; line-height: 1.25; font-weight: 900; color: var(--text); }
 .item-category, .item-location, .item-posted, .item-condition, .post-category, .hero-search-tag, .trust-pill, .mini-location, .distance-chip, .time-chip, .category-badge, .status-badge { white-space: nowrap; }
 .item-seller { margin: 0; color: var(--muted-strong); font-size: 0.92rem; }
