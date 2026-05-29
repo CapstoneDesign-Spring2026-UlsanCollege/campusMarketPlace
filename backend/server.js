@@ -37,6 +37,29 @@ app.get('/api/items/:id', (req, res) => {
   res.json({ item })
 })
 
+// Simple auth stub (development only)
+app.post('/api/auth/login', (req, res) => {
+  const { email } = req.body || {}
+  // return a fake token and demo user
+  res.json({ token: 'demo-token', user: { id: 'user-demo', email: email || 'student@office.uc.ac.kr', firstName: 'Demo', lastName: 'Student' } })
+})
+
+// User profile endpoint
+app.get('/api/users/:id', (req, res) => {
+  const id = req.params.id
+  // return a demo user for any id
+  const user = {
+    id,
+    firstName: 'Demo',
+    lastName: 'Seller',
+    email: 'seller@uc.ac.kr',
+    location: 'Campus Library',
+    avatarUrl: '/uploads/demo-seller.jpg',
+    isVerified: true,
+  }
+  res.json({ user })
+})
+
 // Dynamic placeholder SVG for uploads endpoint so demo images load without binary files
 app.get('/uploads/:name', (req, res) => {
   const { name } = req.params
