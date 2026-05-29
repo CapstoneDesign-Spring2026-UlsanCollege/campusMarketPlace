@@ -274,7 +274,7 @@ export default function ItemDetail({ currency, language = 'en' }) {
               {galleryImages.length > 1 ? <span className="detail-gallery-count">{activeImageIndex + 1}/{galleryImages.length}</span> : null}
             </div>
 
-              {galleryImages.length > 1 ? (
+            {galleryImages.length > 1 ? (
               <div className="detail-thumbs" aria-label="Listing photos">
                 {galleryImages.map((image, index) => {
                   const thumbSrc = resolveImageUrl(image)
@@ -284,18 +284,13 @@ export default function ItemDetail({ currency, language = 'en' }) {
                       key={`${image}-${index}`}
                       type="button"
                       className={`detail-thumb ${isActive ? 'is-active' : ''}`}
-                      onClick={() => setActiveImageIndex(index)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          openLightbox(index)
-                        }
+                      onClick={() => {
+                        setActiveImageIndex(index)
+                        openLightbox(index)
                       }}
                       aria-label={`View image ${index + 1}`}
-                      aria-pressed={isActive}
-                      aria-selected={isActive}
                     >
-                      {thumbSrc ? <img src={thumbSrc} alt={`Thumbnail ${index + 1}`} /> : null}
+                      {thumbSrc ? <img src={thumbSrc} alt="Listing thumbnail" /> : null}
                     </button>
                   )
                 })}
