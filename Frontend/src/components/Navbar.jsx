@@ -173,7 +173,10 @@ export default function Navbar({
               <button className={`nav-pill nav-profile-pill${isProfileActive ? ' is-active' : ''}`} type="button" onClick={handleProfile} aria-label={t(language, 'navbar.profile')} aria-current={isProfileActive ? 'page' : undefined}>
                 <span className="nav-action-icon" aria-hidden="true">{iconLabels.profile}</span>
                 <Avatar src={authUser?.avatarUrl || authUser?.avatar} alt={authUser?.firstName || 'You'} size={28} />
-                <span className="nav-action-label">{t(language, 'navbar.profile')}</span>
+                <span className="nav-profile-copy">
+                  <span className="nav-profile-name">{authUser?.firstName || t(language, 'navbar.profile')}</span>
+                  <span className="nav-profile-subtitle">{t(language, 'navbar.profile')}</span>
+                </span>
               </button>
             )}
             {renderActionButton({ className: 'nav-signout', icon: iconLabels.signout, label: t(language, 'navbar.signOut'), onClick: handleSignOut })}

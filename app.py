@@ -719,6 +719,27 @@ def build_user_payload(user_doc):
         if item_id_str and item_id_str not in normalized_favorite_item_ids:
             normalized_favorite_item_ids.append(item_id_str)
 
+    reviews = user_doc.get('reviews', [])
+    if not isinstance(reviews, list):
+        reviews = []
+
+    serialized_reviews = []
+    total_rating = 0
+    rating_count = 0
+    for review in reviews:
+        if not isinstance(review, dict):
+            continue
+
+        serialized_review = serialize_review_document(dict(review))
+        if serialized_review:
+            serialized_reviews.append(serialized_review)
+            rating_value = serialized_review.get('rating')
+            if isinstance(rating_value, (int, float)):
+                total_rating += rating_value
+                rating_count += 1
+
+    average_rating = round(total_rating / rating_count, 1) if rating_count else 0
+
     return {
         'id': str(user_doc['_id']),
         'firstName': user_doc['firstName'],
@@ -730,7 +751,41 @@ def build_user_payload(user_doc):
         'avatar': user_doc.get('avatar', ''),
         'paymentMethods': payment_methods,
         'favoriteItemIds': normalized_favorite_item_ids,
+        'reviews': serialized_reviews,
+        'reviewCount': rating_count,
+        'averageRating': average_rating,
     }
+
+
+def serialize_review_document(review_doc):
+    review_doc['_id'] = str(review_doc.get('_id') or review_doc.get('id') or uuid4())
+    if review_doc.get('reviewerId') is not None:
+        review_doc['reviewerId'] = str(review_doc['reviewerId'])
+    if review_doc.get('authorId') is not None:
+        review_doc['authorId'] = str(review_doc['authorId'])
+    if review_doc.get('author_id') is not None:
+        review_doc['author_id'] = str(review_doc['author_id'])
+    if review_doc.get('sellerId') is not None:
+        review_doc['sellerId'] = str(review_doc['sellerId'])
+    if review_doc.get('seller_id') is not None:
+        review_doc['seller_id'] = str(review_doc['seller_id'])
+
+    rating_value = review_doc.get('rating', 0)
+    try:
+        review_doc['rating'] = max(1, min(5, int(rating_value)))
+    except Exception:
+        review_doc['rating'] = 0
+
+    review_doc['comment'] = str(review_doc.get('comment', '')).strip()
+
+    for field in ('createdAt', 'updatedAt'):
+        if field in review_doc and hasattr(review_doc[field], 'isoformat'):
+            review_doc[field] = review_doc[field].isoformat()
+
+    if not review_doc['comment']:
+        review_doc['comment'] = ''
+
+    return review_doc
 
 
 def get_favorite_item_ids(user_doc):
@@ -1887,6 +1942,126 @@ def get_public_user(user_id):
         payload['avatarUrl'] = ''
 
     return jsonify({'user': payload})
+
+
+@app.get('/api/users/<user_id>/reviews')
+def get_public_user_reviews(user_id):
+    """Fetch public reviews for a seller/user."""
+    oid = parse_object_id(user_id)
+    if not oid:
+        return json_error('Invalid user id.', 400)
+
+    try:
+        user_doc = users.find_one({'_id': oid}, {'reviews': 1})
+    except Exception as exc:
+        return json_error(f'Failed to fetch reviews: {str(exc)}', 500)
+
+    if not user_doc:
+        return json_error('User not found.', 404)
+
+    reviews = user_doc.get('reviews', [])
+    if not isinstance(reviews, list):
+        reviews = []
+
+    serialized_reviews = []
+    for review in reviews:
+        if isinstance(review, dict):
+            serialized_reviews.append(serialize_review_document(dict(review)))
+
+    serialized_reviews.sort(key=lambda review: review.get('createdAt', ''), reverse=True)
+    return jsonify({'reviews': serialized_reviews})
+
+
+@app.post('/api/users/<user_id>/reviews')
+def create_public_user_review(user_id):
+    """Create or replace a review for a seller/user."""
+    reviewer_id, reviewer_doc, error_response = get_current_user_from_request()
+    if error_response:
+        return error_response
+
+    target_oid = parse_object_id(user_id)
+    if not target_oid:
+        return json_error('Invalid user id.', 400)
+
+    if str(reviewer_id) == str(target_oid):
+        return json_error('You cannot review your own profile.', 400)
+
+    try:
+        target_doc = users.find_one({'_id': target_oid})
+    except Exception as exc:
+        return json_error(f'Failed to load user: {str(exc)}', 500)
+
+    if not target_doc:
+        return json_error('User not found.', 404)
+
+    data = request.get_json(silent=True) or {}
+    comment = str(data.get('comment', '')).strip()
+    rating_value = data.get('rating')
+
+    try:
+        rating = int(rating_value)
+    except (TypeError, ValueError):
+        return json_error('Rating must be an integer between 1 and 5.', 400)
+
+    if rating < 1 or rating > 5:
+        return json_error('Rating must be between 1 and 5.', 400)
+
+    if not comment:
+        return json_error('Review comment is required.', 400)
+
+    if len(comment) > 1000:
+        return json_error('Review comment must be 1000 characters or fewer.', 400)
+
+    now = datetime.now(timezone.utc)
+    existing_reviews = target_doc.get('reviews', [])
+    if not isinstance(existing_reviews, list):
+        existing_reviews = []
+
+    seller_avatar = reviewer_doc.get('avatar') or reviewer_doc.get('avatarUrl') or ''
+    if seller_avatar and isinstance(seller_avatar, str) and seller_avatar.strip() and not re.match(r'^https?://', seller_avatar):
+        seller_avatar = f"{request.host_url.rstrip('/')}/api/uploads/{seller_avatar.lstrip('/')}"
+
+    review_payload = {
+        '_id': str(uuid4()),
+        'reviewerId': str(reviewer_id),
+        'reviewerName': f"{reviewer_doc.get('firstName', '').strip()} {reviewer_doc.get('lastName', '').strip()}".strip() or 'Anonymous',
+        'reviewerAvatarUrl': seller_avatar,
+        'rating': rating,
+        'comment': comment,
+        'createdAt': now,
+        'updatedAt': now,
+    }
+
+    filtered_reviews = []
+    for review in existing_reviews:
+        if not isinstance(review, dict):
+            continue
+        if str(review.get('reviewerId')) == str(reviewer_id):
+            continue
+        filtered_reviews.append(review)
+
+    filtered_reviews.append(review_payload)
+
+    try:
+        users.update_one(
+            {'_id': target_oid},
+            {'$set': {'reviews': filtered_reviews, 'updatedAt': now}},
+        )
+    except Exception as exc:
+        return json_error(f'Failed to save review: {str(exc)}', 500)
+
+    serialized_reviews = [serialize_review_document(dict(review)) for review in filtered_reviews if isinstance(review, dict)]
+    serialized_reviews.sort(key=lambda review: review.get('createdAt', ''), reverse=True)
+    rating_values = [review.get('rating', 0) for review in serialized_reviews if isinstance(review.get('rating'), (int, float))]
+    average_rating = round(sum(rating_values) / len(rating_values), 1) if rating_values else 0
+
+    return jsonify({
+        'message': 'Review saved successfully.',
+        'review': serialize_review_document(dict(review_payload)),
+        'reviews': serialized_reviews,
+        'reviewCount': len(rating_values),
+        'averageRating': average_rating,
+    }), 201
 
 
 @app.post('/api/items')

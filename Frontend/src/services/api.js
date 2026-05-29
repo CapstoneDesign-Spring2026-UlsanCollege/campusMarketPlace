@@ -107,6 +107,19 @@ export async function fetchUser(userId) {
   return apiRequest(`/users/${encodeURIComponent(userId)}`)
 }
 
+export async function fetchUserReviews(userId) {
+  if (!userId) throw new Error('userId required')
+  return apiRequest(`/users/${encodeURIComponent(userId)}/reviews`)
+}
+
+export async function postUserReview(userId, review) {
+  if (!userId) throw new Error('userId required')
+  return apiRequest(`/users/${encodeURIComponent(userId)}/reviews`, {
+    method: 'POST',
+    body: JSON.stringify(review),
+  })
+}
+
 export async function openMessageThread(itemId) {
   return apiRequest('/messages/threads', {
     method: 'POST',

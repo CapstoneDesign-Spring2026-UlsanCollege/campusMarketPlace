@@ -8,6 +8,7 @@ import Search from './routes/Search'
 import Login from './routes/Login'
 import Signup from './routes/Signup'
 import Dashboard from './routes/Dashboard'
+import ItemDetail from './routes/ItemDetail'
 import Messages from './routes/Messages'
 import Profile from './routes/Profile'
 import PublicProfile from './routes/PublicProfile'
@@ -77,6 +78,7 @@ export default function App() {
             <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />
           )}
         />
+        <Route path="/item/:id" element={<ItemDetail currency={currency} language={language} />} />
         <Route
           path="/messages"
           element={authSession.token ? <Messages language={language} /> : <Navigate to="/login" replace state={{ message: 'Please log in first.' }} />}

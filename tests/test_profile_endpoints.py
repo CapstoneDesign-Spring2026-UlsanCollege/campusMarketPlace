@@ -120,6 +120,37 @@ def test_item_can_be_loved_and_saved_to_profile(client):
     assert profile_data['favoriteItems'][0]['_id'] == item_id
 
 
+def test_seller_reviews_can_be_created_and_fetched(client):
+    seller_email = 'review-seller@example.com'
+    reviewer_email = 'review-buyer@example.com'
+    password = 'Test1234!'
+
+    seller_signup = client.post('/api/auth/signup', json={'firstName': 'Seller', 'lastName': 'One', 'email': seller_email, 'password': password})
+    assert seller_signup.status_code == 201
+    seller_id = seller_signup.get_json()['user']['id']
+
+    reviewer_signup = client.post('/api/auth/signup', json={'firstName': 'Reviewer', 'lastName': 'One', 'email': reviewer_email, 'password': password})
+    assert reviewer_signup.status_code == 201
+    reviewer_token = reviewer_signup.get_json()['token']
+
+    created_review = client.post(
+        f'/api/users/{seller_id}/reviews',
+        json={'rating': 5, 'comment': 'Great seller and fast reply.'},
+        headers={'Authorization': f'Bearer {reviewer_token}'},
+    )
+    assert created_review.status_code == 201
+    review_data = created_review.get_json()
+    assert review_data['review']['rating'] == 5
+    assert review_data['review']['comment'] == 'Great seller and fast reply.'
+
+    fetched_reviews = client.get(f'/api/users/{seller_id}/reviews')
+    assert fetched_reviews.status_code == 200
+    fetched_data = fetched_reviews.get_json()
+    assert len(fetched_data['reviews']) == 1
+    assert fetched_data['reviews'][0]['rating'] == 5
+    assert fetched_data['reviews'][0]['comment'] == 'Great seller and fast reply.'
+
+
 # Note: To run these tests locally, create a conftest.py fixture that creates
 # a Flask test client and configures the app to use TEST_MONGODB_URI. This
 # file intentionally leaves those details out to avoid assumptions about your
