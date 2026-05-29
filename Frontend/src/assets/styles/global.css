@@ -791,13 +791,13 @@ h2 { font-size: clamp(1.4rem, 2.2vw, 2rem); line-height: 1.1; }
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 
-/* Detail page gallery and sticky sidebar styles (HamroBazaar-like) */
-.detail-hero { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr) 340px; align-items: start; }
-.detail-gallery-card { display: grid; grid-template-columns: 1fr 96px; gap: 0.75rem; }
-.detail-gallery { display: block; }
-.detail-gallery-button img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.detail-thumbs { display: flex; flex-direction: column; gap: 0.5rem; align-items: stretch; }
-.detail-thumb { width: 100%; height: 72px; padding: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: rgba(255,255,255,0.96); }
+/* Detail page: images on left, seller sidebar on right (original layout) */
+.detail-hero { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr) 320px; align-items: start; }
+.detail-gallery-card { display: grid; grid-template-columns: 1fr; gap: 0.5rem; }
+.detail-gallery { display: block; position: relative; }
+.detail-gallery-button img { width: 100%; height: auto; object-fit: contain; display: block; }
+.detail-thumbs { display: flex; gap: 0.5rem; margin-top: 0.6rem; }
+.detail-thumb { width: 72px; height: 72px; padding: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: rgba(255,255,255,0.96); }
 .detail-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .detail-gallery-count { position: absolute; right: 0.6rem; bottom: 0.6rem; background: rgba(0,0,0,0.5); color: #fff; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.82rem; }
 .detail-sidebar { position: sticky; top: 1.25rem; align-self: start; }
@@ -809,3 +809,5 @@ h2 { font-size: clamp(1.4rem, 2.2vw, 2rem); line-height: 1.1; }
   .detail-thumb { flex: 0 0 72px; height: 72px; }
   .detail-sidebar { position: static; }
 }
+
+
