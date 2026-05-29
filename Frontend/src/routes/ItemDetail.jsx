@@ -90,18 +90,37 @@ export default function ItemDetail({ currency, language = 'en' }) {
   const [sellerProfile, setSellerProfile] = useState(null)
   const [sellerLoading, setSellerLoading] = useState(false)
   const currentUser = getAuthUser()
-  const galleryImages = useMemo(() => getAllImageValues(item), [item])
-  const activeImageSrc = resolveImageUrl(galleryImages[activeImageIndex] || galleryImages[0] || getPrimaryImageValue(item))
+  // Development demo item (used only when backend isn't available)
+  const demoItem = import.meta.env.DEV
+    ? {
+        _id: 'demo-1',
+        title: 'Demo: Canon DSLR with 18-55mm Lens',
+        price: 249.99,
+        category: 'Electronics',
+        condition: 'Good',
+        location: 'Campus Library',
+        createdAt: new Date().toISOString(),
+        description: 'Well-maintained DSLR camera. Includes charger, strap, and 32GB SD card. Perfect for photography students.',
+        images: ['/uploads/demo-camera-1.jpg', '/uploads/demo-camera-2.jpg', '/uploads/demo-camera-3.jpg'],
+        sellerName: 'Demo Seller',
+        sellerAvatarUrl: '',
+        seller_verified: true,
+      }
+    : null
+
+  const effectiveItem = item || demoItem
+  const galleryImages = useMemo(() => getAllImageValues(effectiveItem), [effectiveItem])
+  const activeImageSrc = resolveImageUrl(galleryImages[activeImageIndex] || galleryImages[0] || getPrimaryImageValue(effectiveItem))
   const sellerName = sellerProfile
-    ? `${sellerProfile?.firstName || ''} ${sellerProfile?.lastName || ''}`.trim() || item?.sellerName || 'Seller'
-    : item?.sellerName || 'Seller'
-  const sellerAvatar = item?.sellerAvatarUrl || item?.sellerAvatar || item?.seller_avatar || item?.seller_avatar_url || ''
-  const detailRows = useMemo(() => buildDetailRows(item), [item])
-  const sellerLocation = sellerProfile?.location || item?.location || 'Campus'
-  const sellerEmail = sellerProfile?.email || item?.sellerEmail || ''
-  const sellerPhone = sellerProfile?.phone || item?.sellerPhone || ''
-  const conditionLabel = getConditionLabel(item)
-  const categoryTrail = [item?.category || 'Listings', conditionLabel, sellerLocation].filter(Boolean)
+    ? `${sellerProfile?.firstName || ''} ${sellerProfile?.lastName || ''}`.trim() || effectiveItem?.sellerName || 'Seller'
+    : effectiveItem?.sellerName || 'Seller'
+  const sellerAvatar = effectiveItem?.sellerAvatarUrl || effectiveItem?.sellerAvatar || effectiveItem?.seller_avatar || effectiveItem?.seller_avatar_url || ''
+  const detailRows = useMemo(() => buildDetailRows(effectiveItem), [effectiveItem])
+  const sellerLocation = sellerProfile?.location || effectiveItem?.location || 'Campus'
+  const sellerEmail = sellerProfile?.email || effectiveItem?.sellerEmail || ''
+  const sellerPhone = sellerProfile?.phone || effectiveItem?.sellerPhone || ''
+  const conditionLabel = getConditionLabel(effectiveItem)
+  const categoryTrail = [effectiveItem?.category || 'Listings', conditionLabel, sellerLocation].filter(Boolean)
 
   useEffect(() => {
     let isActive = true
@@ -227,25 +246,48 @@ export default function ItemDetail({ currency, language = 'en' }) {
       </main>
     )
   }
-
+  // If there's an error or no item, show a friendly error page.
+  // In development, fall back to a demo item so designers can preview the UI without the backend.
   if (error || !item) {
-    return (
-      <main className="page-shell marketplace-shell">
-        <section className="panel item-detail-shell item-detail-error">
-          <p className="eyebrow">Listing preview</p>
-          <h1>We could not open that item.</h1>
-          <p className="subcopy">{error || 'The listing was not found.'}</p>
-          <div className="detail-actions">
-            <button className="button button-primary" type="button" onClick={() => navigate(-1)}>
-              Go back
-            </button>
-            <Link className="button button-secondary" to="/search">
-              Search listings
-            </Link>
-          </div>
-        </section>
-      </main>
-    )
+    if (import.meta.env.DEV) {
+      const demo = {
+        _id: 'demo-1',
+        title: 'Demo: Canon DSLR with 18-55mm Lens',
+        price: 249.99,
+        category: 'Electronics',
+        condition: 'Good',
+        location: 'Campus Library',
+        createdAt: new Date().toISOString(),
+        description: 'Well-maintained DSLR camera. Includes charger, strap, and 32GB SD card. Perfect for photography students.',
+        images: [
+          '/uploads/demo-camera-1.jpg',
+          '/uploads/demo-camera-2.jpg',
+          '/uploads/demo-camera-3.jpg',
+        ],
+        sellerName: 'Demo Seller',
+        sellerAvatarUrl: '',
+        seller_verified: true,
+      }
+      // don't set state during render; use demo data via `effectiveItem`
+    } else {
+      return (
+        <main className="page-shell marketplace-shell">
+          <section className="panel item-detail-shell item-detail-error">
+            <p className="eyebrow">Listing preview</p>
+            <h1>We could not open that item.</h1>
+            <p className="subcopy">{error || 'The listing was not found.'}</p>
+            <div className="detail-actions">
+              <button className="button button-primary" type="button" onClick={() => navigate(-1)}>
+                Go back
+              </button>
+              <Link className="button button-secondary" to="/search">
+                Search listings
+              </Link>
+            </div>
+          </section>
+        </main>
+      )
+    }
   }
 
   return (
@@ -254,9 +296,9 @@ export default function ItemDetail({ currency, language = 'en' }) {
         <div className="detail-breadcrumbs">
           <Link to="/browse">Marketplace</Link>
           <span>›</span>
-          <Link to={`/search?category=${encodeURIComponent(item.category || '')}`}>{item.category || 'Listings'}</Link>
+          <Link to={`/search?category=${encodeURIComponent(effectiveItem?.category || '')}`}>{effectiveItem?.category || 'Listings'}</Link>
           <span>›</span>
-          <span>{item.title}</span>
+          <span>{effectiveItem?.title}</span>
         </div>
 
         <div className="detail-hero">
@@ -270,18 +312,18 @@ export default function ItemDetail({ currency, language = 'en' }) {
           </div>
 
           <div className="detail-gallery-card">
-            <div className="detail-gallery">
+            <figure className="detail-gallery">
               {activeImageSrc ? (
                 <button type="button" className="detail-gallery-button" onClick={() => openLightbox(activeImageIndex)} aria-label="Open image viewer">
-                  <img src={activeImageSrc} alt={item.title} />
+                  <img src={activeImageSrc} alt={effectiveItem?.title} />
                 </button>
               ) : (
                 <div className="detail-gallery-fallback" aria-hidden="true">
-                  <span>{(item.category || 'Item').slice(0, 1).toUpperCase()}</span>
+                  <span>{(effectiveItem?.category || 'Item').slice(0, 1).toUpperCase()}</span>
                 </div>
               )}
-              {galleryImages.length > 1 ? <span className="detail-gallery-count">{activeImageIndex + 1}/{galleryImages.length}</span> : null}
-            </div>
+              {galleryImages.length > 1 ? <figcaption className="detail-gallery-count" aria-hidden="true">{activeImageIndex + 1}/{galleryImages.length}</figcaption> : null}
+            </figure>
 
             {galleryImages.length > 1 ? (
               <div className="detail-thumbs" aria-label="Listing photos">
@@ -299,7 +341,7 @@ export default function ItemDetail({ currency, language = 'en' }) {
                       }}
                       aria-label={`View image ${index + 1}`}
                     >
-                      {thumbSrc ? <img src={thumbSrc} alt="Listing thumbnail" /> : null}
+                      {thumbSrc ? <img src={thumbSrc} alt={`Thumbnail ${index + 1}`} /> : null}
                     </button>
                   )
                 })}
@@ -307,11 +349,11 @@ export default function ItemDetail({ currency, language = 'en' }) {
             ) : null}
           </div>
 
-          <aside className="detail-sidebar">
-            <h1 className="detail-title">{item.title}</h1>
+          <aside className="detail-sidebar panel">
+            <h1 className="detail-title">{effectiveItem?.title}</h1>
             <div className="detail-price-row">
-              <strong className="detail-price">{formatPriceFromUsd(item.price, currency)}</strong>
-              {item?.status ? <span className={`status-badge status-${item.status}`}>{item.status}</span> : null}
+              <strong className="detail-price">{formatPriceFromUsd(effectiveItem?.price, currency)}</strong>
+              {effectiveItem?.status ? <span className={`status-badge status-${effectiveItem.status}`}>{effectiveItem.status}</span> : null}
             </div>
             <div className="detail-chip-row">
               {detailRows.map((row) => (
@@ -320,19 +362,19 @@ export default function ItemDetail({ currency, language = 'en' }) {
                 </span>
               ))}
             </div>
-            <p className="detail-description">{item.description}</p>
+            <p className="detail-description">{effectiveItem?.description}</p>
 
             <div className="detail-seller-card">
-              <Link to={`/profile/${item?.seller_id || item?.sellerId || ''}`} onClick={(e) => e.stopPropagation()}>
+              <Link to={`/profile/${effectiveItem?.seller_id || effectiveItem?.sellerId || ''}`} onClick={(e) => e.stopPropagation()}>
                 <Avatar src={sellerProfile?.avatarUrl || sellerAvatar} alt={sellerName} size={56} />
               </Link>
               <div className="detail-seller-copy">
                 <p className="detail-seller-label">Seller</p>
                 <div className="detail-seller-name-row">
                   <strong>{sellerName}</strong>
-                  {Boolean(item?.seller_verified || item?.sellerVerified || sellerProfile?.isVerified) ? <span className="detail-verified-badge">Verified</span> : null}
+                  {Boolean(effectiveItem?.seller_verified || effectiveItem?.sellerVerified || sellerProfile?.isVerified) ? <span className="detail-verified-badge">Verified</span> : null}
                 </div>
-                <p className="detail-seller-note">{currentUser?.id === item?.seller_id ? 'This is your listing.' : sellerLoading ? 'Loading seller profile…' : 'Student seller profile.'}</p>
+                <p className="detail-seller-note">{currentUser?.id === effectiveItem?.seller_id ? 'This is your listing.' : sellerLoading ? 'Loading seller profile…' : 'Student seller profile.'}</p>
                 <p className="detail-seller-note detail-seller-location">{sellerLocation}</p>
               </div>
             </div>
@@ -353,7 +395,7 @@ export default function ItemDetail({ currency, language = 'en' }) {
               <button className="button button-primary" type="button" onClick={handleMessageSeller}>
                 Message seller
               </button>
-              <Link className="button button-secondary" to={`/profile/${item?.seller_id || item?.sellerId || ''}`}>
+              <Link className="button button-secondary" to={`/profile/${effectiveItem?.seller_id || effectiveItem?.sellerId || ''}`}>
                 View profile
               </Link>
               <button className="button button-secondary" type="button" onClick={() => navigate(-1)}>
