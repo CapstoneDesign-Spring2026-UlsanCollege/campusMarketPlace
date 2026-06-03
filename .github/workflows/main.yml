@@ -1,4 +1,4 @@
-# File: .github/workflows/ci.yml
+# File: .github/workflows/main.yml
 name: CI Checks
 
 # Trigger CI on push or pull request to main
@@ -17,19 +17,43 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Step 2: Set up Python
+    # Step 2: Set up Node.js for frontend
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    # Step 3: Install frontend dependencies
+    - name: Install frontend dependencies
+      run: |
+        cd Frontend
+        npm install
+
+    # Step 4: Run frontend tests
+    - name: Run frontend tests
+      run: |
+        cd Frontend
+        npm test
+
+    # Step 5: Build frontend
+    - name: Build frontend
+      run: |
+        cd Frontend
+        npm run build
+
+    # Step 6: Set up Python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
 
-    # Step 3: Install backend dependencies
+    # Step 7: Install backend dependencies
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    # Step 4: Run tests (adjust if you don't have pytest yet)
+    # Step 8: Run backend tests
     - name: Run backend tests
       run: |
         if [ -f "tests/test_sample.py" ]; then
@@ -37,11 +61,3 @@ jobs:
         else
           echo "No tests found. Skipping..."
         fi
-
-    # Optional: Build frontend (if you have JS/React)
-    # - name: Install Node & dependencies
-    #   uses: actions/setup-node@v3
-    #   with:
-    #     node-version: '20'
-    # - run: npm install
-    # - run: npm run build
