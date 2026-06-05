@@ -1013,7 +1013,7 @@ def health_check():
             'imageStorage': IMAGE_STORAGE_MODE,
             'cloudinaryConfigured': use_cloudinary,
         })
-    except Exception as exc:  # pragma: no cover - simple connection diagnostic
+    except Exception as exc:  # Simple database connection diagnostic
         return json_error(f'Database connection failed: {exc}', 500)
 
 
