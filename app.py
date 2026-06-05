@@ -560,6 +560,8 @@ else:
 # Configure upload folder path
 UPLOAD_FOLDER = upload_path.resolve()
 UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
+
+# Maximum image upload size: 5MB
 MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024
 ALLOWED_IMAGE_EXTENSIONS = {
     '.jpg',
