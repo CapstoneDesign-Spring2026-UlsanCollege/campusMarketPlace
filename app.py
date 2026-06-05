@@ -1150,7 +1150,7 @@ def delete_profile_avatar():
 
     return jsonify({'message': 'Avatar removed.'})
 
-
+# User signup endpoint
 @app.post('/api/auth/signup')
 def signup():
     data = request.get_json(silent=True) or {}
