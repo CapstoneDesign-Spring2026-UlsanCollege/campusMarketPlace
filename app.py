@@ -546,6 +546,7 @@ except Exception as exc:
         'Network Access IP allowlist.'
     ) from exc
 
+# Initialize Flask application
 app = Flask(__name__)
 upload_dir_env = os.getenv('UPLOAD_DIR', '').strip()
 if upload_dir_env:
