@@ -202,7 +202,7 @@ def ensure_items_collection_schema():
 def generate_otp(length=6):
     from random import randint
 
-    # Generate a zero-padded numeric OTP
+  # Generate a numeric OTP with leading zeros
     max_val = 10 ** length - 1
     val = randint(0, max_val)
     return str(val).zfill(length)
