@@ -1541,7 +1541,7 @@ def update_profile_password():
 
     return jsonify({'message': 'Password updated successfully.'})
 
-
+# Retrieve user message threads
 @app.get('/api/messages/threads')
 def get_message_threads():
     user_id, _user_doc, auth_error = get_current_user_from_request()
