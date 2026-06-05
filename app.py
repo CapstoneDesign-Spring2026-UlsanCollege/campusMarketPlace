@@ -1241,7 +1241,7 @@ def signup():
         'resendAvailableAt': resend_available_at,
     }), 201
 
-
+# User login endpoint
 @app.post('/api/auth/login')
 def login():
     data = request.get_json(silent=True) or {}
