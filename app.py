@@ -1769,7 +1769,7 @@ def send_message(thread_id):
         ),
     }), 201
 
-
+# Fetch marketplace items
 @app.get('/api/items')
 def get_items():
     """Fetch all marketplace items with pagination and filtering."""
