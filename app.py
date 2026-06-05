@@ -99,7 +99,7 @@ elif is_production:
 
 IMAGE_STORAGE_MODE = 'cloudinary' if use_cloudinary else 'local-disk'
 
-# Email / SMTP settings for sending OTPs
+# Email and SMTP configuration
 SMTP_HOST = os.getenv('SMTP_HOST', '').strip()
 SMTP_PORT = int(os.getenv('SMTP_PORT', '587'))
 SMTP_USER = os.getenv('SMTP_USER', '').strip()
