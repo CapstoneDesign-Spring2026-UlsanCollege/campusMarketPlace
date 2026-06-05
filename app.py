@@ -556,6 +556,7 @@ if upload_dir_env:
 else:
     upload_path = Path(__file__).resolve().parent / 'uploads'
 
+# Configure upload folder path
 UPLOAD_FOLDER = upload_path.resolve()
 UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024
