@@ -1043,7 +1043,7 @@ def upload_image():
         'storage': upload_data['storage'],
     }), 201
 
-
+# Upload user profile avatar
 @app.post('/api/profile/avatar')
 def upload_profile_avatar():
     """Upload and attach an avatar image to the authenticated user's profile."""
