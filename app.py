@@ -908,7 +908,7 @@ def is_strong_password(password):
         return False, 'Password cannot contain spaces.'
     return True, ''
 
-
+# Generate JWT authentication token
 def issue_token(user_doc):
     payload = {
         'sub': str(user_doc['_id']),
