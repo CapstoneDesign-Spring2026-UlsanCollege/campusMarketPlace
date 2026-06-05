@@ -110,6 +110,7 @@ SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '').strip()
 SENDGRID_FROM = os.getenv('SENDGRID_FROM', EMAIL_FROM).strip()
 RESEND_COOLDOWN_SECONDS = int(os.getenv('RESEND_COOLDOWN_SECONDS', '120'))  # 2 minutes default
 
+# Connect to MongoDB database
 client = MongoClient(
     MONGODB_URI,
     serverSelectionTimeoutMS=8000,
