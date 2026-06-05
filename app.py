@@ -1398,7 +1398,7 @@ def me():
 
     return jsonify({'user': build_user_payload(user_doc)})
 
-
+# Fetch authenticated user profile
 @app.get('/api/profile')
 def profile_summary():
     auth_header = request.headers.get('Authorization', '')
