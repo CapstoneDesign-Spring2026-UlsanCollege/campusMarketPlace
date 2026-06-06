@@ -33,7 +33,7 @@ jobs:
     - name: Run frontend tests
       run: |
         cd Frontend
-        has_test_script=$(node -p "try { const scripts = require('./package.json').scripts; (scripts && typeof scripts.test === 'string') ? 'yes' : 'no'; } catch (error) { console.error('Unable to read Frontend/package.json:', error.message); process.exit(2); }")
+        has_test_script=$(node -p "try { const scripts = require('./package.json').scripts; (scripts && typeof scripts.test === 'string') ? 'yes' : 'no'; } catch (error) { console.error('Unable to read Frontend/package.json:', error.message); process.exit(2); }") || exit $?
         if [ "$has_test_script" = "yes" ]; then
           npm test
         else
