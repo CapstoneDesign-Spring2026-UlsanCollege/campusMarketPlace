@@ -99,17 +99,18 @@ elif is_production:
 
 IMAGE_STORAGE_MODE = 'cloudinary' if use_cloudinary else 'local-disk'
 
-# Email / SMTP settings for sending OTPs
+# Email and SMTP configuration
 SMTP_HOST = os.getenv('SMTP_HOST', '').strip()
 SMTP_PORT = int(os.getenv('SMTP_PORT', '587'))
 SMTP_USER = os.getenv('SMTP_USER', '').strip()
 SMTP_PASS = os.getenv('SMTP_PASS', '').strip()
 EMAIL_FROM = os.getenv('EMAIL_FROM', SMTP_USER).strip()
-OTP_TTL_SECONDS = int(os.getenv('OTP_TTL_SECONDS', '600'))  # 10 minutes by default
+OTP_TTL_SECONDS = int(os.getenv('OTP_TTL_SECONDS', '600'))  # OTP expires in 10 minutes
 SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '').strip()
 SENDGRID_FROM = os.getenv('SENDGRID_FROM', EMAIL_FROM).strip()
 RESEND_COOLDOWN_SECONDS = int(os.getenv('RESEND_COOLDOWN_SECONDS', '120'))  # 2 minutes default
 
+# Connect to MongoDB database
 client = MongoClient(
     MONGODB_URI,
     serverSelectionTimeoutMS=8000,
@@ -201,7 +202,7 @@ def ensure_items_collection_schema():
 def generate_otp(length=6):
     from random import randint
 
-    # Generate a zero-padded numeric OTP
+  # Generate a numeric OTP with leading zeros
     max_val = 10 ** length - 1
     val = randint(0, max_val)
     return str(val).zfill(length)
@@ -546,6 +547,7 @@ except Exception as exc:
         'Network Access IP allowlist.'
     ) from exc
 
+# Initialize Flask application
 app = Flask(__name__)
 upload_dir_env = os.getenv('UPLOAD_DIR', '').strip()
 if upload_dir_env:
@@ -555,8 +557,11 @@ if upload_dir_env:
 else:
     upload_path = Path(__file__).resolve().parent / 'uploads'
 
+# Configure upload folder path
 UPLOAD_FOLDER = upload_path.resolve()
 UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
+
+# Maximum image upload size: 5MB
 MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024
 ALLOWED_IMAGE_EXTENSIONS = {
     '.jpg',
@@ -903,7 +908,7 @@ def is_strong_password(password):
         return False, 'Password cannot contain spaces.'
     return True, ''
 
-
+# Generate JWT authentication token
 def issue_token(user_doc):
     payload = {
         'sub': str(user_doc['_id']),
@@ -1012,7 +1017,7 @@ def health_check():
             'imageStorage': IMAGE_STORAGE_MODE,
             'cloudinaryConfigured': use_cloudinary,
         })
-    except Exception as exc:  # pragma: no cover - simple connection diagnostic
+    except Exception as exc:  # Simple database connection diagnostic
         return json_error(f'Database connection failed: {exc}', 500)
 
 
@@ -1038,7 +1043,7 @@ def upload_image():
         'storage': upload_data['storage'],
     }), 201
 
-
+# Upload user profile avatar
 @app.post('/api/profile/avatar')
 def upload_profile_avatar():
     """Upload and attach an avatar image to the authenticated user's profile."""
@@ -1145,7 +1150,7 @@ def delete_profile_avatar():
 
     return jsonify({'message': 'Avatar removed.'})
 
-
+# User signup endpoint
 @app.post('/api/auth/signup')
 def signup():
     data = request.get_json(silent=True) or {}
@@ -1236,7 +1241,7 @@ def signup():
         'resendAvailableAt': resend_available_at,
     }), 201
 
-
+# User login endpoint
 @app.post('/api/auth/login')
 def login():
     data = request.get_json(silent=True) or {}
@@ -1393,7 +1398,7 @@ def me():
 
     return jsonify({'user': build_user_payload(user_doc)})
 
-
+# Fetch authenticated user profile
 @app.get('/api/profile')
 def profile_summary():
     auth_header = request.headers.get('Authorization', '')
@@ -1536,7 +1541,7 @@ def update_profile_password():
 
     return jsonify({'message': 'Password updated successfully.'})
 
-
+# Retrieve user message threads
 @app.get('/api/messages/threads')
 def get_message_threads():
     user_id, _user_doc, auth_error = get_current_user_from_request()
@@ -1764,7 +1769,7 @@ def send_message(thread_id):
         ),
     }), 201
 
-
+# Fetch marketplace items
 @app.get('/api/items')
 def get_items():
     """Fetch all marketplace items with pagination and filtering."""
