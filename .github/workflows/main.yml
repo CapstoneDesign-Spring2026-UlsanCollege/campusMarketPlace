@@ -33,15 +33,11 @@ jobs:
     - name: Run frontend tests
       run: |
         cd Frontend
-        if node -e "const fs=require('fs'); try { const pkg=JSON.parse(fs.readFileSync('package.json','utf8')); process.exit((pkg.scripts || {}).test ? 0 : 1); } catch (error) { console.error('Unable to read Frontend/package.json:', error.message); process.exit(2); }"; then
+        has_test_script=$(node -p "try { const scripts = require('./package.json').scripts; (scripts && typeof scripts.test === 'string') ? 'yes' : 'no'; } catch (error) { console.error('Unable to read Frontend/package.json:', error.message); process.exit(2); }")
+        if [ "$has_test_script" = "yes" ]; then
           npm test
         else
-          status=$?
-          if [ "$status" -eq 1 ]; then
-            echo "No frontend test script found. Skipping..."
-          else
-            exit "$status"
-          fi
+          echo "No frontend test script found. Skipping..."
         fi
 
     # Step 5: Build frontend
