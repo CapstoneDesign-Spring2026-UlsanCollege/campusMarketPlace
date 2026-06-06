@@ -1,0 +1,28 @@
+name: Sync main → bugs
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  create_pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Create pull request to bugs
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "chore: sync main → bugs"
+          body: |
+            Automated sync of `main` into `bugs`.
+          base: bugs
+          branch: sync/main-to-bugs-${{ github.run_id }}
+          labels: automated-sync
+          delete-branch: true
