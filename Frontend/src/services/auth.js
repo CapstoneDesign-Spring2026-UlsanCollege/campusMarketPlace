@@ -6,7 +6,9 @@ function getSessionStorage() {
     return null
   }
 
-  return window.localStorage
+  // Use sessionStorage so auth is cleared when the user closes the browser/tab.
+  // This ensures users must sign in again after closing and reopening the site.
+  return window.sessionStorage
 }
 
 export function readAuthSession() {

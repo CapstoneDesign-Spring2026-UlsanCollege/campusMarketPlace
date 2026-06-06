@@ -302,7 +302,8 @@ export default function ItemDetail({ currency, language = 'en' }) {
         </div>
 
         <div className="detail-hero">
-          <div className="detail-header">
+          <div className="detail-left">
+            <div className="detail-header">
             <p className="eyebrow">Listing preview</p>
             <div className="detail-trail">
               {categoryTrail.map((part) => (
@@ -311,7 +312,7 @@ export default function ItemDetail({ currency, language = 'en' }) {
             </div>
           </div>
 
-          <div className="detail-gallery-card">
+            <div className="detail-gallery-card">
             <figure className="detail-gallery">
               {activeImageSrc ? (
                 <button type="button" className="detail-gallery-button" onClick={() => openLightbox(activeImageIndex)} aria-label="Open image viewer">
@@ -347,6 +348,8 @@ export default function ItemDetail({ currency, language = 'en' }) {
                 })}
               </div>
             ) : null}
+          </div>
+
           </div>
 
           <aside className="detail-sidebar panel">
