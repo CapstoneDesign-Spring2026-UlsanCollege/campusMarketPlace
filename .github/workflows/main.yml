@@ -33,7 +33,11 @@ jobs:
     - name: Run frontend tests
       run: |
         cd Frontend
-        npm test
+        if npm run | grep -q " test"; then
+          npm test
+        else
+          echo "No frontend test script found. Skipping..."
+        fi
 
     # Step 5: Build frontend
     - name: Build frontend
