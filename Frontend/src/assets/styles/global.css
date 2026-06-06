@@ -773,6 +773,23 @@ h2 { font-size: clamp(1.4rem, 2.2vw, 2rem); line-height: 1.1; }
 
 /* Detail page: images on left, seller sidebar on right (original layout) */
 .detail-hero { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr) 320px; align-items: start; }
+
+/* Item detail layout tweaks */
+.detail-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0; /* allow children to shrink properly in grid */
+}
+.detail-sidebar {
+  align-self: start; /* keep sidebar aligned to top of left column */
+}
+.detail-title { margin-bottom: 0.35rem; }
+.detail-gallery-card { width: 100%; }
+
+@media (max-width: 900px) {
+  .detail-left { gap: 0.5rem; }
+}
 .detail-gallery-card { display: grid; grid-template-columns: 1fr 96px; gap: 0.75rem; align-items: start; }
 .detail-gallery { display: block; position: relative; }
 .detail-gallery-button img { width: 100%; height: clamp(240px, 45vh, 360px); max-height: 60vh; object-fit: cover; display: block; }
