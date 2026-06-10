@@ -4,6 +4,37 @@ import { fetchMessageThreads, fetchThreadMessages, openMessageThread, sendThread
 import { getAuthToken, getAuthUser } from '../services/auth'
 import { t } from '../services/i18n'
 
+function MessageStatus({ status }) {
+  if (!status) return null
+  if (status === 'seen') {
+    return (
+      <span className="msg-status msg-status-seen" title="Seen">
+        <svg width="16" height="10" viewBox="0 0 16 10" fill="none" aria-hidden="true">
+          <path d="M1 5l3 3 5-7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M6 5l3 3 5-7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </span>
+    )
+  }
+  if (status === 'delivered') {
+    return (
+      <span className="msg-status msg-status-delivered" title="Delivered">
+        <svg width="16" height="10" viewBox="0 0 16 10" fill="none" aria-hidden="true">
+          <path d="M1 5l3 3 5-7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M6 5l3 3 5-7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </span>
+    )
+  }
+  return (
+    <span className="msg-status msg-status-sent" title="Sent">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+        <path d="M1 5l3 3 5-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </span>
+  )
+}
+
 function UserAvatar({ name, src }) {
   const [imgError, setImgError] = useState(false)
   const initials = name
@@ -321,7 +352,10 @@ export default function Messages({ language = 'en' }) {
                           <div className="msg-sender">{message.sender_name || t(language, 'messages.student')}</div>
                         )}
                         <p>{message.body}</p>
-                        <time className="msg-time">{formatTime(message.createdAt)}</time>
+                        <div className="msg-footer">
+                          <time className="msg-time">{formatTime(message.createdAt)}</time>
+                          {isOwnMessage && <MessageStatus status={message.status} />}
+                        </div>
                       </article>
                     )
                   })

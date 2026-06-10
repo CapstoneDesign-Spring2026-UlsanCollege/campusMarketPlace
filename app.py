@@ -1696,6 +1696,14 @@ def get_message_thread_messages(thread_id):
     if user_id not in thread_doc.get('participants', []):
         return json_error('You do not have access to this conversation.', 403)
 
+    # Record that this user has now received/viewed the messages (delivered state).
+    now = datetime.now(timezone.utc)
+    message_threads.update_one(
+        {'_id': thread_oid},
+        {'$set': {f'last_delivered.{str(user_id)}': now.isoformat()}}
+    )
+    thread_doc = message_threads.find_one({'_id': thread_oid})
+
     since_value = str(request.args.get('since', '')).strip()
     query = {'thread_id': thread_oid}
     if since_value:
@@ -1705,10 +1713,41 @@ def get_message_thread_messages(thread_id):
         except ValueError:
             pass
 
+    # Identify the other participant so we can compute outgoing message status.
+    participants = [str(p) for p in thread_doc.get('participants', [])]
+    other_user_id = next((p for p in participants if p != str(user_id)), None)
+
+    def _parse_dt(value):
+        if not value:
+            return None
+        try:
+            return datetime.fromisoformat(str(value).replace('Z', '+00:00'))
+        except Exception:
+            return None
+
+    last_read_map = thread_doc.get('last_read', {})
+    last_delivered_map = thread_doc.get('last_delivered', {})
+    other_read_dt = _parse_dt(last_read_map.get(other_user_id)) if other_user_id else None
+    other_delivered_dt = _parse_dt(last_delivered_map.get(other_user_id)) if other_user_id else None
+
     message_docs = list(message_messages.find(query).sort('createdAt', 1))
+    serialized = []
+    for doc in message_docs:
+        is_own = str(doc.get('sender_id')) == str(user_id)
+        created_dt = doc.get('createdAt')  # raw datetime before serialization
+        msg = serialize_message_document(doc)
+        if is_own:
+            if other_read_dt and created_dt and created_dt <= other_read_dt:
+                msg['status'] = 'seen'
+            elif other_delivered_dt and created_dt and created_dt <= other_delivered_dt:
+                msg['status'] = 'delivered'
+            else:
+                msg['status'] = 'sent'
+        serialized.append(msg)
+
     return jsonify({
         'thread': build_message_thread_payload(thread_doc, current_user_id=user_id),
-        'messages': [serialize_message_document(message_doc) for message_doc in message_docs],
+        'messages': serialized,
     })
 
 

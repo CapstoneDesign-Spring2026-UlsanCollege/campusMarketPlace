@@ -866,7 +866,7 @@ html.dark .messages-stream { background: rgba(15,22,25,0.6); }
 }
 html.dark .message-bubble.is-own { background: rgba(0,100,120,0.9); }
 .message-bubble.is-own p { color: rgba(255,255,255,0.97); }
-.message-bubble.is-own .msg-time { color: rgba(255,255,255,0.55); text-align: right; }
+.message-bubble.is-own .msg-time { color: rgba(255,255,255,0.55); }
 
 /* Other message: white card, left-aligned, chat-tail bottom-left */
 .message-bubble.is-other {
@@ -877,10 +877,16 @@ html.dark .message-bubble.is-own { background: rgba(0,100,120,0.9); }
 }
 html.dark .message-bubble.is-other { background: rgba(30,42,46,0.9); }
 .message-bubble.is-other .msg-time { color: var(--muted); }
+.message-bubble.is-other .msg-footer { justify-content: flex-start; }
 
 .message-bubble p { margin: 0; color: var(--text); line-height: 1.55; font-size: 0.92rem; }
 .msg-sender { font-size: 0.74rem; font-weight: 700; color: var(--primary-strong); margin-bottom: 0.2rem; }
-.msg-time { font-size: 0.7rem; margin-top: 0.3rem; display: block; }
+.msg-footer { display: flex; align-items: center; justify-content: flex-end; gap: 3px; margin-top: 0.25rem; }
+.msg-time { font-size: 0.68rem; }
+.msg-status { display: inline-flex; align-items: center; flex-shrink: 0; }
+.msg-status-sent { color: rgba(255,255,255,0.45); }
+.msg-status-delivered { color: rgba(255,255,255,0.7); }
+.msg-status-seen { color: #6ee7b7; }
 
 /* ── Compose form ────────────────────────────────────────────────────── */
 .message-compose {
