@@ -311,15 +311,17 @@ export default function Messages({ language = 'en' }) {
                 {messages.length === 0 ? (
                   <div className="message-empty-state">{t(language, 'messages.noMessagesYet')}</div>
                 ) : (
-                  messages.map((message) => {
+                  messages.map((message, index) => {
                     const isOwnMessage = message.sender_id === user?.id
+                    const prevMessage = messages[index - 1]
+                    const isFirstInGroup = !prevMessage || prevMessage.sender_id !== message.sender_id
                     return (
                       <article key={message._id} className={`message-bubble ${isOwnMessage ? 'is-own' : 'is-other'}`}>
-                        <div className="message-bubble-meta">
-                          <strong>{isOwnMessage ? t(language, 'messages.you') : message.sender_name || t(language, 'messages.student')}</strong>
-                          <span>{formatTime(message.createdAt)}</span>
-                        </div>
+                        {!isOwnMessage && isFirstInGroup && (
+                          <div className="msg-sender">{message.sender_name || t(language, 'messages.student')}</div>
+                        )}
                         <p>{message.body}</p>
+                        <time className="msg-time">{formatTime(message.createdAt)}</time>
                       </article>
                     )
                   })
