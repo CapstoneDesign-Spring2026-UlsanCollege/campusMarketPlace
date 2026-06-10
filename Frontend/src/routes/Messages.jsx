@@ -185,7 +185,8 @@ export default function Messages({ language = 'en' }) {
   }, [statusMessage])
 
   function handleTextareaKeyDown(event) {
-    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
       handleSendMessage(event)
     }
   }
@@ -332,13 +333,15 @@ export default function Messages({ language = 'en' }) {
                   onChange={(event) => setDraft(event.target.value)}
                   onKeyDown={handleTextareaKeyDown}
                   placeholder={t(language, 'messages.writeMessage')}
-                  rows={4}
+                  rows={3}
                 />
                 <div className="message-compose-actions">
                   {error ? (
                     <span className="message-status is-error" aria-live="polite">{error}</span>
-                  ) : (
+                  ) : statusMessage ? (
                     <span className="message-status is-success" aria-live="polite">{statusMessage}</span>
+                  ) : (
+                    <span className="message-compose-hint">Enter to send · Shift+Enter for new line</span>
                   )}
                   <button type="submit" className="button button-primary" disabled={isSending || !draft.trim()}>
                     {isSending ? t(language, 'messages.sending') : t(language, 'messages.send')}
