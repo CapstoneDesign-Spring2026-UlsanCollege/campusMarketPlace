@@ -1717,24 +1717,31 @@ def get_message_thread_messages(thread_id):
     participants = [str(p) for p in thread_doc.get('participants', [])]
     other_user_id = next((p for p in participants if p != str(user_id)), None)
 
-    def _parse_dt(value):
-        if not value:
+    def _to_aware(value):
+        """Parse any datetime value to a UTC-aware datetime, or return None."""
+        if value is None:
             return None
-        try:
-            return datetime.fromisoformat(str(value).replace('Z', '+00:00'))
-        except Exception:
-            return None
+        if isinstance(value, str):
+            try:
+                dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
+            except Exception:
+                return None
+        else:
+            dt = value
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt
 
     last_read_map = thread_doc.get('last_read', {})
     last_delivered_map = thread_doc.get('last_delivered', {})
-    other_read_dt = _parse_dt(last_read_map.get(other_user_id)) if other_user_id else None
-    other_delivered_dt = _parse_dt(last_delivered_map.get(other_user_id)) if other_user_id else None
+    other_read_dt = _to_aware(last_read_map.get(other_user_id)) if other_user_id else None
+    other_delivered_dt = _to_aware(last_delivered_map.get(other_user_id)) if other_user_id else None
 
     message_docs = list(message_messages.find(query).sort('createdAt', 1))
     serialized = []
     for doc in message_docs:
         is_own = str(doc.get('sender_id')) == str(user_id)
-        created_dt = doc.get('createdAt')  # raw datetime before serialization
+        created_dt = _to_aware(doc.get('createdAt'))  # normalise before comparison
         msg = serialize_message_document(doc)
         if is_own:
             if other_read_dt and created_dt and created_dt <= other_read_dt:

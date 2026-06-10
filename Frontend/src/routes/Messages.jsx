@@ -366,10 +366,14 @@ export default function Messages({ language = 'en' }) {
               <form className="message-compose" onSubmit={handleSendMessage}>
                 <textarea
                   value={draft}
-                  onChange={(event) => setDraft(event.target.value)}
+                  onChange={(event) => {
+                    setDraft(event.target.value)
+                    event.target.style.height = 'auto'
+                    event.target.style.height = Math.min(event.target.scrollHeight, 140) + 'px'
+                  }}
                   onKeyDown={handleTextareaKeyDown}
                   placeholder={t(language, 'messages.writeMessage')}
-                  rows={3}
+                  rows={1}
                 />
                 <div className="message-compose-actions">
                   {error ? (
