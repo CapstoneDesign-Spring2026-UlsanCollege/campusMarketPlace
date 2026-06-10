@@ -4,6 +4,29 @@ import { fetchMessageThreads, fetchThreadMessages, openMessageThread, sendThread
 import { getAuthToken, getAuthUser } from '../services/auth'
 import { t } from '../services/i18n'
 
+function UserAvatar({ name, src }) {
+  const [imgError, setImgError] = useState(false)
+  const initials = name
+    ? name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+    : '?'
+
+  if (src && !imgError) {
+    return (
+      <img
+        src={src}
+        alt={name || 'User'}
+        className="thread-avatar"
+        onError={() => setImgError(true)}
+      />
+    )
+  }
+  return (
+    <span className="thread-avatar thread-avatar-initials" aria-label={name || 'User'}>
+      {initials}
+    </span>
+  )
+}
+
 const POLL_INTERVAL_MS = 4000
 
 function formatTime(value) {
@@ -155,6 +178,18 @@ export default function Messages({ language = 'en' }) {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages])
 
+  useEffect(() => {
+    if (!statusMessage) return undefined
+    const id = setTimeout(() => setStatusMessage(''), 3000)
+    return () => clearTimeout(id)
+  }, [statusMessage])
+
+  function handleTextareaKeyDown(event) {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+      handleSendMessage(event)
+    }
+  }
+
   async function handleSelectThread(threadId) {
     setActiveThreadId(threadId)
     setError('')
@@ -208,9 +243,9 @@ export default function Messages({ language = 'en' }) {
 
   return (
     <main className="page-shell messages-shell">
-      <section className="messages-layout panel">
+      <section className={`messages-layout panel${activeThread ? ' has-active' : ''}`}>
         <aside className="messages-sidebar">
-                  <div className="messages-sidebar-head">
+          <div className="messages-sidebar-head">
             <p className="eyebrow">{t(language, 'messages.messages')}</p>
             <h1>{t(language, 'messages.inbox')}</h1>
             <p className="subcopy">{t(language, 'messages.subcopy')}</p>
@@ -229,11 +264,14 @@ export default function Messages({ language = 'en' }) {
                   className={`thread-item ${thread._id === activeThreadId ? 'is-active' : ''}`}
                   onClick={() => handleSelectThread(thread._id)}
                 >
-                  <div className="thread-item-top" style={{display: 'flex', gap: 8, alignItems: 'center'}}>
-                    <img src={thread.other_user_avatar || thread.other_user_avatar_url || thread.otherUserAvatar || ''} alt={thread.other_user_name || 'User'} style={{width:36, height:36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0}} />
-                    <div style={{flex: 1}}>
+                  <div className="thread-item-top">
+                    <UserAvatar
+                      name={thread.other_user_name}
+                      src={thread.other_user_avatar || thread.other_user_avatar_url || thread.otherUserAvatar}
+                    />
+                    <div className="thread-item-info">
                       <strong>{thread.other_user_name || t(language, 'messages.chat')}</strong>
-                      <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                      <div className="thread-item-meta">
                         <span>{formatTime(thread.latestMessageAt || thread.updatedAt)}</span>
                         {thread.unreadCount > 0 ? (
                           <span className="thread-unread-badge" aria-label={`${thread.unreadCount} unread messages`}>{thread.unreadCount}</span>
@@ -254,6 +292,13 @@ export default function Messages({ language = 'en' }) {
             <>
               <header className="messages-panel-head">
                 <div>
+                  <button
+                    type="button"
+                    className="messages-back-btn"
+                    onClick={() => { setActiveThreadId(''); setActiveThread(null); setMessages([]) }}
+                  >
+                    ← {t(language, 'messages.inbox')}
+                  </button>
                   <p className="eyebrow">{t(language, 'messages.conversation')}</p>
                   <h2>{activeThread.other_user_name || t(language, 'messages.chat')}</h2>
                   <p className="subcopy">{activeThread.itemTitle || t(language, 'messages.listingConversation')} {activeThread.itemStatus ? `• ${activeThread.itemStatus}` : ''}</p>
@@ -285,11 +330,16 @@ export default function Messages({ language = 'en' }) {
                 <textarea
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
+                  onKeyDown={handleTextareaKeyDown}
                   placeholder={t(language, 'messages.writeMessage')}
                   rows={4}
                 />
                 <div className="message-compose-actions">
-                  <span className="message-status" aria-live="polite">{error || statusMessage}</span>
+                  {error ? (
+                    <span className="message-status is-error" aria-live="polite">{error}</span>
+                  ) : (
+                    <span className="message-status is-success" aria-live="polite">{statusMessage}</span>
+                  )}
                   <button type="submit" className="button button-primary" disabled={isSending || !draft.trim()}>
                     {isSending ? t(language, 'messages.sending') : t(language, 'messages.send')}
                   </button>
