@@ -42,7 +42,6 @@ export default function App() {
     if (saved !== null) {
       return saved === 'true'
     }
-    // Default to system preference if not set
     if (typeof window !== 'undefined') {
       return window.matchMedia('(prefers-color-scheme: dark)').matches
     }

@@ -1,6 +1,7 @@
 # Frontend build and dependencies
 Frontend/dist/
 Frontend/node_modules/
+backend/node_modules/
 
 # Python cache and virtual environment
 __pycache__/
@@ -9,6 +10,7 @@ __pycache__/
 
 # Uploaded files
 uploads/
+.mongo-data/
 
 # Environment variables (never commit sensitive data)
 .env
