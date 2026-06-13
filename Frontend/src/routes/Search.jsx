@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import ItemGrid from '../components/ItemGrid'
 import { fetchItems } from '../services/api'
@@ -15,11 +15,18 @@ export default function Search({ currency, language = 'en', marketQuery, onMarke
   const [error, setError] = useState('')
   const [reloadToken, setReloadToken] = useState(0)
   const [showCategories, setShowCategories] = useState(false)
+  const [liveSearchEnabled, setLiveSearchEnabled] = useState(true)
+  const [searchDraft, setSearchDraft] = useState('')
+  const resultsRef = useRef(null)
 
   const currentPage = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
   const currentCategory = searchParams.get('category') || ''
   const effectiveMarketQuery = typeof marketQuery === 'string' ? marketQuery : ''
   const setMarketQuery = typeof onMarketQueryChange === 'function' ? onMarketQueryChange : () => {}
+
+  useEffect(() => {
+    setSearchDraft(effectiveMarketQuery)
+  }, [effectiveMarketQuery])
 
   useEffect(() => {
     let isActive = true
@@ -83,6 +90,32 @@ export default function Search({ currency, language = 'en', marketQuery, onMarke
     })
   }
 
+  function handleSearchInputChange(event) {
+    const nextQuery = event.target.value
+    setSearchDraft(nextQuery)
+    if (liveSearchEnabled) {
+      setMarketQuery(nextQuery)
+    }
+  }
+
+  function handleSearchSubmit(event) {
+    event.preventDefault()
+    setMarketQuery(searchDraft)
+    window.requestAnimationFrame(() => {
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
+
+  function handleLiveSearchToggle() {
+    setLiveSearchEnabled((current) => {
+      const next = !current
+      if (next) {
+        setMarketQuery(searchDraft)
+      }
+      return next
+    })
+  }
+
   const normalizedQuery = effectiveMarketQuery.trim().toLowerCase()
   const visibleItems = normalizedQuery
     ? items.filter((item) => {
@@ -103,16 +136,23 @@ export default function Search({ currency, language = 'en', marketQuery, onMarke
           Search listings, narrow by category, and keep the marketplace focused on Ulsan College students.
         </p>
 
-        <div className="dashboard-search" role="search" aria-label="Marketplace search">
+        <form className="dashboard-search" role="search" aria-label="Marketplace search" onSubmit={handleSearchSubmit}>
           <input
-            value={effectiveMarketQuery}
-            onChange={(event) => setMarketQuery(event.target.value)}
+            value={searchDraft}
+            onChange={handleSearchInputChange}
             type="search"
             placeholder="Search textbooks, laptops, bikes..."
             aria-label="Search marketplace listings"
           />
-          <span className="hero-search-tag">Live search</span>
-        </div>
+          <button
+            type="button"
+            className={`hero-search-tag live-search-toggle ${liveSearchEnabled ? 'is-active' : ''}`}
+            aria-pressed={liveSearchEnabled}
+            onClick={handleLiveSearchToggle}
+          >
+            Live search: {liveSearchEnabled ? 'On' : 'Off'}
+          </button>
+        </form>
 
         <div className="category-options-wrap">
           <button
@@ -153,18 +193,20 @@ export default function Search({ currency, language = 'en', marketQuery, onMarke
         </p>
       </section>
 
-      <ItemGrid
-        items={visibleItems}
-        currency={currency}
-        isLoading={isLoading}
-        error={error}
-        pagination={pagination}
-        currentCategory={currentCategory}
-        onCategoryChange={handleCategoryChange}
-        onPageChange={handlePageChange}
-        onRetry={handleRetry}
-        language={language}
-      />
+      <div ref={resultsRef}>
+        <ItemGrid
+          items={visibleItems}
+          currency={currency}
+          isLoading={isLoading}
+          error={error}
+          pagination={pagination}
+          currentCategory={currentCategory}
+          onCategoryChange={handleCategoryChange}
+          onPageChange={handlePageChange}
+          onRetry={handleRetry}
+          language={language}
+        />
+      </div>
     </main>
   )
 }
