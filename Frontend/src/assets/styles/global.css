@@ -289,6 +289,24 @@ html.dark .nav-links a.is-active, html.dark .nav-pill.is-active {
 }
 .currency-menu-item:hover, .currency-menu-item[aria-pressed='true'] { background: linear-gradient(135deg, rgba(0, 87, 102, 0.1), rgba(23, 137, 79, 0.08)); color: #06424d; }
 
+html.dark .currency-hamburger-wrapper {
+  border-color: rgba(226, 246, 243, 0.18);
+  background: linear-gradient(180deg, rgba(28, 45, 49, 0.96), rgba(13, 26, 30, 0.98));
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+html.dark .language-indicator { color: #f3fffc; }
+html.dark .currency-menu, html.dark .search-menu {
+  background: linear-gradient(180deg, rgba(26, 43, 47, 0.99), rgba(9, 21, 25, 0.99));
+  border-color: rgba(129, 234, 255, 0.22);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.62);
+}
+html.dark .menu-section-title { color: #b9d9d5; }
+html.dark .currency-menu-item { color: #f6fffd; }
+html.dark .currency-menu-item:hover, html.dark .currency-menu-item[aria-pressed='true'] {
+  background: linear-gradient(135deg, rgba(129, 234, 255, 0.16), rgba(240, 204, 117, 0.1));
+  color: #ffffff;
+}
+
 @media (max-width: 1100px) {
   .nav-links {
     flex-wrap: nowrap;
