@@ -111,12 +111,14 @@ SENDGRID_FROM = os.getenv('SENDGRID_FROM', EMAIL_FROM).strip()
 RESEND_COOLDOWN_SECONDS = int(os.getenv('RESEND_COOLDOWN_SECONDS', '120'))  # 2 minutes default
 
 # Connect to MongoDB database
-client = MongoClient(
-    MONGODB_URI,
-    serverSelectionTimeoutMS=8000,
-    connectTimeoutMS=8000,
-    tlsCAFile=certifi.where(),
-)
+mongo_client_options = {
+    'serverSelectionTimeoutMS': 8000,
+    'connectTimeoutMS': 8000,
+}
+if MONGODB_URI.startswith('mongodb+srv://'):
+    mongo_client_options['tlsCAFile'] = certifi.where()
+
+client = MongoClient(MONGODB_URI, **mongo_client_options)
 db = client[MONGODB_DB_NAME]
 users = db.users
 pending_signups = db.pending_signups
