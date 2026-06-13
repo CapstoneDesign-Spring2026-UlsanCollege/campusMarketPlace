@@ -289,6 +289,24 @@ html.dark .nav-links a.is-active, html.dark .nav-pill.is-active {
 }
 .currency-menu-item:hover, .currency-menu-item[aria-pressed='true'] { background: linear-gradient(135deg, rgba(0, 87, 102, 0.1), rgba(23, 137, 79, 0.08)); color: #06424d; }
 
+html.dark .currency-hamburger-wrapper {
+  border-color: rgba(226, 246, 243, 0.18);
+  background: linear-gradient(180deg, rgba(28, 45, 49, 0.96), rgba(13, 26, 30, 0.98));
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+html.dark .language-indicator { color: #f3fffc; }
+html.dark .currency-menu, html.dark .search-menu {
+  background: linear-gradient(180deg, rgba(26, 43, 47, 0.99), rgba(9, 21, 25, 0.99));
+  border-color: rgba(129, 234, 255, 0.22);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.62);
+}
+html.dark .menu-section-title { color: #b9d9d5; }
+html.dark .currency-menu-item { color: #f6fffd; }
+html.dark .currency-menu-item:hover, html.dark .currency-menu-item[aria-pressed='true'] {
+  background: linear-gradient(135deg, rgba(129, 234, 255, 0.16), rgba(240, 204, 117, 0.1));
+  color: #ffffff;
+}
+
 @media (max-width: 1100px) {
   .nav-links {
     flex-wrap: nowrap;
@@ -1229,6 +1247,46 @@ html.dark .message-compose { background: rgba(18,27,30,0.95); }
 .detail-contact-list { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.6rem; color: var(--muted-strong); }
 .detail-actions { display: flex; gap: 0.6rem; margin-top: 0.6rem; flex-wrap: wrap; }
 .detail-actions .button { min-width: 0; flex: 1 1 auto; }
+
+html.dark .detail-sidebar {
+  background: linear-gradient(180deg, rgba(22, 37, 41, 0.98), rgba(10, 22, 26, 0.98));
+  border-color: rgba(129, 234, 255, 0.18);
+  color: #fbfffd;
+}
+html.dark .detail-title,
+html.dark .detail-seller-name-row strong,
+html.dark .detail-contact-card strong {
+  color: #ffffff;
+}
+html.dark .detail-price { color: #b9f5ff; }
+html.dark .detail-chip {
+  background: rgba(8, 18, 21, 0.82);
+  border-color: rgba(226, 246, 243, 0.16);
+  color: #f3fffc;
+}
+html.dark .detail-description {
+  color: #e9f6f4;
+  background: rgba(8, 18, 21, 0.44);
+  border: 1px solid rgba(226, 246, 243, 0.12);
+  border-radius: 16px;
+  padding: 0.85rem;
+}
+html.dark .detail-seller-card,
+html.dark .detail-contact-card {
+  background: linear-gradient(180deg, rgba(27, 44, 48, 0.96), rgba(13, 27, 31, 0.96));
+  border-color: rgba(129, 234, 255, 0.18);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.34);
+}
+html.dark .detail-seller-label,
+html.dark .detail-seller-note {
+  color: #cfe2df;
+}
+html.dark .detail-contact-list { color: #f3fffc; }
+html.dark .detail-verified-badge {
+  background: linear-gradient(135deg, rgba(129, 234, 255, 0.16), rgba(240, 204, 117, 0.14));
+  color: #ffffff;
+  border: 1px solid rgba(129, 234, 255, 0.2);
+}
 
 /* Lightbox polish */
 .detail-lightbox { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; background: rgba(6,24,19,0.6); }
