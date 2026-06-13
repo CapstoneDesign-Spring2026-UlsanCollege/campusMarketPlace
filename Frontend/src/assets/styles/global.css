@@ -427,6 +427,8 @@ html.dark .feature-pill, html.dark .category-chip, html.dark .badge, html.dark .
 }
 .feature-pill, .category-chip, .item-category, .item-posted, .item-condition, .item-location, .trust-pill, .mini-location, .meta-pill, .hero-search-tag, .time-chip, .distance-chip { padding: 0.5rem 0.8rem; }
 .category-chip.is-active, .feature-pill.is-active, .badge-default, .status-badge.status-active, .item-condition.is-hot, .item-condition.is-popular { background: rgba(0, 87, 102, 0.12); color: var(--primary-strong); border-color: rgba(0, 87, 102, 0.18); }
+.live-search-toggle { cursor: pointer; font: inherit; }
+.live-search-toggle.is-active { background: rgba(0, 87, 102, 0.12); color: var(--primary-strong); border-color: rgba(0, 87, 102, 0.18); }
 
 .button, .hero-actions .button, .modal-actions .button, .browse-toolbar .button, .auth-form .button, .profile-card .button, .message-compose .button, .composer-submit {
   display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0.85rem 1.15rem; border-radius: 999px; border: 1px solid transparent; transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease;
