@@ -14,6 +14,7 @@ export default function Search({ currency, language = 'en', marketQuery, onMarke
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [reloadToken, setReloadToken] = useState(0)
+  const [showCategories, setShowCategories] = useState(false)
 
   const currentPage = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
   const currentCategory = searchParams.get('category') || ''
@@ -113,30 +114,43 @@ export default function Search({ currency, language = 'en', marketQuery, onMarke
           <span className="hero-search-tag">Live search</span>
         </div>
 
-        <div className="category-chip-row" aria-label="Quick categories">
+        <div className="category-options-wrap">
           <button
             type="button"
-            className={`category-chip ${!currentCategory ? 'is-active' : ''}`}
-            onClick={() => handleCategoryChange('')}
+            className="button button-secondary category-toggle"
+            aria-expanded={showCategories}
+            aria-controls="search-category-options"
+            onClick={() => setShowCategories((current) => !current)}
           >
-            All
+            Show options <span aria-hidden="true">{showCategories ? '→' : '●'}</span>
           </button>
-          {CATEGORIES.map((category) => (
+
+          {showCategories && (
+            <div id="search-category-options" className="category-chip-row" aria-label="Quick categories">
             <button
-              key={category}
               type="button"
-              className={`category-chip ${currentCategory === category ? 'is-active' : ''}`}
-              onClick={() => handleCategoryChange(category)}
+              className={`category-chip ${!currentCategory ? 'is-active' : ''}`}
+              onClick={() => handleCategoryChange('')}
             >
-              {category}
+              All
             </button>
-          ))}
+            {CATEGORIES.map((category) => (
+              <button
+                key={category}
+                type="button"
+                className={`category-chip ${currentCategory === category ? 'is-active' : ''}`}
+                onClick={() => handleCategoryChange(category)}
+              >
+                {category}
+              </button>
+            ))}
+            </div>
+          )}
         </div>
 
-        <div className="search-page-meta">
-          <span>{t(language, 'browse.browseListings')}</span>
-          <span>{normalizedQuery ? `Showing matches for "${effectiveMarketQuery}"` : 'Browse the newest campus listings.'}</span>
-        </div>
+        <p className="search-page-meta">
+          {t(language, 'browse.browseListings')}, {normalizedQuery ? `showing matches for "${effectiveMarketQuery}".` : 'Browse the newest campus listings.'}
+        </p>
       </section>
 
       <ItemGrid

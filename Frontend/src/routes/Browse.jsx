@@ -14,6 +14,7 @@ export default function Browse({ currency, language = 'en' }) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [reloadToken, setReloadToken] = useState(0)
+  const [showCategories, setShowCategories] = useState(false)
 
   const currentPage = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
   const currentCategory = searchParams.get('category') || ''
@@ -86,24 +87,38 @@ export default function Browse({ currency, language = 'en' }) {
         <p className="eyebrow">{t(language, 'browse.eyebrow')}</p>
         <h1>{t(language, 'browse.title')}</h1>
         <p className="subcopy">{t(language, 'browse.subcopy')}</p>
-        <div className="category-chip-row" aria-label="Quick category filters">
+        <div className="category-options-wrap">
           <button
             type="button"
-            className={`category-chip ${!currentCategory ? 'is-active' : ''}`}
-            onClick={() => handleCategoryChange('')}
+            className="button button-secondary category-toggle"
+            aria-expanded={showCategories}
+            aria-controls="browse-category-options"
+            onClick={() => setShowCategories((current) => !current)}
           >
-            {t(language, 'browse.all')}
+            Show options <span aria-hidden="true">{showCategories ? '→' : '●'}</span>
           </button>
-          {CATEGORIES.map((category) => (
+
+          {showCategories && (
+            <div id="browse-category-options" className="category-chip-row" aria-label="Quick category filters">
             <button
-              key={category}
               type="button"
-              className={`category-chip ${currentCategory === category ? 'is-active' : ''}`}
-              onClick={() => handleCategoryChange(category)}
+              className={`category-chip ${!currentCategory ? 'is-active' : ''}`}
+              onClick={() => handleCategoryChange('')}
             >
-              {category}
+              {t(language, 'browse.all')}
             </button>
-          ))}
+            {CATEGORIES.map((category) => (
+              <button
+                key={category}
+                type="button"
+                className={`category-chip ${currentCategory === category ? 'is-active' : ''}`}
+                onClick={() => handleCategoryChange(category)}
+              >
+                {category}
+              </button>
+            ))}
+            </div>
+          )}
         </div>
       </section>
 
