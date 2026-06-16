@@ -14,6 +14,8 @@ const LANGUAGE_OPTIONS = [
 export default function Navbar({
   language,
   onLanguageChange,
+  isDarkMode,
+  onDarkModeChange,
   isAuthenticated,
   authUser,
   onAuthChange,
@@ -131,6 +133,12 @@ export default function Navbar({
     setLanguageMenuOpen((s) => !s)
   }
 
+  function handleDarkModeToggle() {
+    if (typeof onDarkModeChange === 'function') {
+      onDarkModeChange((prev) => !prev)
+    }
+  }
+
   function renderLabeledContent(icon, label) {
     return (
       <>
@@ -227,6 +235,15 @@ export default function Navbar({
                 </div>
               )}
             </div>
+            <button
+              className="nav-pill"
+              type="button"
+              onClick={handleDarkModeToggle}
+              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={isDarkMode ? 'Light mode' : 'Dark mode'}
+            >
+              <span aria-hidden>{isDarkMode ? '☀️' : '🌙'}</span>
+            </button>
             {renderPrimaryActions()}
           </nav>
         </div>

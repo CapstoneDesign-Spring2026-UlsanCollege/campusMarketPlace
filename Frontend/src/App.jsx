@@ -19,6 +19,7 @@ import { readAuthSession } from './services/auth'
 
 const CURRENCY_STORAGE_KEY = 'campusMarketplaceCurrency'
 const LANGUAGE_STORAGE_KEY = 'campusMarketplaceLanguage'
+const DARK_MODE_STORAGE_KEY = 'campusMarketplaceDarkMode'
 
 export default function App() {
   const [authSession, setAuthSession] = useState(readAuthSession)
@@ -36,6 +37,17 @@ export default function App() {
     return saved || 'en'
   })
 
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem(DARK_MODE_STORAGE_KEY)
+    if (saved !== null) {
+      return saved === 'true'
+    }
+    if (typeof window !== 'undefined') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches
+    }
+    return false
+  })
+
   useEffect(() => {
     localStorage.setItem(CURRENCY_STORAGE_KEY, currency)
   }, [currency])
@@ -43,6 +55,15 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, language)
   }, [language])
+
+  useEffect(() => {
+    localStorage.setItem(DARK_MODE_STORAGE_KEY, isDarkMode)
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [isDarkMode])
 
   function refreshAuthSession() {
     setAuthSession(readAuthSession())
@@ -54,6 +75,8 @@ export default function App() {
         currency={currency}
         language={language}
         onLanguageChange={setLanguage}
+        isDarkMode={isDarkMode}
+        onDarkModeChange={setIsDarkMode}
         isAuthenticated={Boolean(authSession.token)}
         authUser={authSession.user}
         onAuthChange={refreshAuthSession}

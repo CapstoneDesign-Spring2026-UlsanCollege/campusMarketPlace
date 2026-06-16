@@ -108,18 +108,10 @@ export default function ItemCard({ item, currency, language = 'en' }) {
   const isSeller = Boolean(currentUserId && sellerId && String(currentUserId) === String(sellerId))
   const initialListingStatus = String(item?.status || 'active').toLowerCase()
   const [listingStatus, setListingStatus] = useState(initialListingStatus)
-  const sellerLabelMap = {
-    active: 'On sale by',
-    reserved: 'Reserved by',
-    sold: 'Sold by',
-    removed: 'On sale by',
-    draft: 'On sale by',
-  }
-  const sellerLabel = sellerLabelMap[listingStatus] || 'On sale by'
   const statusOptions = [
     { value: 'active', label: 'On sale' },
     { value: 'reserved', label: 'Reserved' },
-    { value: 'sold', label: 'Sold' },
+    { value: 'sold', label: 'Sold out' },
   ]
   const initialLoveCount = Number.isFinite(Number(item?.favoritesCount)) ? Math.max(0, Number(item.favoritesCount)) : 0
   const [isLoved, setIsLoved] = useState(Boolean(item?.isLoved || item?.isFavorited || item?.isLiked || item?.liked))
@@ -262,18 +254,53 @@ export default function ItemCard({ item, currency, language = 'en' }) {
         <div className="item-compact-meta">
           {/* keep meta area for price/other small bits; status moved to header right */}
         </div>
-        <div className="item-actions-row compact-actions" aria-label="Buyer actions">
-          <button
-            type="button"
-            className="item-action-button item-action-message button button-primary"
-            onClick={(event) => {
-              event.stopPropagation()
-              handleMessageSeller()
-            }}
-          >
-            <span>{t(language, 'dashboard.messageSeller')}</span>
-          </button>
+        <div className="item-actions-row compact-actions" aria-label={isSeller ? 'Seller actions' : 'Buyer actions'}>
+          {isSeller ? (
+            <button
+              type="button"
+              className="item-action-button item-action-edit button button-primary"
+              onClick={(event) => {
+                event.stopPropagation()
+                openStatusEditor()
+              }}
+            >
+              <span>Edit listing</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="item-action-button item-action-message button button-primary"
+              onClick={(event) => {
+                event.stopPropagation()
+                handleMessageSeller()
+              }}
+            >
+              <span>{t(language, 'dashboard.messageSeller')}</span>
+            </button>
+          )}
         </div>
+        {isSeller && isEditingStatus ? (
+          <div className="item-status-editor" onClick={(event) => event.stopPropagation()}>
+            <label className="item-status-editor-label">
+              Listing status
+              <select value={statusDraft} onChange={(event) => setStatusDraft(event.target.value)}>
+                {statusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </label>
+            <div className="item-status-editor-actions">
+              <button type="button" className="button button-primary" onClick={handleSaveStatus} disabled={isSavingStatus}>
+                {isSavingStatus ? 'Saving…' : 'Save status'}
+              </button>
+              <button type="button" className="button button-secondary" onClick={openStatusEditor} disabled={isSavingStatus}>
+                Cancel
+              </button>
+            </div>
+            {statusMessage ? <p className="message-status is-success">{statusMessage}</p> : null}
+            {statusError ? <p className="message-status is-error">{statusError}</p> : null}
+          </div>
+        ) : null}
       </div>
     </article>
   )
