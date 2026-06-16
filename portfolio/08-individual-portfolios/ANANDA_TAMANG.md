@@ -1,58 +1,74 @@
-# Ananda Tamang Individual Portfolio
+# Individual Portfolio — Tamang Ananda
 
-## Role
+## 1. My Role
 
-Database/backend contributor, project manager during parts of the semester, QA lead during MVP verification and Sprint 4, and contributor to the MongoDB/authentication direction.
+- **Name:** Tamang Ananda
+- **Team:** CampusMarketplace capstone team
+- **Project:** CampusMarketplace
+- **Main responsibilities:** Database and backend coordination, QA tracking, MVP verification support, and email/OTP planning
+- **Roles held during the semester:** Project Manager in early and Week 9 sprint materials, QA Lead in Week 11 and Week 12 materials, and database/backend contributor across sprint packets
 
-## Strongest Contributions
+## 2. My Strongest Contributions
 
-- Helped define and support the database/backend direction for the project.
-- Served as PM in early and MVP verification sprint materials.
-- Helped track QA and core-flow verification during later sprints.
-- Supported MongoDB, authentication, and OTP/email-related planning in sprint packets.
-- Contributed to the team evidence trail through sprint planning, QA notes, and ownership documentation.
+| Contribution | What I personally did | Evidence link |
+|---|---|---|
+| Project management and sprint coordination | Took PM responsibility in sprint planning documents and helped keep the team focused on the MVP path and deliverables. | [Week 2 sprint packet](../../docs/Sprint_Packet/Weekly%20Sprint%20Packet%20-%20Week2.md), [Week 9 sprint packet](../../docs/Sprint_Packet/Week_9/Weekly%20Sprint%20Packet%20-%20Week9.md) |
+| Database and backend ownership | Supported the MongoDB/database direction and was listed as the owner for the database layer in sprint evidence and AI ownership tracking. | [Sprint 3 packet](../../docs/Sprint_Packet/SPRINT_3.md), [Week 11 sprint packet](../../docs/Sprint_Packet/Week_11/Weekly%20Sprint%20Packet%20-%20Week11.md), [AI ownership audit](../06-ai-and-code-ownership/AI_CODE_OWNERSHIP_AUDIT.md) |
+| QA and MVP verification | Led QA-related verification work during the MVP phase and helped document what was complete, what was risky, and what still needed fallback handling. | [Week 11 sprint packet](../../docs/Sprint_Packet/Week_11/Weekly%20Sprint%20Packet%20-%20Week11.md), [Week 12 sprint packet](../../docs/Sprint_Packet/Week_12/Weekly_Sprint_Packet_Week12.md) |
 
-## Evidence Links
+## 3. One Area I Can Explain Clearly
 
-- Team role evidence: [docs/TEAMAGREEMENT.md](../../docs/TEAMAGREEMENT.md)
-- Project overview role evidence: [docs/PROJECT_1.md](../../docs/PROJECT_1.md)
-- Week 02 PM/database role evidence: [docs/Sprint_Packet/Weekly Sprint Packet - Week2.md](../../docs/Sprint_Packet/Weekly%20Sprint%20Packet%20-%20Week2.md)
-- Sprint 3 PM evidence: [docs/Sprint_Packet/SPRINT_3.md](../../docs/Sprint_Packet/SPRINT_3.md)
-- Week 09 PM evidence: [docs/Sprint_Packet/Week_9/Weekly Sprint Packet - Week9.md](../../docs/Sprint_Packet/Week_9/Weekly%20Sprint%20Packet%20-%20Week9.md)
-- Week 11 QA lead evidence: [docs/Sprint_Packet/Week_11/Weekly Sprint Packet - Week11.md](../../docs/Sprint_Packet/Week_11/Weekly%20Sprint%20Packet%20-%20Week11.md)
-- Week 12 QA lead evidence: [docs/Sprint_Packet/Week_12/Weekly_Sprint_Packet_Week12.md](../../docs/Sprint_Packet/Week_12/Weekly_Sprint_Packet_Week12.md)
-- AI/code ownership evidence: [docs/Sprint_Packet/Week_9/AI Code Ownership Audit.md](../../docs/Sprint_Packet/Week_9/AI%20Code%20Ownership%20Audit.md)
+- **Area:** Email verification and OTP readiness in the backend/MVP flow
+- **File, folder, Issue, PR, or doc:** [Week 11 sprint packet](../../docs/Sprint_Packet/Week_11/Weekly%20Sprint%20Packet%20-%20Week11.md), [Week 12 sprint packet](../../docs/Sprint_Packet/Week_12/Weekly_Sprint_Packet_Week12.md), [Issue #38](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/issues/38)
+- **What it does:** It defines the verification gate for campus signup and tracks the missing step of actually sending the OTP/verification email through a provider.
+- **How it works:** A user signs up with a campus email, the backend keeps verification status in the user flow, and protected behavior depends on that verified state. The sprint packets show that the verification gate existed, while real email delivery still needed provider integration.
+- **How it was tested:** The team documented the verification flow in sprint QA materials and used a manual fallback for demo readiness when provider delivery was not fully wired yet.
+- **One possible failure or limitation:** If the email provider is not configured correctly, users cannot complete real verification even if the backend gate exists.
+- **Evidence link:** [Week 11 risk and QA section](../../docs/Sprint_Packet/Week_11/Weekly%20Sprint%20Packet%20-%20Week11.md), [Week 12 backlog and risks](../../docs/Sprint_Packet/Week_12/Weekly_Sprint_Packet_Week12.md)
 
-## One Area I Can Explain Clearly
+## 4. My AI Use
 
-I can explain the database and backend role in the project at a high level: MongoDB stores users, items, messages, favorites, and reviews; Flask exposes API routes; and authenticated actions use JWT tokens to connect requests to the current user.
+- **AI tools used:** ChatGPT and other AI assistants for explanation, debugging direction, and documentation drafting
+- **What AI helped with:** Understanding backend/database implementation ideas, organizing sprint wording, and thinking through OTP/email integration steps
+- **What I personally checked:** I checked whether the repo, sprint packets, and MVP evidence actually matched what the AI-assisted explanation claimed
+- **What I personally changed:** I adapted the ideas to our campus email verification flow, our MongoDB/backend plan, and our sprint/QA documentation
+- **How I tested or verified it:** By comparing the output to the actual project files, sprint evidence, and the final MVP story we could defend
+- **One part I still do not fully understand:** A complete production-ready email delivery setup with all provider-side configuration and failure handling
 
-I can also explain how QA connects to the MVP: the team had to verify signup, login, item posting, item browsing, profile behavior, and known limitations before the final demo.
+## 5. One Problem I Helped Solve
 
-## My AI Use
+- **Problem:** The project needed a clear backend/database direction and a believable MVP verification story instead of too many unfinished features
+- **Why it mattered:** Without that focus, the team could not confidently explain how authentication, verification, listings, and demo readiness fit together
+- **What I did:** I helped anchor the project around database/backend ownership, QA checkpoints, and email verification planning in the sprint materials
+- **What changed:** The repo and portfolio now show a more defensible MVP narrative with identified limitations, ownership, and fallback plans instead of vague claims
+- **Evidence link:** [Week 9 sprint packet](../../docs/Sprint_Packet/Week_9/Weekly%20Sprint%20Packet%20-%20Week9.md), [Week 11 sprint packet](../../docs/Sprint_Packet/Week_11/Weekly%20Sprint%20Packet%20-%20Week11.md), [Week 12 sprint packet](../../docs/Sprint_Packet/Week_12/Weekly_Sprint_Packet_Week12.md)
 
-I used AI tools as support for understanding implementation ideas, debugging direction, and organizing sprint/QA documentation. I still had to check outputs against the actual project, test behavior, and make sure the work matched our campus marketplace requirements.
+## 6. Reflection
 
-## One Problem I Helped Solve
+### What I learned
 
-I helped keep the project focused on backend/database readiness and MVP verification. The project had many possible features, so the important work was making the core marketplace flow understandable and demoable.
+- Backend readiness is not just code; it also depends on configuration, verification logic, QA proof, and realistic demo planning.
 
-## What I Learned
+### What I am most proud of
 
-I learned how important backend configuration is: MongoDB, JWT secrets, OTP email, and image storage all affect whether a feature works in a real demo. I also learned that QA evidence needs to be collected while building, not only at the end.
+- I am most proud that the team ended with a real full-stack marketplace story that connects auth, data, QA, and portfolio evidence.
 
-## What I Am Proud Of
+### What I should have done better
 
-I am proud that the team moved from an idea and early frontend into a real full-stack project with authentication, marketplace items, profiles, and final documentation.
+- I should have kept even clearer individual evidence and receipts during each sprint so my personal contributions were easier to prove later.
 
-## What I Should Have Done Better
+### What I would improve next
 
-I should have added more complete evidence links and receipts during each sprint, especially for database and QA work. Some weekly packets still have placeholders, which makes final proof harder.
+- I would improve test setup, seed data, CI-backed backend verification, and the real email provider integration path.
 
-## What I Would Improve Next
+### One skill I want to continue developing
 
-I would add a proper test database setup, a pytest `conftest.py` fixture, seed demo data, and stronger CI checks so the backend can be verified automatically.
+- I want to continue developing backend testing and deployment skills, especially for Flask APIs connected to MongoDB and external services.
 
-## Skill I Want to Continue Developing
+## 7. My Best Evidence Links
 
-I want to continue developing backend/database testing skills, especially writing tests that prove Flask API routes work correctly with MongoDB.
+1. [Team Agreement](../../docs/TEAMAGREEMENT.md)
+2. [Week 2 sprint packet](../../docs/Sprint_Packet/Weekly%20Sprint%20Packet%20-%20Week2.md)
+3. [Week 9 sprint packet](../../docs/Sprint_Packet/Week_9/Weekly%20Sprint%20Packet%20-%20Week9.md)
+4. [Week 11 sprint packet](../../docs/Sprint_Packet/Week_11/Weekly%20Sprint%20Packet%20-%20Week11.md)
+5. [Week 12 sprint packet](../../docs/Sprint_Packet/Week_12/Weekly_Sprint_Packet_Week12.md)
