@@ -13,10 +13,12 @@
 
 | Contribution | What I personally did | Evidence link |
 |---|---|---|
-| Add Vite frontend / Setup Vite | Initialized the modern React frontend using Vite and added initial app structure and config | https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/25 https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/26 |
+
+| improve overall layout and visual hierarchy | Refines global styling, Extends Messages route | https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/161 |
 | Profile page & profile button integration | Added profile page, profile button in navbar, hamburger menu, and currency/language toggles | https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/94 |
 | Currency & language toggle + currency display update | Implemented the toggle UI and updated currency displays from USD to KRW across the frontend | https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/74 https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/commit/e392d9d5d26afba78b163dc2708d7b1bb43b34a6 |
 | File upload bug fix | Diagnosed and fixed file upload handling so uploads succeed end-to-end; coordinated backend fix and frontend changes | https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/52 https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/commit/88d3d6ab381cd6a205cb161a7641a18294fc91f3 |
+| Add Vite frontend / Setup Vite | Initialized the modern React frontend using Vite and added initial app structure and config | https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/25 https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/26 |
 | GitHub Actions workflow for Pages | Added CI workflow to deploy frontend to GitHub Pages and fixed CORS issues for the site | https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/commit/54f22782dd0e86841c4052a65b1179dcc249ad5a |
 | Update backend / `app.py` changes | Updated server logic and small backend fixes referenced in PRs, improving profile and API behavior | https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/48 https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/commit/d4ec9608a60e51865d11220d40c1806cce2b8efb |
 | MIDTERM and docs improvements | Reorganized and updated MIDTERM_SUBMISSION and other docs to improve evidence and links | https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/commit/36e493d2ddb0ddcf4d456af5ea536798aab1afb7 https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/commit/b9471bb7be565486faa2935c72f49f92b375a97e |
@@ -81,7 +83,7 @@
 3. https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/94
 4. https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/48
 5. https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/109
+6. https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace/pull/161
 
 ---
 
-Notes: this is a draft based on your GitHub commits/PRs. Tell me any wording changes or additional evidence you'd like included and I'll update the file.
