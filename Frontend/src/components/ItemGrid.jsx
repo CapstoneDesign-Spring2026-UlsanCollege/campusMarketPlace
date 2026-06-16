@@ -1,5 +1,4 @@
 import ItemCard from './ItemCard'
-import { CATEGORIES, getCategoryLabel } from '../constants/categories'
 import { t } from '../services/i18n'
 
 function LoadingState({ language = 'en' }) {
@@ -65,21 +64,6 @@ export default function ItemGrid({
         </div>
 
         <div className="filter-and-pagination">
-          <select
-            className="category-filter"
-            value={currentCategory || ''}
-            onChange={(e) => onCategoryChange(e.target.value || null)}
-            disabled={isLoading}
-            aria-label="Filter by category"
-          >
-            <option value="">{t(language, 'browse.selectCategory')}</option>
-            {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-
           <div className="pagination-summary" aria-label="Pagination summary">
             <span>
               {t(language, 'browse.page')} {page} {t(language, 'browse.of')} {pages}
