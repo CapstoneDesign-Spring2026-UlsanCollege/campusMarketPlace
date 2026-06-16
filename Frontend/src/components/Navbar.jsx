@@ -181,6 +181,11 @@ export default function Navbar({
             )}
             {renderActionButton({ className: 'nav-signout', icon: iconLabels.signout, label: t(language, 'navbar.signOut'), onClick: handleSignOut })}
           </>
+        ) : (
+          <>
+            {renderActionLink({ to: '/', end: true, icon: iconLabels.home, label: t(language, 'navbar.home') })}
+            {isAuthenticated ? renderActionLink({ to: '/profile', icon: iconLabels.profile, label: t(language, 'navbar.profile') }) : renderActionLink({ to: '/login', icon: iconLabels.login, label: 'Login' })}
+            {!isAuthenticated ? renderActionLink({ to: '/signup', icon: iconLabels.signup, label: 'Sign Up' }) : null}
             {isAuthenticated ? (
               renderActionButton({ className: 'nav-signout', icon: iconLabels.signout, label: t(language, 'navbar.signOut'), onClick: handleSignOut })
             ) : null}
