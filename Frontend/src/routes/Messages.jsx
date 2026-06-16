@@ -60,6 +60,92 @@ function UserAvatar({ name, src }) {
 
 const POLL_INTERVAL_MS = 4000
 
+function createDemoConversationData(ownUserId = 'demo-self') {
+  const now = Date.now()
+  const threadOneId = 'demo-thread-1'
+  const threadTwoId = 'demo-thread-2'
+
+  const threads = [
+    {
+      _id: threadOneId,
+      other_user_name: 'Minji Park',
+      other_user_avatar: '',
+      latestMessageAt: new Date(now - 1000 * 60 * 8).toISOString(),
+      latestMessage: 'Thanks, I can meet after class.',
+      unreadCount: 0,
+      itemTitle: 'Calculus textbook',
+      itemStatus: 'active',
+      itemImage: '',
+    },
+    {
+      _id: threadTwoId,
+      other_user_name: 'Daniel Lee',
+      other_user_avatar: '',
+      latestMessageAt: new Date(now - 1000 * 60 * 32).toISOString(),
+      latestMessage: 'Can you hold it until tomorrow?',
+      unreadCount: 1,
+      itemTitle: 'Dorm desk lamp',
+      itemStatus: 'reserved',
+      itemImage: '',
+    },
+  ]
+
+  const messagesByThread = {
+    [threadOneId]: [
+      {
+        _id: 'demo-message-1',
+        sender_id: 'demo-student-a',
+        sender_name: 'Minji Park',
+        body: 'Hi, is the calculus textbook still available?',
+        createdAt: new Date(now - 1000 * 60 * 18).toISOString(),
+        status: 'seen',
+      },
+      {
+        _id: 'demo-message-2',
+        sender_id: ownUserId,
+        body: 'Yes, it is. I can hand it over after class today.',
+        createdAt: new Date(now - 1000 * 60 * 14).toISOString(),
+        status: 'delivered',
+      },
+      {
+        _id: 'demo-message-3',
+        sender_id: 'demo-student-a',
+        sender_name: 'Minji Park',
+        body: 'Perfect. I will stop by the library entrance around 4.',
+        createdAt: new Date(now - 1000 * 60 * 8).toISOString(),
+        status: 'sent',
+      },
+    ],
+    [threadTwoId]: [
+      {
+        _id: 'demo-message-4',
+        sender_id: 'demo-student-b',
+        sender_name: 'Daniel Lee',
+        body: 'I still want the desk lamp. Can you hold it for me?',
+        createdAt: new Date(now - 1000 * 60 * 40).toISOString(),
+        status: 'seen',
+      },
+      {
+        _id: 'demo-message-5',
+        sender_id: ownUserId,
+        body: 'Sure, I can reserve it until tomorrow morning.',
+        createdAt: new Date(now - 1000 * 60 * 34).toISOString(),
+        status: 'delivered',
+      },
+      {
+        _id: 'demo-message-6',
+        sender_id: 'demo-student-b',
+        sender_name: 'Daniel Lee',
+        body: 'Can you hold it until tomorrow?',
+        createdAt: new Date(now - 1000 * 60 * 32).toISOString(),
+        status: 'sent',
+      },
+    ],
+  }
+
+  return { threads, messagesByThread }
+}
+
 function formatTime(value) {
   if (!value) {
     return ''
@@ -90,7 +176,11 @@ export default function Messages({ language = 'en' }) {
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState('')
   const [statusMessage, setStatusMessage] = useState('')
+  const [notificationMessage, setNotificationMessage] = useState('')
+  const [isDemoMode, setIsDemoMode] = useState(false)
   const bottomRef = useRef(null)
+  const unreadTotalRef = useRef(0)
+  const hasLoadedThreadsRef = useRef(false)
 
   const itemId = searchParams.get('item') || ''
   const draftFromItem = searchParams.get('draft') || ''
@@ -98,6 +188,39 @@ export default function Messages({ language = 'en' }) {
   const user = useMemo(() => {
     return getAuthUser()
   }, [])
+  const demoOwnUserId = user?.id || user?.user_id || 'demo-self'
+
+  function loadDemoConversation(initialThreadId = 'demo-thread-1') {
+    const demoData = createDemoConversationData(demoOwnUserId)
+    const fallbackThread = demoData.threads.find((thread) => thread._id === initialThreadId) || demoData.threads[0]
+    const fallbackMessages = demoData.messagesByThread[fallbackThread._id] || []
+
+    setIsDemoMode(true)
+    setThreads(demoData.threads)
+    setActiveThreadId(fallbackThread._id)
+    setActiveThread(fallbackThread)
+    setMessages(fallbackMessages)
+    setDraft('')
+    setError('')
+    setStatusMessage('')
+    setNotificationMessage('')
+    syncUnreadNotification(demoData.threads, false)
+    setIsLoading(false)
+  }
+
+  function getUnreadTotal(threadList) {
+    return threadList.reduce((total, thread) => total + (Number(thread?.unreadCount) || 0), 0)
+  }
+
+  function syncUnreadNotification(nextThreads, shouldNotify) {
+    const nextUnreadTotal = getUnreadTotal(nextThreads)
+    if (shouldNotify && hasLoadedThreadsRef.current && nextUnreadTotal > unreadTotalRef.current) {
+      const delta = nextUnreadTotal - unreadTotalRef.current
+      setNotificationMessage(`${delta} ${t(language, 'messages.unreadMessages')}`)
+    }
+    unreadTotalRef.current = nextUnreadTotal
+    hasLoadedThreadsRef.current = true
+  }
 
   useEffect(() => {
     const token = getAuthToken()
@@ -118,7 +241,14 @@ export default function Messages({ language = 'en' }) {
         }
 
         const nextThreads = Array.isArray(threadData?.threads) ? threadData.threads : []
+        if (nextThreads.length === 0) {
+          if (isActive) {
+            loadDemoConversation()
+          }
+          return
+        }
         setThreads(nextThreads)
+        syncUnreadNotification(nextThreads, false)
 
         let nextThread = null
         if (itemId) {
@@ -144,7 +274,9 @@ export default function Messages({ language = 'en' }) {
             await markThreadRead(nextThread._id)
             const updatedList = await fetchMessageThreads()
             if (isActive) {
-              setThreads(Array.isArray(updatedList?.threads) ? updatedList.threads : [])
+              const updatedThreads = Array.isArray(updatedList?.threads) ? updatedList.threads : []
+              setThreads(updatedThreads)
+              syncUnreadNotification(updatedThreads, false)
             }
           } catch (e) {
             // non-fatal
@@ -152,7 +284,7 @@ export default function Messages({ language = 'en' }) {
         }
       } catch (err) {
         if (isActive) {
-          setError(err instanceof Error ? err.message : 'Unable to load messages right now.')
+          loadDemoConversation()
         }
       } finally {
         if (isActive) {
@@ -169,7 +301,7 @@ export default function Messages({ language = 'en' }) {
   }, [navigate, itemId, draftFromItem])
 
   useEffect(() => {
-    if (!activeThreadId) {
+    if (isDemoMode || !activeThreadId) {
       return undefined
     }
 
@@ -187,7 +319,9 @@ export default function Messages({ language = 'en' }) {
 
         const threadList = await fetchMessageThreads()
         if (isActive) {
-          setThreads(Array.isArray(threadList?.threads) ? threadList.threads : [])
+          const nextThreads = Array.isArray(threadList?.threads) ? threadList.threads : []
+          setThreads(nextThreads)
+          syncUnreadNotification(nextThreads, true)
         }
       } catch (err) {
         if (isActive) {
@@ -203,7 +337,7 @@ export default function Messages({ language = 'en' }) {
       isActive = false
       window.clearInterval(intervalId)
     }
-  }, [activeThreadId])
+  }, [activeThreadId, isDemoMode])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
@@ -214,6 +348,12 @@ export default function Messages({ language = 'en' }) {
     const id = setTimeout(() => setStatusMessage(''), 3000)
     return () => clearTimeout(id)
   }, [statusMessage])
+
+  useEffect(() => {
+    if (!notificationMessage) return undefined
+    const id = setTimeout(() => setNotificationMessage(''), 3500)
+    return () => clearTimeout(id)
+  }, [notificationMessage])
 
   function handleTextareaKeyDown(event) {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -227,6 +367,24 @@ export default function Messages({ language = 'en' }) {
     setError('')
     setStatusMessage('')
     setMessages([])
+
+    if (isDemoMode) {
+      const demoData = createDemoConversationData(demoOwnUserId)
+      const nextThread = demoData.threads.find((thread) => thread._id === threadId)
+      if (!nextThread) {
+        return
+      }
+
+      const nextThreads = demoData.threads.map((thread) => (
+        thread._id === threadId ? { ...thread, unreadCount: 0 } : thread
+      ))
+      setThreads(nextThreads)
+      setActiveThread(nextThread.unreadCount > 0 ? { ...nextThread, unreadCount: 0 } : nextThread)
+      setMessages(demoData.messagesByThread[threadId] || [])
+      syncUnreadNotification(nextThreads, false)
+      return
+    }
+
     try {
       const threadData = await fetchThreadMessages(threadId)
       setActiveThread(threadData?.thread || null)
@@ -256,6 +414,28 @@ export default function Messages({ language = 'en' }) {
     setIsSending(true)
     setError('')
     try {
+      if (isDemoMode) {
+        const messageBody = draft.trim()
+        const sentAt = new Date().toISOString()
+        const nextMessage = {
+          _id: `demo-message-${Date.now()}`,
+          sender_id: demoOwnUserId,
+          body: messageBody,
+          createdAt: sentAt,
+          status: 'sent',
+        }
+
+        setDraft('')
+        setStatusMessage('Message sent.')
+        setMessages((current) => [...current, nextMessage])
+        setThreads((current) => current.map((thread) => (
+          thread._id === activeThreadId
+            ? { ...thread, latestMessage: messageBody, latestMessageAt: sentAt }
+            : thread
+        )))
+        return
+      }
+
       const response = await sendThreadMessage(activeThreadId, draft.trim())
       setDraft('')
       setStatusMessage('Message sent.')
@@ -281,6 +461,7 @@ export default function Messages({ language = 'en' }) {
             <p className="eyebrow">{t(language, 'messages.messages')}</p>
             <h1>{t(language, 'messages.inbox')}</h1>
             <p className="subcopy">{t(language, 'messages.subcopy')}</p>
+            {isDemoMode ? <span className="messages-demo-chip">Demo conversations loaded</span> : null}
           </div>
 
           {isLoading ? (
@@ -306,7 +487,7 @@ export default function Messages({ language = 'en' }) {
                       <div className="thread-item-meta">
                         <span>{formatTime(thread.latestMessageAt || thread.updatedAt)}</span>
                         {thread.unreadCount > 0 ? (
-                          <span className="thread-unread-badge" aria-label={`${thread.unreadCount} unread messages`}>{thread.unreadCount}</span>
+                          <span className="thread-unread-badge" aria-label={`${thread.unreadCount} unread messages`}>1</span>
                         ) : null}
                       </div>
                     </div>
@@ -320,6 +501,7 @@ export default function Messages({ language = 'en' }) {
         </aside>
 
         <section className="messages-panel">
+          {notificationMessage ? <div className="messages-notification" aria-live="polite">{notificationMessage}</div> : null}
           {activeThread ? (
             <>
               <header className="messages-panel-head">

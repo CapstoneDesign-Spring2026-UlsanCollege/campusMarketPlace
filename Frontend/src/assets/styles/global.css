@@ -1137,9 +1137,28 @@ html.dark .item-action-comment.is-active {
 .thread-item small { display: block; font-size: 0.76rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
 .thread-item-info strong { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.88rem; font-weight: 700; }
 .thread-unread-badge {
-  min-width: 1.2rem; height: 1.2rem; padding: 0 0.25rem; border-radius: 999px;
+  min-width: 1.05rem; height: 1.05rem; padding: 0 0.2rem; border-radius: 999px;
   display: inline-grid; place-items: center;
-  background: var(--primary); color: #fff; font-size: 0.65rem; font-weight: 800; flex-shrink: 0;
+  background: var(--primary); color: #fff; font-size: 0.62rem; font-weight: 900; line-height: 1; flex-shrink: 0;
+}
+.messages-demo-chip {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  margin-top: 0.15rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 123, 69, 0.14);
+  background: rgba(15, 123, 69, 0.08);
+  color: var(--primary-strong);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+html.dark .messages-demo-chip {
+  border-color: rgba(129, 234, 255, 0.18);
+  background: rgba(129, 234, 255, 0.08);
+  color: #dffcff;
 }
 .thread-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 .thread-avatar-initials {
@@ -1249,6 +1268,23 @@ html.dark .message-compose { background: rgba(18,27,30,0.95); }
 .message-status { min-height: 1rem; font-size: 0.83rem; }
 .message-status.is-error { color: var(--danger); }
 .message-status.is-success { color: var(--primary-strong); }
+.messages-notification {
+  margin-bottom: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 123, 69, 0.16);
+  background: linear-gradient(135deg, rgba(15, 123, 69, 0.1), rgba(255, 255, 255, 0.95));
+  color: var(--primary-strong);
+  font-size: 0.9rem;
+  font-weight: 800;
+  box-shadow: 0 10px 22px rgba(6, 24, 19, 0.08);
+}
+
+html.dark .messages-notification {
+  border-color: rgba(129, 234, 255, 0.18);
+  background: linear-gradient(135deg, rgba(129, 234, 255, 0.12), rgba(18, 27, 30, 0.96));
+  color: #eaffff;
+}
 
 .footer {
   position: static; z-index: 20; width: 100%; margin-top: auto;
