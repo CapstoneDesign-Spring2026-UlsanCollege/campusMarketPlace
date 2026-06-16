@@ -455,8 +455,8 @@ html.dark .subcopy { color: #dce9e7; font-weight: 500; letter-spacing: 0; }
 
 .feature-list, .category-chip-row { display: flex; flex-wrap: wrap; gap: 0.7rem; }
 .category-options-wrap { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 0.7rem; margin: 0.85rem 0 0.7rem; }
-.hero-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; align-items: stretch; }
-.feature-list { margin: 1.5rem 0; }
+.hero-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; align-items: stretch; margin-top: 2rem; }
+.feature-list { margin: 1.8rem 0 1.2rem; }
 .marketplace-hero { display: grid; gap: 1rem; }
 .dashboard-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.75rem; align-items: center; }
 .feature-pill, .category-chip, .badge, .category-badge, .status-badge, .item-category, .item-posted, .item-condition, .item-location, .trust-pill, .mini-location, .meta-pill, .hero-search-tag, .time-chip, .distance-chip {
@@ -839,8 +839,11 @@ html.dark .password-rules {
 .item-comment-input:focus { outline: 3px solid rgba(15, 123, 69, 0.12); border-color: rgba(15, 123, 69, 0.24); }
 .item-comment-actions { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
 .item-comment-hint { color: var(--muted); font-size: 0.8rem; line-height: 1.4; }
-.hero-stat-grid, .trust-grid, .category-grid, .near-you-grid, .item-meta-grid, .listing-meta, .post-footer, .dashboard-grid { display: grid; gap: 0.75rem; }
-.hero-stat-grid, .trust-grid, .category-grid, .near-you-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.hero-stat-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-top: 2rem; margin-bottom: 1.6rem; }
+.trust-grid, .category-grid, .near-you-grid, .item-meta-grid, .listing-meta, .post-footer, .dashboard-grid { display: grid; gap: 0.75rem; }
+.trust-grid, .category-grid, .near-you-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.category-grid { margin-top: 2rem; margin-bottom: 1.6rem; gap: 1rem; }
+.trust-grid { margin-top: 2rem; margin-bottom: 1.6rem; }
 .hero-stat-card, .trust-card, .category-card, .near-you-card, .feed-panel, .composer, .messages-layout, .browse-hero, .state-card, .profile-card, .post-card { border: 1px solid var(--border); background: rgba(255, 255, 255, 0.94); box-shadow: var(--shadow-sm); color: var(--text); }
 .hero-stat-card, .trust-card, .category-card, .near-you-card { padding: 1rem; border-radius: 22px; }
 .hero-stat-label { color: var(--muted); font-size: 0.76rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; }
