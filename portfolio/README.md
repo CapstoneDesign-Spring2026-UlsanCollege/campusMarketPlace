@@ -31,3 +31,7 @@ This portfolio is the final handoff package for CampusMarketplace, a campus-only
 ## Portfolio Note
 
 This portfolio links the work that exists in the repository. Some weeks have full sprint packets, some weeks only have partial or template documents, and some weeks have no formal packet. Those gaps are documented honestly in the weekly files.
+
+## Verification Note
+
+After the portfolio was merged, the frontend build was repaired and verified on `main`. The portfolio contains documentation only; the app build is checked by the repository CI.
