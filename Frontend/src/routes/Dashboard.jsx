@@ -37,6 +37,125 @@ const STORIES = [
   'Furniture',
 ]
 
+const DASHBOARD_COPY = {
+  en: {
+    loginRequired: 'Please log in first.',
+    uploadLimit: (count) => `Please choose up to ${count} images total.`,
+    supportedImageType: 'Please choose a supported image type (JPG, PNG, GIF, WebP, AVIF, BMP, TIFF, HEIC, or ICO).',
+    uploading: (count) => `Uploading ${count} image${count > 1 ? 's' : ''}...`,
+    imageTooLarge: 'Please choose images smaller than 5 MB each.',
+    uploadedSuccessfully: (count) => (count > 1 ? `${count} images uploaded successfully.` : 'Image uploaded successfully.'),
+    locationRequired: 'Location is required.',
+    priceRequired: (currency) => `Price is required and must be a positive ${currency === 'KRW' ? 'KRW amount' : 'USD amount'}.`,
+    descriptionRequired: 'Description is required.',
+    categoryRequired: 'Category is required.',
+    statusRequired: 'Status is required.',
+    imageRequired: 'Please upload at least one image.',
+    itemPostedSuccessfully: 'Item posted successfully.',
+    failedToPostItem: 'Failed to post item.',
+    postComposer: 'Post composer',
+    openPostComposer: 'Open post composer',
+    writeCustomLocation: 'Write a custom location',
+    meetingSpotPlaceholder: 'Enter a meeting spot or room',
+    photos: 'Photos',
+    photoHint: (count) => `Add up to ${count} clear images. JPG, PNG, WebP, GIF, and more.`,
+    choosePhotos: 'Choose photos',
+    noPhotosSelected: 'No photos selected yet',
+    trendingListings: 'Trending listings',
+    results: 'results',
+    showingMatches: (query) => `Showing matches for "${query}"`,
+    freshListings: 'Fresh campus listings from students around Ulsan College.',
+    clearSearch: 'Clear search',
+  },
+  ko: {
+    loginRequired: '먼저 로그인하세요.',
+    uploadLimit: (count) => `이미지는 총 ${count}장까지 선택할 수 있습니다.`,
+    supportedImageType: '지원되는 이미지 형식을 선택하세요(JPG, PNG, GIF, WebP, AVIF, BMP, TIFF, HEIC, ICO).',
+    uploading: (count) => `${count}개의 이미지를 업로드하는 중...`,
+    imageTooLarge: '각 이미지는 5MB보다 작아야 합니다.',
+    uploadedSuccessfully: (count) => (count > 1 ? `${count}개의 이미지가 업로드되었습니다.` : '이미지가 업로드되었습니다.'),
+    locationRequired: '위치를 입력하세요.',
+    priceRequired: (currency) => `가격은 필수이며 양수 ${currency === 'KRW' ? 'KRW 금액' : 'USD 금액'}이어야 합니다.`,
+    descriptionRequired: '설명을 입력하세요.',
+    categoryRequired: '카테고리를 선택하세요.',
+    statusRequired: '상태를 선택하세요.',
+    imageRequired: '이미지를 하나 이상 업로드하세요.',
+    itemPostedSuccessfully: '게시글이 등록되었습니다.',
+    failedToPostItem: '게시글을 등록하지 못했습니다.',
+    postComposer: '게시글 작성',
+    openPostComposer: '게시글 작성 열기',
+    writeCustomLocation: '직접 위치 작성',
+    meetingSpotPlaceholder: '만남 장소나 방을 입력하세요',
+    photos: '사진',
+    photoHint: (count) => `선명한 이미지를 최대 ${count}장까지 추가하세요. JPG, PNG, WebP, GIF 등 지원.`,
+    choosePhotos: '사진 선택',
+    noPhotosSelected: '선택된 사진이 없습니다',
+    trendingListings: '인기 게시글',
+    results: '개 결과',
+    showingMatches: (query) => `"${query}"에 대한 결과를 표시 중`,
+    freshListings: '울산과학대학교 학생들의 새로운 캠퍼스 게시글입니다.',
+    clearSearch: '검색 지우기',
+  },
+  ne: {
+    loginRequired: 'पहिले लगइन गर्नुहोस्।',
+    uploadLimit: (count) => `कुल ${count} वटा छविसम्म मात्र छान्न सक्नुहुन्छ।`,
+    supportedImageType: 'समर्थित छवि प्रकार छान्नुहोस् (JPG, PNG, GIF, WebP, AVIF, BMP, TIFF, HEIC, वा ICO).',
+    uploading: (count) => `${count} छवि${count > 1 ? 'हरू' : ''} अपलोड हुँदैछ...`,
+    imageTooLarge: 'कृपया प्रत्येक 5 MB भन्दा साना छविहरू छान्नुहोस्।',
+    uploadedSuccessfully: (count) => (count > 1 ? `${count} छविहरू सफलतापूर्वक अपलोड भए।` : 'छवि सफलतापूर्वक अपलोड भयो।'),
+    locationRequired: 'स्थान आवश्यक छ।',
+    priceRequired: (currency) => `मूल्य आवश्यक छ र यो सकारात्मक ${currency === 'KRW' ? 'KRW रकम' : 'USD रकम'} हुनुपर्छ।`,
+    descriptionRequired: 'विवरण आवश्यक छ।',
+    categoryRequired: 'श्रेणी आवश्यक छ।',
+    statusRequired: 'स्थिति आवश्यक छ।',
+    imageRequired: 'कृपया कम्तीमा एउटा छवि अपलोड गर्नुहोस्।',
+    itemPostedSuccessfully: 'वस्तु सफलतापूर्वक पोस्ट भयो।',
+    failedToPostItem: 'वस्तु पोस्ट गर्न सकिएन।',
+    postComposer: 'पोस्ट कम्पोजर',
+    openPostComposer: 'पोस्ट कम्पोजर खोल्नुहोस्',
+    writeCustomLocation: 'कस्टम स्थान लेख्नुहोस्',
+    meetingSpotPlaceholder: 'भेट्ने ठाउँ वा कोठा लेख्नुहोस्',
+    photos: 'फोटोहरू',
+    photoHint: (count) => `स्पष्ट छविहरू ${count} वटासम्म थप्नुहोस्। JPG, PNG, WebP, GIF आदि।`,
+    choosePhotos: 'फोटो छान्नुहोस्',
+    noPhotosSelected: 'अहिलेसम्म फोटो छानिएको छैन',
+    trendingListings: 'प्रचलित सूचिहरू',
+    results: 'नतिजा',
+    showingMatches: (query) => `"${query}" का मिल्दोजुल्दो नतिजा देखाउँदै`,
+    freshListings: 'उल्सान कलेजका विद्यार्थीहरूबाट नयाँ क्याम्पस सूचिहरू।',
+    clearSearch: 'खोजी खाली गर्नुहोस्',
+  },
+  hi: {
+    loginRequired: 'पहले लॉग इन करें।',
+    uploadLimit: (count) => `कुल ${count} छवियों तक चुनें।`,
+    supportedImageType: 'समर्थित छवि प्रकार चुनें (JPG, PNG, GIF, WebP, AVIF, BMP, TIFF, HEIC, या ICO).',
+    uploading: (count) => `${count} छवियाँ अपलोड हो रही हैं...`,
+    imageTooLarge: 'कृपया प्रत्येक 5 MB से छोटी छवियाँ चुनें।',
+    uploadedSuccessfully: (count) => (count > 1 ? `${count} छवियाँ सफलतापूर्वक अपलोड हुईं।` : 'छवि सफलतापूर्वक अपलोड हुई।'),
+    locationRequired: 'स्थान आवश्यक है।',
+    priceRequired: (currency) => `मूल्य आवश्यक है और यह एक सकारात्मक ${currency === 'KRW' ? 'KRW राशि' : 'USD राशि'} होना चाहिए।`,
+    descriptionRequired: 'विवरण आवश्यक है।',
+    categoryRequired: 'श्रेणी आवश्यक है।',
+    statusRequired: 'स्थिति आवश्यक है।',
+    imageRequired: 'कृपया कम से कम एक छवि अपलोड करें।',
+    itemPostedSuccessfully: 'आइटम सफलतापूर्वक पोस्ट किया गया।',
+    failedToPostItem: 'आइटम पोस्ट नहीं किया जा सका।',
+    postComposer: 'पोस्ट कंपोज़र',
+    openPostComposer: 'पोस्ट कंपोज़र खोलें',
+    writeCustomLocation: 'कस्टम स्थान लिखें',
+    meetingSpotPlaceholder: 'मिलने की जगह या कमरा दर्ज करें',
+    photos: 'फ़ोटो',
+    photoHint: (count) => `अधिकतम ${count} स्पष्ट छवियाँ जोड़ें। JPG, PNG, WebP, GIF और अधिक।`,
+    choosePhotos: 'फ़ोटो चुनें',
+    noPhotosSelected: 'अभी कोई फ़ोटो नहीं चुनी गई',
+    trendingListings: 'ट्रेंडिंग लिस्टिंग्स',
+    results: 'परिणाम',
+    showingMatches: (query) => `"${query}" के मिलते-जुलते परिणाम दिखा रहे हैं`,
+    freshListings: 'उल्सान कॉलेज के छात्रों की नई कैंपस लिस्टिंग्स।',
+    clearSearch: 'खोज साफ़ करें',
+  },
+}
+
 function getPrimaryImageValue(item) {
   if (item?.image) {
     if (typeof item.image === 'string') {
@@ -75,6 +194,7 @@ function resolveImageUrl(imageUrl) {
 export default function Dashboard({ currency, language = 'en', marketQuery, onMarketQueryChange }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const copy = DASHBOARD_COPY[language] || DASHBOARD_COPY.en
   const [user, setUser] = useState(null)
   const [mode, setMode] = useState(location.state?.mode || 'home')
   const [internalMarketQuery, setInternalMarketQuery] = useState('')
@@ -129,7 +249,7 @@ export default function Dashboard({ currency, language = 'en', marketQuery, onMa
     if (!token || !sessionUser) {
       navigate('/login', {
         replace: true,
-        state: { message: 'Please log in first.' },
+        state: { message: copy.loginRequired },
       })
       return
     }
@@ -285,7 +405,7 @@ export default function Dashboard({ currency, language = 'en', marketQuery, onMa
     }
 
     if (selectedFiles.length + uploadedImages.length > MAX_IMAGE_COUNT) {
-      setUploadError(`Please choose up to ${MAX_IMAGE_COUNT} images total.`)
+      setUploadError(copy.uploadLimit(MAX_IMAGE_COUNT))
       setUploadMessage('')
       fileInput.value = ''
       return
@@ -293,14 +413,14 @@ export default function Dashboard({ currency, language = 'en', marketQuery, onMa
 
     const unsupportedFile = selectedFiles.find((selectedFile) => !ALLOWED_IMAGE_TYPES.has(selectedFile.type))
     if (unsupportedFile) {
-      setUploadError('Please choose a supported image type (JPG, PNG, GIF, WebP, AVIF, BMP, TIFF, HEIC, or ICO).')
+      setUploadError(copy.supportedImageType)
       setUploadMessage('')
       fileInput.value = ''
       return
     }
 
     setUploadError('')
-    setUploadMessage(`Uploading ${selectedFiles.length} image${selectedFiles.length > 1 ? 's' : ''}...`)
+    setUploadMessage(copy.uploading(selectedFiles.length))
     setIsUploading(true)
 
     try {
@@ -308,7 +428,7 @@ export default function Dashboard({ currency, language = 'en', marketQuery, onMa
 
       for (const selectedFile of selectedFiles) {
         if (selectedFile.size > MAX_IMAGE_SIZE_BYTES) {
-          throw new Error('Please choose images smaller than 5 MB each.')
+          throw new Error(copy.imageTooLarge)
         }
 
         const formData = new FormData()
@@ -329,14 +449,12 @@ export default function Dashboard({ currency, language = 'en', marketQuery, onMa
       setIsPreviewExpanded(false)
       updatePreviewUrl(nextImages[0] || '')
       setUploadMessage(
-        uploadedUrls.length > 1
-          ? `${uploadedUrls.length} images uploaded successfully.`
-          : 'Image uploaded successfully.',
+        copy.uploadedSuccessfully(uploadedUrls.length),
       )
       setUploadError('')
       setFormErrors((prev) => ({ ...prev, image: '' }))
     } catch (uploadErr) {
-      setUploadError(uploadErr instanceof Error ? uploadErr.message : 'Image upload failed.')
+      setUploadError(uploadErr instanceof Error ? uploadErr.message : copy.failedToPostItem)
         setUploadMessage('')
     } finally {
       setIsUploading(false)
@@ -376,14 +494,14 @@ export default function Dashboard({ currency, language = 'en', marketQuery, onMa
     const nextErrors = {}
     const priceValue = Number(formData.price)
 
-    if (!formData.location.trim()) nextErrors.location = 'Location is required.'
+    if (!formData.location.trim()) nextErrors.location = copy.locationRequired
     if (!formData.price.trim() || !Number.isFinite(priceValue) || priceValue <= 0) {
-      nextErrors.price = `Price is required and must be a positive ${currency === 'KRW' ? 'KRW amount' : 'USD amount'}.`
+      nextErrors.price = copy.priceRequired(currency)
     }
-    if (!formData.description.trim()) nextErrors.description = 'Description is required.'
-    if (!formData.category.trim()) nextErrors.category = 'Category is required.'
-    if (!formData.status.trim()) nextErrors.status = 'Status is required.'
-    if (uploadedImages.length === 0) nextErrors.image = 'Please upload at least one image.'
+    if (!formData.description.trim()) nextErrors.description = copy.descriptionRequired
+    if (!formData.category.trim()) nextErrors.category = copy.categoryRequired
+    if (!formData.status.trim()) nextErrors.status = copy.statusRequired
+    if (uploadedImages.length === 0) nextErrors.image = copy.imageRequired
 
     setFormErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
@@ -412,7 +530,7 @@ export default function Dashboard({ currency, language = 'en', marketQuery, onMa
 
       await createItem(payload)
 
-      setSubmitMessage('Item posted successfully.')
+      setSubmitMessage(copy.itemPostedSuccessfully)
       setFormData({
         location: '',
         price: '',
@@ -430,7 +548,7 @@ export default function Dashboard({ currency, language = 'en', marketQuery, onMa
       setIsComposerOpen(false)
       await loadItems()
     } catch (submitErr) {
-      setSubmitError(submitErr.message || 'Failed to post item.')
+      setSubmitError(submitErr.message || copy.failedToPostItem)
     } finally {
       setIsSubmitting(false)
     }
@@ -441,7 +559,7 @@ export default function Dashboard({ currency, language = 'en', marketQuery, onMa
       <section className="feed-layout">
         <section className="feed-main-col">
           {mode !== 'buy' && (
-            <section className="feed-panel composer" aria-label="Post composer">
+            <section className="feed-panel composer" aria-label={copy.postComposer}>
               <form className="composer-form" onSubmit={handlePostItemSubmit} noValidate>
                 <div className="composer-row">
                   <div className="avatar-badge" aria-hidden="true">
@@ -451,7 +569,7 @@ export default function Dashboard({ currency, language = 'en', marketQuery, onMa
                     className="composer-input"
                     type="button"
                     onClick={openComposer}
-                    aria-label="Open post composer"
+                    aria-label={copy.openPostComposer}
                     disabled={isSubmitting || isUploading}
                   >
                     {t(language, 'dashboard.prompt')}
@@ -482,14 +600,14 @@ export default function Dashboard({ currency, language = 'en', marketQuery, onMa
                             {option}
                           </option>
                         ))}
-                        <option value="__custom__">Write a custom location</option>
+                        <option value="__custom__">{copy.writeCustomLocation}</option>
                       </select>
 
                       {locationSelection === '__custom__' && (
                         <input
                           name="location"
                           type="text"
-                          placeholder="Enter a meeting spot or room"
+                          placeholder={copy.meetingSpotPlaceholder}
                           value={formData.location}
                           onChange={handleFormChange}
                           className="composer-text-input"
@@ -619,9 +737,9 @@ export default function Dashboard({ currency, language = 'en', marketQuery, onMa
 
                 <div className="composer-upload-panel">
                   <div className="composer-upload-copy">
-                    <p className="composer-upload-label">Photos</p>
+                    <p className="composer-upload-label">{copy.photos}</p>
                     <p className="composer-upload-hint">
-                      Add up to {MAX_IMAGE_COUNT} clear images. JPG, PNG, WebP, GIF, and more.
+                      {copy.photoHint(MAX_IMAGE_COUNT)}
                     </p>
                   </div>
                   <div className="composer-upload-actions">
@@ -631,12 +749,12 @@ export default function Dashboard({ currency, language = 'en', marketQuery, onMa
                       onClick={handleImageUpload}
                       disabled={isUploading || isSubmitting}
                     >
-                      Choose photos
+                      {copy.choosePhotos}
                     </button>
                     <span className="composer-upload-meta">
                       {uploadedImages.length > 0
                         ? `${uploadedImages.length} selected`
-                        : 'No photos selected yet'}
+                        : copy.noPhotosSelected}
                     </span>
                   </div>
                   <input
@@ -655,15 +773,15 @@ export default function Dashboard({ currency, language = 'en', marketQuery, onMa
           <section className="feed-post-list" aria-label="Marketplace feed posts">
             <div className="browse-toolbar">
               <div>
-                <p className="eyebrow">Trending listings</p>
-                <h2>{visibleItems.length.toLocaleString()} results</h2>
+                <p className="eyebrow">{copy.trendingListings}</p>
+                <h2>{visibleItems.length.toLocaleString()} {copy.results}</h2>
                 <p className="browse-summary">
-                  {normalizedQuery ? `Showing matches for "${marketQuery}"` : 'Fresh campus listings from students around Ulsan College.'}
+                  {normalizedQuery ? copy.showingMatches(marketQuery) : copy.freshListings}
                 </p>
               </div>
               {marketQuery ? (
                 <button className="button button-secondary" type="button" onClick={() => setMarketQuery('')}>
-                  Clear search
+                  {copy.clearSearch}
                 </button>
               ) : null}
             </div>

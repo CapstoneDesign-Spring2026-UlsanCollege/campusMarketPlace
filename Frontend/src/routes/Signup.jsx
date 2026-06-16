@@ -7,13 +7,132 @@ import { t } from '../services/i18n'
 const REQUIRED_FIELDS = ['firstName', 'lastName', 'email', 'password', 'confirmPassword']
 
 const PASSWORD_RULES = [
-  { key: 'length', label: 'At least 8 characters', test: (value) => value.length >= 8 },
-  { key: 'uppercase', label: 'One uppercase letter', test: (value) => /[A-Z]/.test(value) },
-  { key: 'lowercase', label: 'One lowercase letter', test: (value) => /[a-z]/.test(value) },
-  { key: 'number', label: 'One number', test: (value) => /\d/.test(value) },
-  { key: 'special', label: 'One special character', test: (value) => /[^A-Za-z0-9]/.test(value) },
-  { key: 'spaces', label: 'No spaces', test: (value) => !/\s/.test(value) },
+  { key: 'length', test: (value) => value.length >= 8 },
+  { key: 'uppercase', test: (value) => /[A-Z]/.test(value) },
+  { key: 'lowercase', test: (value) => /[a-z]/.test(value) },
+  { key: 'number', test: (value) => /\d/.test(value) },
+  { key: 'special', test: (value) => /[^A-Za-z0-9]/.test(value) },
+  { key: 'spaces', test: (value) => !/\s/.test(value) },
 ]
+
+const SIGNUP_COPY = {
+  en: {
+    requiredField: 'This field is required.',
+    nameFormat: 'Use letters only (spaces, apostrophes, and hyphens allowed).',
+    emailFormat: 'Enter a valid email address.',
+    emailDomain: 'Only @office.uc.ac.kr email addresses are allowed.',
+    passwordStrength: 'Password does not meet strength requirements.',
+    passwordsDoNotMatch: 'Passwords do not match.',
+    highlightFields: 'Please fix the highlighted fields before creating your account.',
+    verificationSent: 'A verification code was sent to your email.',
+    verificationResent: 'Verification code resent.',
+    resendFailed: 'Failed to resend code.',
+    signupFailed: 'Signup failed. Please try again.',
+    verificationFailed: 'Verification failed.',
+    verificationCode: 'Verification code',
+    show: 'Show',
+    hide: 'Hide',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
+    resendIn: (seconds) => `Resend in ${seconds}s`,
+    resendCode: 'Resend code',
+    passwordRules: {
+      length: 'At least 8 characters',
+      uppercase: 'One uppercase letter',
+      lowercase: 'One lowercase letter',
+      number: 'One number',
+      special: 'One special character',
+      spaces: 'No spaces',
+    },
+  },
+  ko: {
+    requiredField: '이 필드는 필수입니다.',
+    nameFormat: '문자만 사용하세요(공백, 아포스트로피, 하이픈 허용).',
+    emailFormat: '유효한 이메일 주소를 입력하세요.',
+    emailDomain: '@office.uc.ac.kr 이메일만 사용할 수 있습니다.',
+    passwordStrength: '비밀번호가 보안 요구 사항을 충족하지 않습니다.',
+    passwordsDoNotMatch: '비밀번호가 일치하지 않습니다.',
+    highlightFields: '강조된 항목을 수정한 후 계정을 생성하세요.',
+    verificationSent: '인증 코드가 이메일로 전송되었습니다.',
+    verificationResent: '인증 코드가 다시 전송되었습니다.',
+    resendFailed: '코드를 다시 보내지 못했습니다.',
+    signupFailed: '가입에 실패했습니다. 다시 시도하세요.',
+    verificationFailed: '인증에 실패했습니다.',
+    verificationCode: '인증 코드',
+    show: '표시',
+    hide: '숨기기',
+    showPassword: '비밀번호 표시',
+    hidePassword: '비밀번호 숨기기',
+    resendIn: (seconds) => `${seconds}초 후 재전송`,
+    resendCode: '코드 재전송',
+    passwordRules: {
+      length: '8자 이상',
+      uppercase: '대문자 1개',
+      lowercase: '소문자 1개',
+      number: '숫자 1개',
+      special: '특수문자 1개',
+      spaces: '공백 없음',
+    },
+  },
+  ne: {
+    requiredField: 'यो फिल्ड अनिवार्य छ।',
+    nameFormat: 'अक्षर मात्र प्रयोग गर्नुहोस् (स्पेस, अपोस्ट्रोफी, र हाइफन अनुमति छ)।',
+    emailFormat: 'मान्य इमेल ठेगाना प्रविष्ट गर्नुहोस्।',
+    emailDomain: 'केवल @office.uc.ac.kr इमेल ठेगानाहरू मात्र अनुमति छन्।',
+    passwordStrength: 'पासवर्डले बलियोपनका आवश्यकताहरू पूरा गर्दैन।',
+    passwordsDoNotMatch: 'पासवर्डहरू मिल्दैनन्।',
+    highlightFields: 'कृपया आफ्नो खाता सिर्जना गर्नु अघि हाइलाइट गरिएका फिल्डहरू ठीक गर्नुहोस्।',
+    verificationSent: 'तपाईंको इमेलमा प्रमाणीकरण कोड पठाइएको छ।',
+    verificationResent: 'प्रमाणीकरण कोड फेरि पठाइयो।',
+    resendFailed: 'कोड फेरि पठाउन सकिएन।',
+    signupFailed: 'साइनअप असफल भयो। कृपया फेरि प्रयास गर्नुहोस्।',
+    verificationFailed: 'प्रमाणीकरण असफल भयो।',
+    verificationCode: 'प्रमाणीकरण कोड',
+    show: 'देखाउनुहोस्',
+    hide: 'लुकाउनुहोस्',
+    showPassword: 'पासवर्ड देखाउनुहोस्',
+    hidePassword: 'पासवर्ड लुकाउनुहोस्',
+    resendIn: (seconds) => `${seconds} सेकेन्डमा पुनः पठाउनुहोस्`,
+    resendCode: 'कोड पुनः पठाउनुहोस्',
+    passwordRules: {
+      length: 'कम्तीमा 8 अक्षर',
+      uppercase: 'एक ठूलो अक्षर',
+      lowercase: 'एक सानो अक्षर',
+      number: 'एक अंक',
+      special: 'एक विशेष चिन्ह',
+      spaces: 'स्पेस छैन',
+    },
+  },
+  hi: {
+    requiredField: 'यह फ़ील्ड आवश्यक है।',
+    nameFormat: 'केवल अक्षरों का उपयोग करें (स्पेस, अपॉस्ट्रोफी, और हाइफ़न अनुमति हैं)।',
+    emailFormat: 'मान्य ईमेल पता दर्ज करें।',
+    emailDomain: 'केवल @office.uc.ac.kr ईमेल पतों की अनुमति है।',
+    passwordStrength: 'पासवर्ड सुरक्षा आवश्यकताओं को पूरा नहीं करता।',
+    passwordsDoNotMatch: 'पासवर्ड मेल नहीं खाते।',
+    highlightFields: 'कृपया खाता बनाने से पहले हाइलाइट किए गए फ़ील्ड ठीक करें।',
+    verificationSent: 'आपके ईमेल पर एक सत्यापन कोड भेजा गया है।',
+    verificationResent: 'सत्यापन कोड फिर से भेजा गया।',
+    resendFailed: 'कोड फिर से भेजने में विफल रहा।',
+    signupFailed: 'साइनअप विफल रहा। कृपया फिर से प्रयास करें।',
+    verificationFailed: 'सत्यापन विफल रहा।',
+    verificationCode: 'सत्यापन कोड',
+    show: 'दिखाएँ',
+    hide: 'छिपाएँ',
+    showPassword: 'पासवर्ड दिखाएँ',
+    hidePassword: 'पासवर्ड छिपाएँ',
+    resendIn: (seconds) => `${seconds} सेकंड में फिर भेजें`,
+    resendCode: 'कोड फिर भेजें',
+    passwordRules: {
+      length: 'कम से कम 8 अक्षर',
+      uppercase: 'एक बड़ा अक्षर',
+      lowercase: 'एक छोटा अक्षर',
+      number: 'एक संख्या',
+      special: 'एक विशेष वर्ण',
+      spaces: 'कोई स्पेस नहीं',
+    },
+  },
+}
 
 const initialValues = {
   firstName: '',
@@ -31,22 +150,22 @@ function getPasswordChecks(password) {
   }, {})
 }
 
-function validateField(name, values) {
+function validateField(name, values, copy) {
   const value = values[name]?.trim?.() ?? values[name]
 
   if (REQUIRED_FIELDS.includes(name) && !value) {
-    return 'This field is required.'
+    return copy.requiredField
   }
 
   if (name === 'firstName' || name === 'lastName') {
     if (!/^[A-Za-z][A-Za-z\s'-]*$/.test(value)) {
-      return 'Use letters only (spaces, apostrophes, and hyphens allowed).'
+      return copy.nameFormat
     }
   }
 
   if (name === 'middleName' && value) {
     if (!/^[A-Za-z\s'-]+$/.test(value)) {
-      return 'Use letters only (spaces, apostrophes, and hyphens allowed).'
+      return copy.nameFormat
     }
   }
 
@@ -55,11 +174,11 @@ function validateField(name, values) {
     const basicEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
     if (!basicEmailRegex.test(normalized)) {
-      return 'Enter a valid email address.'
+      return copy.emailFormat
     }
 
     if (!normalized.endsWith('@office.uc.ac.kr')) {
-      return 'Only @office.uc.ac.kr email addresses are allowed.'
+      return copy.emailDomain
     }
   }
 
@@ -68,22 +187,22 @@ function validateField(name, values) {
     const isStrong = Object.values(checks).every(Boolean)
 
     if (!isStrong) {
-      return 'Password does not meet strength requirements.'
+      return copy.passwordStrength
     }
   }
 
   if (name === 'confirmPassword') {
     if (values.confirmPassword !== values.password) {
-      return 'Passwords do not match.'
+      return copy.passwordsDoNotMatch
     }
   }
 
   return ''
 }
 
-function validateAll(values) {
+function validateAll(values, copy) {
   return Object.keys(values).reduce((acc, field) => {
-    const error = validateField(field, values)
+    const error = validateField(field, values, copy)
     if (error) {
       acc[field] = error
     }
@@ -93,6 +212,7 @@ function validateAll(values) {
 
 export default function Signup({ language = 'en', onAuthChange }) {
   const navigate = useNavigate()
+  const copy = SIGNUP_COPY[language] || SIGNUP_COPY.en
   const [formValues, setFormValues] = useState(initialValues)
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
@@ -114,7 +234,7 @@ export default function Signup({ language = 'en', onAuthChange }) {
     setTouched((prev) => ({ ...prev, [name]: true }))
     setErrors((prev) => ({
       ...prev,
-      [name]: validateField(name, formValues),
+      [name]: validateField(name, formValues, copy),
     }))
   }
 
@@ -125,11 +245,11 @@ export default function Signup({ language = 'en', onAuthChange }) {
     setSubmitStatus({ type: '', message: '' })
 
     if (touched[name]) {
-      setErrors((prev) => ({ ...prev, [name]: validateField(name, nextValues) }))
+      setErrors((prev) => ({ ...prev, [name]: validateField(name, nextValues, copy) }))
     }
 
     if (name === 'password' && touched.confirmPassword) {
-      setErrors((prev) => ({ ...prev, confirmPassword: validateField('confirmPassword', nextValues) }))
+      setErrors((prev) => ({ ...prev, confirmPassword: validateField('confirmPassword', nextValues, copy) }))
     }
   }
 
@@ -153,7 +273,7 @@ export default function Signup({ language = 'en', onAuthChange }) {
       return acc
     }, {})
 
-    const formErrors = validateAll(normalizedValues)
+    const formErrors = validateAll(normalizedValues, copy)
 
     setFormValues(normalizedValues)
     setTouched(nextTouched)
@@ -162,7 +282,7 @@ export default function Signup({ language = 'en', onAuthChange }) {
     if (Object.keys(formErrors).length > 0) {
       setSubmitStatus({
         type: 'error',
-        message: 'Please fix the highlighted fields before creating your account.',
+        message: copy.highlightFields,
       })
       return
     }
@@ -176,7 +296,7 @@ export default function Signup({ language = 'en', onAuthChange }) {
 
       if (response?.requiresVerification) {
         setIsAwaitingVerification(true)
-        setOtpStatus({ type: 'info', message: 'A verification code was sent to your email.' })
+        setOtpStatus({ type: 'info', message: copy.verificationSent })
         if (response?.resendAvailableAt) {
           const then = new Date(response.resendAvailableAt).getTime()
           const now = Date.now()
@@ -217,14 +337,14 @@ export default function Signup({ language = 'en', onAuthChange }) {
       })
 
       if (!payload?.token || !payload?.user) {
-        throw new Error('Verification failed.')
+        throw new Error(copy.verificationFailed)
       }
 
       saveAuthSession(payload.token, payload.user)
       if (typeof onAuthChange === 'function') onAuthChange()
       navigate('/dashboard', { replace: true })
     } catch (err) {
-      setOtpStatus({ type: 'error', message: err instanceof Error ? err.message : 'Verification failed.' })
+      setOtpStatus({ type: 'error', message: err instanceof Error ? err.message : copy.verificationFailed })
     }
   }
 
@@ -235,11 +355,11 @@ export default function Signup({ language = 'en', onAuthChange }) {
         method: 'POST',
         body: JSON.stringify({ email: formValues.email.trim().toLowerCase() }),
       })
-      setOtpStatus({ type: 'info', message: 'Verification code resent.' })
+      setOtpStatus({ type: 'info', message: copy.verificationResent })
       // start 2-minute cooldown
       setResendSecondsLeft(120)
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to resend code.'
+      const msg = err instanceof Error ? err.message : copy.resendFailed
       setOtpStatus({ type: 'error', message: msg })
       // try to extract seconds from server message like 'Please wait 90 seconds...'
       const m = msg.match(/(\d+)\s*seconds/)
@@ -357,23 +477,16 @@ export default function Signup({ language = 'en', onAuthChange }) {
                 type="button"
                 className="toggle-visibility"
                 onClick={() => setShowPassword((prev) => !prev)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? copy.hidePassword : copy.showPassword}
               >
-                {showPassword ? t(language, 'signup.hide') : t(language, 'signup.show')}
+                {showPassword ? copy.hide : copy.show}
               </button>
             </div>
             {fieldError('password') && <span className="field-error">{fieldError('password')}</span>}
-
-            <div className="password-meter" aria-hidden="true">
-              <div
-                className="password-meter-cover"
-                style={{ width: `${100 - strengthPercent}%` }}
-              />
-            </div>
             <ul className="password-rules" aria-label="Password requirements">
               {PASSWORD_RULES.map((rule) => (
                 <li key={rule.key} className={passwordChecks[rule.key] ? 'rule-ok' : 'rule-missing'}>
-                  {rule.label}
+                  {copy.passwordRules[rule.key]}
                 </li>
               ))}
             </ul>
@@ -413,7 +526,7 @@ export default function Signup({ language = 'en', onAuthChange }) {
           ) : (
             <div>
               <label>
-                <span className="label-text">Verification code</span>
+                <span className="label-text">{copy.verificationCode}</span>
                 <input
                   type="text"
                   name="otp"
@@ -435,7 +548,7 @@ export default function Signup({ language = 'en', onAuthChange }) {
                   onClick={handleResendOtp}
                   disabled={resendSecondsLeft > 0}
                 >
-                  {resendSecondsLeft > 0 ? `Resend in ${resendSecondsLeft}s` : 'Resend code'}
+                  {resendSecondsLeft > 0 ? copy.resendIn(resendSecondsLeft) : copy.resendCode}
                 </button>
               </div>
             </div>

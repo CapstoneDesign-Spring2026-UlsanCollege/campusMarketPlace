@@ -5,6 +5,181 @@ import { formatPriceFromUsd } from '../services/currency'
 import { getAuthUser } from '../services/auth'
 import Avatar from '../components/Avatar'
 
+const DETAIL_COPY = {
+  en: {
+    justNow: 'Just now',
+    minutesAgo: (minutes) => `${minutes}m ago`,
+    hoursAgo: (hours) => `${hours}h ago`,
+    daysAgo: (days) => `${days}d ago`,
+    listingPreview: 'Listing preview',
+    loadingItemDetails: 'Loading item details…',
+    fetchingLayout: 'Fetching the listing layout so you can see how it will look.',
+    itemNotFound: 'The listing was not found.',
+    unableToOpen: 'We could not open that item.',
+    goBack: 'Go back',
+    searchListings: 'Search listings',
+    marketplace: 'Marketplace',
+    listings: 'Listings',
+    item: 'Item',
+    category: 'Category',
+    condition: 'Condition',
+    location: 'Location',
+    posted: 'Posted',
+    likeNew: 'Like new',
+    general: 'General',
+    campus: 'Campus',
+    seller: 'Seller',
+    verified: 'Verified',
+    thisIsYourListing: 'This is your listing.',
+    loadingSellerProfile: 'Loading seller profile…',
+    studentSellerProfile: 'Student seller profile.',
+    contact: 'Contact',
+    reachSellerDirectly: 'Reach the seller directly',
+    messageInApp: 'Message in app',
+    fastInAppMessagingAvailable: 'Fast in-app messaging available',
+    messageSeller: 'Message seller',
+    viewProfile: 'View profile',
+    back: 'Back',
+    listingImageViewer: 'Listing image viewer',
+    closeImageViewer: 'Close image viewer',
+    previousImage: 'Previous image',
+    nextImage: 'Next image',
+    openImageViewer: 'Open image viewer',
+    viewImage: (index) => `View image ${index}`,
+    thumbnail: (index) => `Thumbnail ${index}`,
+    imageCount: (index, total) => `${index} / ${total}`,
+  },
+  ko: {
+    justNow: '방금 전',
+    minutesAgo: (minutes) => `${minutes}분 전`,
+    hoursAgo: (hours) => `${hours}시간 전`,
+    daysAgo: (days) => `${days}일 전`,
+    listingPreview: '게시글 미리보기',
+    loadingItemDetails: '상품 정보를 불러오는 중…',
+    fetchingLayout: '게시글 레이아웃을 불러와 화면을 확인할 수 있게 합니다.',
+    itemNotFound: '게시글을 찾을 수 없습니다.',
+    unableToOpen: '해당 항목을 열 수 없습니다.',
+    goBack: '뒤로 가기',
+    searchListings: '게시글 검색',
+    marketplace: '마켓플레이스',
+    listings: '게시글',
+    item: '상품',
+    category: '카테고리',
+    condition: '상태',
+    location: '위치',
+    posted: '게시됨',
+    likeNew: '거의 새것',
+    general: '일반',
+    campus: '캠퍼스',
+    seller: '판매자',
+    verified: '인증됨',
+    thisIsYourListing: '이것은 회원님의 게시글입니다.',
+    loadingSellerProfile: '판매자 프로필을 불러오는 중…',
+    studentSellerProfile: '학생 판매자 프로필입니다.',
+    contact: '연락처',
+    reachSellerDirectly: '판매자에게 직접 연락',
+    messageInApp: '앱에서 메시지',
+    fastInAppMessagingAvailable: '빠른 앱 내 메시지 이용 가능',
+    messageSeller: '판매자에게 메시지',
+    viewProfile: '프로필 보기',
+    back: '뒤로',
+    listingImageViewer: '게시글 이미지 뷰어',
+    closeImageViewer: '이미지 뷰어 닫기',
+    previousImage: '이전 이미지',
+    nextImage: '다음 이미지',
+    openImageViewer: '이미지 뷰어 열기',
+    viewImage: (index) => `${index}번 이미지 보기`,
+    thumbnail: (index) => `${index}번 썸네일`,
+    imageCount: (index, total) => `${index} / ${total}`,
+  },
+  ne: {
+    justNow: 'अहिले नै',
+    minutesAgo: (minutes) => `${minutes} मिनेट अघि`,
+    hoursAgo: (hours) => `${hours} घण्टा अघि`,
+    daysAgo: (days) => `${days} दिन अघि`,
+    listingPreview: 'सूची पूर्वावलोकन',
+    loadingItemDetails: 'वस्तु विवरण लोड हुँदैछ…',
+    fetchingLayout: 'सूची कस्तो देखिन्छ भनेर देखाउन यसको लेआउट ल्याइँदैछ।',
+    itemNotFound: 'सूची फेला परेन।',
+    unableToOpen: 'यो वस्तु खोल्न सकिएन।',
+    goBack: 'फिर्ता जानुहोस्',
+    searchListings: 'सूचीहरू खोज्नुहोस्',
+    marketplace: 'बजार',
+    listings: 'सूचीहरू',
+    item: 'वस्तु',
+    category: 'श्रेणी',
+    condition: 'अवस्था',
+    location: 'स्थान',
+    posted: 'प्रकाशित',
+    likeNew: 'नयाँ जस्तै',
+    general: 'सामान्य',
+    campus: 'क्याम्पस',
+    seller: 'बिक्रेता',
+    verified: 'प्रमाणित',
+    thisIsYourListing: 'यो तपाईंको सूची हो।',
+    loadingSellerProfile: 'बिक्रेताको प्रोफाइल लोड हुँदैछ…',
+    studentSellerProfile: 'विद्यार्थी बिक्रेताको प्रोफाइल।',
+    contact: 'सम्पर्क',
+    reachSellerDirectly: 'बिक्रेतासँग सिधै सम्पर्क गर्नुहोस्',
+    messageInApp: 'एपभित्र सन्देश',
+    fastInAppMessagingAvailable: 'छिटो इन-एप मेसेजिङ उपलब्ध छ',
+    messageSeller: 'बिक्रेतालाई सन्देश',
+    viewProfile: 'प्रोफाइल हेर्नुहोस्',
+    back: 'फिर्ता',
+    listingImageViewer: 'सूची छवि दर्शक',
+    closeImageViewer: 'छवि दर्शक बन्द गर्नुहोस्',
+    previousImage: 'अघिल्लो छवि',
+    nextImage: 'अर्को छवि',
+    openImageViewer: 'छवि दर्शक खोल्नुहोस्',
+    viewImage: (index) => `छवि ${index} हेर्नुहोस्`,
+    thumbnail: (index) => `थम्बनेल ${index}`,
+    imageCount: (index, total) => `${index} / ${total}`,
+  },
+  hi: {
+    justNow: 'अभी',
+    minutesAgo: (minutes) => `${minutes} मिनट पहले`,
+    hoursAgo: (hours) => `${hours} घंटे पहले`,
+    daysAgo: (days) => `${days} दिन पहले`,
+    listingPreview: 'लिस्टिंग पूर्वावलोकन',
+    loadingItemDetails: 'आइटम विवरण लोड हो रहा है…',
+    fetchingLayout: 'लिस्टिंग का लेआउट लाकर यह दिखाया जा रहा है कि यह कैसा लगेगा।',
+    itemNotFound: 'लिस्टिंग नहीं मिली।',
+    unableToOpen: 'हम उस आइटम को खोल नहीं पाए।',
+    goBack: 'वापस जाएँ',
+    searchListings: 'लिस्टिंग खोजें',
+    marketplace: 'मार्केटप्लेस',
+    listings: 'लिस्टिंग्स',
+    item: 'आइटम',
+    category: 'श्रेणी',
+    condition: 'स्थिति',
+    location: 'स्थान',
+    posted: 'पोस्ट किया गया',
+    likeNew: 'नए जैसा',
+    general: 'सामान्य',
+    campus: 'कैंपस',
+    seller: 'विक्रेता',
+    verified: 'सत्यापित',
+    thisIsYourListing: 'यह आपकी लिस्टिंग है।',
+    loadingSellerProfile: 'विक्रेता प्रोफ़ाइल लोड हो रही है…',
+    studentSellerProfile: 'छात्र विक्रेता प्रोफ़ाइल।',
+    contact: 'संपर्क',
+    reachSellerDirectly: 'विक्रेता से सीधे संपर्क करें',
+    messageInApp: 'ऐप में संदेश',
+    fastInAppMessagingAvailable: 'तेज़ इन-ऐप मैसेजिंग उपलब्ध है',
+    messageSeller: 'विक्रेता को संदेश',
+    viewProfile: 'प्रोफ़ाइल देखें',
+    back: 'वापस',
+    listingImageViewer: 'लिस्टिंग इमेज व्यूअर',
+    closeImageViewer: 'इमेज व्यूअर बंद करें',
+    previousImage: 'पिछली छवि',
+    nextImage: 'अगली छवि',
+    openImageViewer: 'इमेज व्यूअर खोलें',
+    viewImage: (index) => `छवि ${index} देखें`,
+    thumbnail: (index) => `थंबनेल ${index}`,
+    imageCount: (index, total) => `${index} / ${total}`,
+  },
+}
+
 function getPrimaryImageValue(item) {
   if (item?.image) {
     if (typeof item.image === 'string') return item.image
@@ -44,37 +219,37 @@ function resolveImageUrl(imageUrl) {
   return new URL(imageUrl.replace(/^\/+/, ''), `${API_ORIGIN}/`).href
 }
 
-function formatPostedTime(value) {
-  if (!value) return 'Just now'
+function formatPostedTime(value, copy) {
+  if (!value) return copy.justNow
 
   const createdAt = new Date(value)
-  if (Number.isNaN(createdAt.getTime())) return 'Just now'
+  if (Number.isNaN(createdAt.getTime())) return copy.justNow
 
   const diffMs = Date.now() - createdAt.getTime()
   const diffSeconds = Math.floor(diffMs / 1000)
-  if (diffSeconds < 60) return 'Just now'
+  if (diffSeconds < 60) return copy.justNow
 
   const diffMinutes = Math.floor(diffSeconds / 60)
-  if (diffMinutes < 60) return `${diffMinutes}m ago`
+  if (diffMinutes < 60) return copy.minutesAgo(diffMinutes)
 
   const diffHours = Math.floor(diffMinutes / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
+  if (diffHours < 24) return copy.hoursAgo(diffHours)
 
-  return `${Math.floor(diffHours / 24)}d ago`
+  return copy.daysAgo(Math.floor(diffHours / 24))
 }
 
-function getConditionLabel(item) {
+function getConditionLabel(item, copy) {
   const raw = item?.condition || item?.itemCondition || item?.state || ''
   const normalized = String(raw).trim()
-  return normalized || 'Like new'
+  return normalized || copy.likeNew
 }
 
-function buildDetailRows(item) {
+function buildDetailRows(item, copy) {
   return [
-    { label: 'Category', value: item?.category || 'General' },
-    { label: 'Condition', value: item?.condition || item?.itemCondition || item?.state || 'Like new' },
-    { label: 'Location', value: item?.location || 'Campus' },
-    { label: 'Posted', value: formatPostedTime(item?.createdAt) },
+    { label: copy.category, value: item?.category || copy.general },
+    { label: copy.condition, value: item?.condition || item?.itemCondition || item?.state || copy.likeNew },
+    { label: copy.location, value: item?.location || copy.campus },
+    { label: copy.posted, value: formatPostedTime(item?.createdAt, copy) },
   ]
 }
 
@@ -82,6 +257,7 @@ export default function ItemDetail({ currency, language = 'en' }) {
   const navigate = useNavigate()
   const params = useParams()
   const location = useLocation()
+  const copy = DETAIL_COPY[language] || DETAIL_COPY.en
   const [item, setItem] = useState(location.state?.item || null)
   const [isLoading, setIsLoading] = useState(!location.state?.item)
   const [error, setError] = useState('')
@@ -112,11 +288,11 @@ export default function ItemDetail({ currency, language = 'en' }) {
   const galleryImages = useMemo(() => getAllImageValues(effectiveItem), [effectiveItem])
   const activeImageSrc = resolveImageUrl(galleryImages[activeImageIndex] || galleryImages[0] || getPrimaryImageValue(effectiveItem))
   const sellerName = sellerProfile
-    ? `${sellerProfile?.firstName || ''} ${sellerProfile?.lastName || ''}`.trim() || effectiveItem?.sellerName || 'Seller'
-    : effectiveItem?.sellerName || 'Seller'
+    ? `${sellerProfile?.firstName || ''} ${sellerProfile?.lastName || ''}`.trim() || effectiveItem?.sellerName || copy.seller
+    : effectiveItem?.sellerName || copy.seller
   const sellerAvatar = effectiveItem?.sellerAvatarUrl || effectiveItem?.sellerAvatar || effectiveItem?.seller_avatar || effectiveItem?.seller_avatar_url || ''
-  const detailRows = useMemo(() => buildDetailRows(effectiveItem), [effectiveItem])
-  const sellerLocation = sellerProfile?.location || effectiveItem?.location || 'Campus'
+  const detailRows = useMemo(() => buildDetailRows(effectiveItem, copy), [effectiveItem, copy])
+  const sellerLocation = sellerProfile?.location || effectiveItem?.location || copy.campus
   const sellerId = sellerProfile?.id || sellerProfile?._id || effectiveItem?.seller_id || effectiveItem?.sellerId || effectiveItem?.seller?.id || effectiveItem?.seller?._id || ''
   const sellerProfileState = {
     seller: {
@@ -128,8 +304,8 @@ export default function ItemDetail({ currency, language = 'en' }) {
   }
   const sellerEmail = sellerProfile?.email || effectiveItem?.sellerEmail || ''
   const sellerPhone = sellerProfile?.phone || effectiveItem?.sellerPhone || ''
-  const conditionLabel = getConditionLabel(effectiveItem)
-  const categoryTrail = [effectiveItem?.category || 'Listings', conditionLabel, sellerLocation].filter(Boolean)
+  const conditionLabel = getConditionLabel(effectiveItem, copy)
+  const categoryTrail = [effectiveItem?.category || copy.listings, conditionLabel, sellerLocation].filter(Boolean)
 
   useEffect(() => {
     let isActive = true
@@ -248,9 +424,9 @@ export default function ItemDetail({ currency, language = 'en' }) {
     return (
       <main className="page-shell marketplace-shell">
         <section className="panel item-detail-shell">
-          <p className="eyebrow">Listing preview</p>
-          <h1>Loading item details…</h1>
-          <p className="subcopy">Fetching the listing layout so you can see how it will look.</p>
+          <p className="eyebrow">{copy.listingPreview}</p>
+          <h1>{copy.loadingItemDetails}</h1>
+          <p className="subcopy">{copy.fetchingLayout}</p>
         </section>
       </main>
     )
@@ -282,15 +458,15 @@ export default function ItemDetail({ currency, language = 'en' }) {
       return (
         <main className="page-shell marketplace-shell">
           <section className="panel item-detail-shell item-detail-error">
-            <p className="eyebrow">Listing preview</p>
-            <h1>We could not open that item.</h1>
-            <p className="subcopy">{error || 'The listing was not found.'}</p>
+            <p className="eyebrow">{copy.listingPreview}</p>
+            <h1>{copy.unableToOpen}</h1>
+            <p className="subcopy">{error || copy.itemNotFound}</p>
             <div className="detail-actions">
               <button className="button button-primary" type="button" onClick={() => navigate(-1)}>
-                Go back
+                {copy.goBack}
               </button>
               <Link className="button button-secondary" to="/search">
-                Search listings
+                {copy.searchListings}
               </Link>
             </div>
           </section>
@@ -303,9 +479,9 @@ export default function ItemDetail({ currency, language = 'en' }) {
     <main className="page-shell marketplace-shell">
       <section className="item-detail-shell panel">
         <div className="detail-breadcrumbs">
-          <Link to="/browse">Marketplace</Link>
+          <Link to="/browse">{copy.marketplace}</Link>
           <span>›</span>
-          <Link to={`/search?category=${encodeURIComponent(effectiveItem?.category || '')}`}>{effectiveItem?.category || 'Listings'}</Link>
+          <Link to={`/search?category=${encodeURIComponent(effectiveItem?.category || '')}`}>{effectiveItem?.category || copy.listings}</Link>
           <span>›</span>
           <span>{effectiveItem?.title}</span>
         </div>
@@ -313,7 +489,7 @@ export default function ItemDetail({ currency, language = 'en' }) {
         <div className="detail-hero">
           <div className="detail-left">
             <div className="detail-header">
-            <p className="eyebrow">Listing preview</p>
+            <p className="eyebrow">{copy.listingPreview}</p>
             <div className="detail-trail">
               {categoryTrail.map((part) => (
                 <span key={part} className="detail-trail-pill">{part}</span>
@@ -324,19 +500,19 @@ export default function ItemDetail({ currency, language = 'en' }) {
             <div className="detail-gallery-card">
             <figure className="detail-gallery">
               {activeImageSrc ? (
-                <button type="button" className="detail-gallery-button" onClick={() => openLightbox(activeImageIndex)} aria-label="Open image viewer">
+                <button type="button" className="detail-gallery-button" onClick={() => openLightbox(activeImageIndex)} aria-label={copy.openImageViewer}>
                   <img src={activeImageSrc} alt={effectiveItem?.title} />
                 </button>
               ) : (
                 <div className="detail-gallery-fallback" aria-hidden="true">
-                  <span>{(effectiveItem?.category || 'Item').slice(0, 1).toUpperCase()}</span>
+                  <span>{(effectiveItem?.category || copy.item).slice(0, 1).toUpperCase()}</span>
                 </div>
               )}
-              {galleryImages.length > 1 ? <figcaption className="detail-gallery-count" aria-hidden="true">{activeImageIndex + 1}/{galleryImages.length}</figcaption> : null}
+              {galleryImages.length > 1 ? <figcaption className="detail-gallery-count" aria-hidden="true">{copy.imageCount(activeImageIndex + 1, galleryImages.length)}</figcaption> : null}
             </figure>
 
             {galleryImages.length > 1 ? (
-              <div className="detail-thumbs" aria-label="Listing photos">
+              <div className="detail-thumbs" aria-label={copy.listingImageViewer}>
                 {galleryImages.map((image, index) => {
                   const thumbSrc = resolveImageUrl(image)
                   const isActive = index === activeImageIndex
@@ -349,9 +525,9 @@ export default function ItemDetail({ currency, language = 'en' }) {
                         setActiveImageIndex(index)
                         openLightbox(index)
                       }}
-                      aria-label={`View image ${index + 1}`}
+                      aria-label={copy.viewImage(index + 1)}
                     >
-                      {thumbSrc ? <img src={thumbSrc} alt={`Thumbnail ${index + 1}`} /> : null}
+                      {thumbSrc ? <img src={thumbSrc} alt={copy.thumbnail(index + 1)} /> : null}
                     </button>
                   )
                 })}
@@ -385,55 +561,55 @@ export default function ItemDetail({ currency, language = 'en' }) {
                 <Avatar src={sellerProfile?.avatarUrl || sellerAvatar} alt={sellerName} size={56} />
               )}
               <div className="detail-seller-copy">
-                <p className="detail-seller-label">Seller</p>
+                <p className="detail-seller-label">{copy.seller}</p>
                 <div className="detail-seller-name-row">
                   <strong>{sellerName}</strong>
-                  {Boolean(effectiveItem?.seller_verified || effectiveItem?.sellerVerified || sellerProfile?.isVerified) ? <span className="detail-verified-badge">Verified</span> : null}
+                  {Boolean(effectiveItem?.seller_verified || effectiveItem?.sellerVerified || sellerProfile?.isVerified) ? <span className="detail-verified-badge">{copy.verified}</span> : null}
                 </div>
-                <p className="detail-seller-note">{currentUser?.id === effectiveItem?.seller_id ? 'This is your listing.' : sellerLoading ? 'Loading seller profile…' : 'Student seller profile.'}</p>
+                <p className="detail-seller-note">{currentUser?.id === effectiveItem?.seller_id ? copy.thisIsYourListing : sellerLoading ? copy.loadingSellerProfile : copy.studentSellerProfile}</p>
                 <p className="detail-seller-note detail-seller-location">{sellerLocation}</p>
               </div>
             </div>
 
             <div className="detail-contact-card">
               <div>
-                <p className="detail-seller-label">Contact</p>
-                <strong>{sellerEmail || sellerPhone ? 'Reach the seller directly' : 'Message in app'}</strong>
+                <p className="detail-seller-label">{copy.contact}</p>
+                <strong>{sellerEmail || sellerPhone ? copy.reachSellerDirectly : copy.messageInApp}</strong>
               </div>
               <div className="detail-contact-list">
                 {sellerEmail ? <span>{sellerEmail}</span> : null}
                 {sellerPhone ? <span>{sellerPhone}</span> : null}
-                {!sellerEmail && !sellerPhone ? <span>Fast in-app messaging available</span> : null}
+                {!sellerEmail && !sellerPhone ? <span>{copy.fastInAppMessagingAvailable}</span> : null}
               </div>
             </div>
 
             <div className="detail-actions">
               <button className="button button-primary" type="button" onClick={handleMessageSeller}>
-                Message seller
+                {copy.messageSeller}
               </button>
               {sellerId ? (
                 <Link className="button button-secondary" to={`/profile/${sellerId}`} state={sellerProfileState}>
-                  View profile
+                  {copy.viewProfile}
                 </Link>
               ) : (
                 <span className="button button-secondary" aria-disabled="true">
-                  View profile
+                  {copy.viewProfile}
                 </span>
               )}
               <button className="button button-secondary" type="button" onClick={() => navigate(-1)}>
-                Back
+                {copy.back}
               </button>
             </div>
           </aside>
         </div>
 
         {lightboxIndex !== null && galleryImages[lightboxIndex] ? (
-          <div className="detail-lightbox" role="dialog" aria-modal="true" aria-label="Listing image viewer" onClick={closeLightbox}>
+          <div className="detail-lightbox" role="dialog" aria-modal="true" aria-label={copy.listingImageViewer} onClick={closeLightbox}>
             <div className="detail-lightbox-panel" onClick={(event) => event.stopPropagation()}>
-              <button type="button" className="detail-lightbox-close" onClick={closeLightbox} aria-label="Close image viewer">×</button>
-              <button type="button" className="detail-lightbox-nav detail-lightbox-prev" onClick={() => moveLightbox(-1)} aria-label="Previous image">‹</button>
+              <button type="button" className="detail-lightbox-close" onClick={closeLightbox} aria-label={copy.closeImageViewer}>×</button>
+              <button type="button" className="detail-lightbox-nav detail-lightbox-prev" onClick={() => moveLightbox(-1)} aria-label={copy.previousImage}>‹</button>
               <img src={resolveImageUrl(galleryImages[lightboxIndex])} alt={item.title} className="detail-lightbox-image" />
-              <button type="button" className="detail-lightbox-nav detail-lightbox-next" onClick={() => moveLightbox(1)} aria-label="Next image">›</button>
+              <button type="button" className="detail-lightbox-nav detail-lightbox-next" onClick={() => moveLightbox(1)} aria-label={copy.nextImage}>›</button>
               <div className="detail-lightbox-caption">
                 <strong>{item.title}</strong>
                 <span>{lightboxIndex + 1} / {galleryImages.length}</span>

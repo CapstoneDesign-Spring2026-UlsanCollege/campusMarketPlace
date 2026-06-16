@@ -3,8 +3,60 @@ import { useNavigate } from 'react-router-dom'
 import { changePassword } from '../services/api'
 import { t } from '../services/i18n'
 
+const PASSWORD_COPY = {
+  en: {
+    currentPasswordRequired: 'Current password is required.',
+    newPasswordRequired: 'New password is required.',
+    passwordsDoNotMatch: 'Passwords do not match.',
+    unableToChange: 'Unable to change password.',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
+    showConfirmPassword: 'Show confirm password',
+    hideConfirmPassword: 'Hide confirm password',
+    show: 'Show',
+    hide: 'Hide',
+  },
+  ko: {
+    currentPasswordRequired: '현재 비밀번호가 필요합니다.',
+    newPasswordRequired: '새 비밀번호가 필요합니다.',
+    passwordsDoNotMatch: '비밀번호가 일치하지 않습니다.',
+    unableToChange: '비밀번호를 변경할 수 없습니다.',
+    showPassword: '비밀번호 표시',
+    hidePassword: '비밀번호 숨기기',
+    showConfirmPassword: '확인 비밀번호 표시',
+    hideConfirmPassword: '확인 비밀번호 숨기기',
+    show: '표시',
+    hide: '숨기기',
+  },
+  ne: {
+    currentPasswordRequired: 'हालको पासवर्ड आवश्यक छ।',
+    newPasswordRequired: 'नयाँ पासवर्ड आवश्यक छ।',
+    passwordsDoNotMatch: 'पासवर्डहरू मिल्दैनन्।',
+    unableToChange: 'पासवर्ड परिवर्तन गर्न सकिएन।',
+    showPassword: 'पासवर्ड देखाउनुहोस्',
+    hidePassword: 'पासवर्ड लुकाउनुहोस्',
+    showConfirmPassword: 'पुष्टि पासवर्ड देखाउनुहोस्',
+    hideConfirmPassword: 'पुष्टि पासवर्ड लुकाउनुहोस्',
+    show: 'देखाउनुहोस्',
+    hide: 'लुकाउनुहोस्',
+  },
+  hi: {
+    currentPasswordRequired: 'वर्तमान पासवर्ड आवश्यक है।',
+    newPasswordRequired: 'नया पासवर्ड आवश्यक है।',
+    passwordsDoNotMatch: 'पासवर्ड मेल नहीं खाते।',
+    unableToChange: 'पासवर्ड बदला नहीं जा सका।',
+    showPassword: 'पासवर्ड दिखाएँ',
+    hidePassword: 'पासवर्ड छिपाएँ',
+    showConfirmPassword: 'पुष्टि पासवर्ड दिखाएँ',
+    hideConfirmPassword: 'पुष्टि पासवर्ड छिपाएँ',
+    show: 'दिखाएँ',
+    hide: 'छिपाएँ',
+  },
+}
+
 export default function ChangePassword({ language = 'en' }) {
   const navigate = useNavigate()
+  const copy = PASSWORD_COPY[language] || PASSWORD_COPY.en
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -19,17 +71,17 @@ export default function ChangePassword({ language = 'en' }) {
     setMessage({ type: '', text: '' })
 
     if (!currentPassword) {
-      setMessage({ type: 'error', text: 'Current password is required.' })
+      setMessage({ type: 'error', text: copy.currentPasswordRequired })
       return
     }
 
     if (!newPassword) {
-      setMessage({ type: 'error', text: 'New password is required.' })
+      setMessage({ type: 'error', text: copy.newPasswordRequired })
       return
     }
 
     if (newPassword !== confirmPassword) {
-      setMessage({ type: 'error', text: 'Passwords do not match.' })
+      setMessage({ type: 'error', text: copy.passwordsDoNotMatch })
       return
     }
 
@@ -42,7 +94,7 @@ export default function ChangePassword({ language = 'en' }) {
       setConfirmPassword('')
       setTimeout(() => navigate('/profile'), 900)
     } catch (err) {
-      setMessage({ type: 'error', text: err?.message || 'Unable to change password.' })
+      setMessage({ type: 'error', text: err?.message || copy.unableToChange })
     } finally {
       setIsLoading(false)
     }
@@ -65,8 +117,8 @@ export default function ChangePassword({ language = 'en' }) {
             {t(language, 'changePassword.currentPassword')}
             <div className="input-with-action">
               <input type={showCurrentPassword ? 'text' : 'password'} value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} autoComplete="current-password" />
-              <button type="button" className="toggle-visibility" onClick={() => setShowCurrentPassword((s) => !s)} aria-label={showCurrentPassword ? 'Hide password' : 'Show password'}>
-                {showCurrentPassword ? 'Hide' : 'Show'}
+              <button type="button" className="toggle-visibility" onClick={() => setShowCurrentPassword((s) => !s)} aria-label={showCurrentPassword ? copy.hidePassword : copy.showPassword}>
+                {showCurrentPassword ? copy.hide : copy.show}
               </button>
             </div>
           </label>
@@ -75,8 +127,8 @@ export default function ChangePassword({ language = 'en' }) {
             {t(language, 'changePassword.newPassword')}
             <div className="input-with-action">
               <input type={showNewPassword ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} autoComplete="new-password" />
-              <button type="button" className="toggle-visibility" onClick={() => setShowNewPassword((s) => !s)} aria-label={showNewPassword ? 'Hide password' : 'Show password'}>
-                {showNewPassword ? 'Hide' : 'Show'}
+              <button type="button" className="toggle-visibility" onClick={() => setShowNewPassword((s) => !s)} aria-label={showNewPassword ? copy.hidePassword : copy.showPassword}>
+                {showNewPassword ? copy.hide : copy.show}
               </button>
             </div>
           </label>
@@ -85,8 +137,8 @@ export default function ChangePassword({ language = 'en' }) {
             {t(language, 'changePassword.confirmNewPassword')}
             <div className="input-with-action">
               <input type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password" />
-              <button type="button" className="toggle-visibility" onClick={() => setShowConfirmPassword((s) => !s)} aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}>
-                {showConfirmPassword ? 'Hide' : 'Show'}
+              <button type="button" className="toggle-visibility" onClick={() => setShowConfirmPassword((s) => !s)} aria-label={showConfirmPassword ? copy.hideConfirmPassword : copy.showConfirmPassword}>
+                {showConfirmPassword ? copy.hide : copy.show}
               </button>
             </div>
           </label>
