@@ -3,7 +3,7 @@
 ## 1. My Role
 
 - **Name:** Gayatri Kumari Bhandari
-- **Team:** CapstoneDesign-Spring2026-UlsanCollege
+- **Team:** @CapstoneDesign-Spring2026-UlsanCollege/Campus Marketplace
 - **Project:** Campus MarketPlace - A campus-only buying and selling platform for Ulsan College students
 - **Responsibilities:** Full-stack development (frontend & backend), database architecture, deployment, image management
 - **Roles held:** Full-stack Developer, DevOps Engineer
