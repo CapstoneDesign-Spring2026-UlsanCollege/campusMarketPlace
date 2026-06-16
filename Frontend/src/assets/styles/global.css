@@ -74,8 +74,9 @@ body {
     linear-gradient(135deg, #fcfefe 0%, #f4fbf9 30%, #eef7f4 60%, #f7fcfb 100%);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  font-weight: 500;
-  letter-spacing: 0;
+  font-weight: 400;
+  letter-spacing: -0.3px;
+  line-height: 1.6;
 }
 
 html.dark body {
@@ -89,7 +90,8 @@ html.dark body {
     linear-gradient(135deg, #0a0f0f 0%, #0d1316 28%, #0f151a 56%, #0d1418 100%);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  letter-spacing: 0;
+  letter-spacing: -0.3px;
+  line-height: 1.6;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -98,6 +100,25 @@ button { cursor: pointer; }
 img { display: block; max-width: 100%; }
 ::selection { background: rgba(0, 87, 102, 0.18); color: var(--text); }
 :focus-visible { outline: 2px solid rgba(0, 87, 102, 0.45); outline-offset: 2px; }
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.1rem; }
+h6 { font-size: 1rem; }
+
+p { margin: 0; line-height: 1.6; }
+
 
 html.dark ::selection { background: rgba(100, 200, 220, 0.25); color: #f0f7f5; }
 html.dark :focus-visible { outline: 2px solid rgba(125, 217, 240, 0.6); outline-offset: 2px; }
