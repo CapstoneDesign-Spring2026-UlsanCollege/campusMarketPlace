@@ -238,6 +238,20 @@ html.dark .nav-links a.is-active, html.dark .nav-pill.is-active {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 244, 244, 0.98) 100%);
 }
 .nav-pill { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; }
+.nav-theme-toggle { min-width: 3rem; padding-inline: 0.8rem; font-size: 1rem; }
+.nav-theme-toggle span[aria-hidden] { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.18)); }
+
+html.dark .nav-theme-toggle {
+  border-color: rgba(129, 234, 255, 0.42);
+  background: linear-gradient(135deg, rgba(129, 234, 255, 0.24) 0%, rgba(240, 204, 117, 0.18) 100%);
+  color: #ffffff;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+html.dark .nav-theme-toggle:hover {
+  border-color: rgba(129, 234, 255, 0.58);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
 .nav-action-icon {
   display: none; align-items: center; justify-content: center; width: 1.55rem; height: 1.55rem;
   border-radius: 999px; font-size: 0.95rem; line-height: 1; color: #475569;

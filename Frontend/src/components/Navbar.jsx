@@ -249,7 +249,7 @@ export default function Navbar({
               )}
             </div>
             <button
-              className="nav-pill"
+              className="nav-pill nav-theme-toggle"
               type="button"
               onClick={handleDarkModeToggle}
               aria-label={isDarkMode ? darkModeLabels.on : darkModeLabels.off}
