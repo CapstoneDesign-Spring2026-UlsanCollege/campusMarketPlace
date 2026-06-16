@@ -129,14 +129,14 @@ html.dark :focus-visible { outline: 2px solid rgba(125, 217, 240, 0.6); outline-
   position: sticky; top: 0; z-index: 30; width: 100%;
   border-bottom: 1px solid rgba(6,24,19,0.06);
   /* deeper translucent topbar to contrast the darker page overlay */
-  background: linear-gradient(180deg, rgba(2,36,38,0.07), rgba(245,248,246,0.94));
+  background: linear-gradient(180deg, rgba(2,36,38,0.09), rgba(236,242,239,0.96));
   backdrop-filter: blur(20px) saturate(1.12);
   box-shadow: 0 16px 36px rgba(6, 24, 19, 0.07);
 }
 
 html.dark .topbar {
   border-bottom-color: rgba(255,255,255,0.08);
-  background: linear-gradient(180deg, rgba(15,30,35,0.08), rgba(20,28,28,0.94));
+  background: linear-gradient(180deg, rgba(15,30,35,0.12), rgba(14,22,24,0.98));
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
 }
 .topbar::before {
@@ -1189,7 +1189,11 @@ html.dark .message-compose { background: rgba(18,27,30,0.95); }
 
 .footer {
   position: static; z-index: 20; width: 100%; margin-top: auto;
-  border-top: 1px solid var(--border); background: rgba(255, 255, 255, 0.84); backdrop-filter: blur(18px); color: var(--muted);
+  border-top: 1px solid var(--border); background: rgba(239, 244, 241, 0.94); backdrop-filter: blur(18px); color: var(--muted);
+}
+
+html.dark .footer {
+  background: rgba(11, 18, 20, 0.96);
 }
 .form-shell + .footer { position: static; }
 .footer-inner { max-width: var(--container); margin: 0 auto; padding: 0.75rem 1rem 1rem; }
