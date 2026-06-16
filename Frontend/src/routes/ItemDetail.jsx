@@ -117,6 +117,15 @@ export default function ItemDetail({ currency, language = 'en' }) {
   const sellerAvatar = effectiveItem?.sellerAvatarUrl || effectiveItem?.sellerAvatar || effectiveItem?.seller_avatar || effectiveItem?.seller_avatar_url || ''
   const detailRows = useMemo(() => buildDetailRows(effectiveItem), [effectiveItem])
   const sellerLocation = sellerProfile?.location || effectiveItem?.location || 'Campus'
+  const sellerId = sellerProfile?.id || sellerProfile?._id || effectiveItem?.seller_id || effectiveItem?.sellerId || effectiveItem?.seller?.id || effectiveItem?.seller?._id || ''
+  const sellerProfileState = {
+    seller: {
+      id: sellerId,
+      firstName: sellerName,
+      avatarUrl: sellerProfile?.avatarUrl || sellerAvatar,
+      location: sellerLocation,
+    },
+  }
   const sellerEmail = sellerProfile?.email || effectiveItem?.sellerEmail || ''
   const sellerPhone = sellerProfile?.phone || effectiveItem?.sellerPhone || ''
   const conditionLabel = getConditionLabel(effectiveItem)
@@ -183,7 +192,7 @@ export default function ItemDetail({ currency, language = 'en' }) {
 
   useEffect(() => {
     let isActive = true
-    const sellerId = item?.seller_id || item?.sellerId || ''
+    const sellerId = item?.seller_id || item?.sellerId || item?.seller?.id || item?.seller?._id || ''
 
     async function loadSellerProfile() {
       if (!sellerId) {
@@ -209,7 +218,7 @@ export default function ItemDetail({ currency, language = 'en' }) {
     return () => {
       isActive = false
     }
-  }, [item?.sellerId, item?.seller_id])
+  }, [item?.sellerId, item?.seller_id, item?.seller?.id, item?.seller?._id])
 
   async function handleMessageSeller() {
     if (!item?._id) return
@@ -368,9 +377,13 @@ export default function ItemDetail({ currency, language = 'en' }) {
             <p className="detail-description">{effectiveItem?.description}</p>
 
             <div className="detail-seller-card">
-              <Link to={`/profile/${effectiveItem?.seller_id || effectiveItem?.sellerId || ''}`} onClick={(e) => e.stopPropagation()}>
+              {sellerId ? (
+                <Link to={`/profile/${sellerId}`} state={sellerProfileState} onClick={(e) => e.stopPropagation()}>
+                  <Avatar src={sellerProfile?.avatarUrl || sellerAvatar} alt={sellerName} size={56} />
+                </Link>
+              ) : (
                 <Avatar src={sellerProfile?.avatarUrl || sellerAvatar} alt={sellerName} size={56} />
-              </Link>
+              )}
               <div className="detail-seller-copy">
                 <p className="detail-seller-label">Seller</p>
                 <div className="detail-seller-name-row">
@@ -398,9 +411,15 @@ export default function ItemDetail({ currency, language = 'en' }) {
               <button className="button button-primary" type="button" onClick={handleMessageSeller}>
                 Message seller
               </button>
-              <Link className="button button-secondary" to={`/profile/${effectiveItem?.seller_id || effectiveItem?.sellerId || ''}`}>
-                View profile
-              </Link>
+              {sellerId ? (
+                <Link className="button button-secondary" to={`/profile/${sellerId}`} state={sellerProfileState}>
+                  View profile
+                </Link>
+              ) : (
+                <span className="button button-secondary" aria-disabled="true">
+                  View profile
+                </span>
+              )}
               <button className="button button-secondary" type="button" onClick={() => navigate(-1)}>
                 Back
               </button>
