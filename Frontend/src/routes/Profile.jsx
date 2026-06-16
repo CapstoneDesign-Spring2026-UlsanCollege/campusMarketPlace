@@ -132,6 +132,9 @@ function PaymentMethodList({ paymentMethods, copy }) {
           {method.isDefault ? <span className="badge badge-default">{copy.default}</span> : null}
         </article>
       ))}
+      <div className="profile-detail-box" style={{ marginTop: 12 }}>
+        <p style={{ margin: 0 }}><strong>Demo preview:</strong> Saved payment methods are displayed here as masked cards, not processed for real checkout.</p>
+      </div>
     </div>
   )
 }

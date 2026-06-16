@@ -3,9 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import { fetchProfile, updateProfile, uploadProfileAvatar, updateEmail } from '../services/api'
 import { t } from '../services/i18n'
 
+const DEMO_PAYMENT_METHOD = {
+  id: 'demo-campus-card',
+  label: 'Campus Visa (Demo)',
+  type: 'Card',
+  provider: 'Demo card',
+  last4: '4242',
+  isDefault: true,
+}
+
 export default function EditProfile({ language = 'en' }) {
   const navigate = useNavigate()
   const [form, setForm] = useState({ firstName: '', lastName: '', location: '' })
+  const [paymentMethods, setPaymentMethods] = useState([])
   const [email, setEmail] = useState('')
   const [originalEmail, setOriginalEmail] = useState('')
   const [isDirty, setIsDirty] = useState(false)
@@ -27,6 +37,7 @@ export default function EditProfile({ language = 'en' }) {
           lastName: user.lastName || '',
           location: user.location || '',
         })
+        setPaymentMethods(Array.isArray(user.paymentMethods) ? user.paymentMethods : [])
         setAvatarPreview(user.avatarUrl || '')
         setEmail(user.email || '')
         setOriginalEmail(user.email || '')
@@ -65,6 +76,33 @@ export default function EditProfile({ language = 'en' }) {
           setAvatarPreview(URL.createObjectURL(f))
           setIsDirty(true)
         })
+    }
+  }
+
+  async function addDemoPaymentMethod() {
+    setIsSaving(true)
+    setError('')
+    setSubmitStatus({ type: '', message: '' })
+
+    const nextPaymentMethods = [DEMO_PAYMENT_METHOD]
+
+    try {
+      const payload = {
+        ...form,
+        email,
+        paymentMethods: nextPaymentMethods,
+      }
+
+      await updateProfile(payload)
+      setPaymentMethods(nextPaymentMethods)
+      setIsDirty(false)
+      setSubmitStatus({ type: 'success', message: 'Demo payment method added.' })
+      navigate('/profile', { replace: true })
+    } catch (err) {
+      setError(err?.message || 'Unable to add demo payment method')
+      setSubmitStatus({ type: 'error', message: err?.message || 'Unable to add demo payment method' })
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -123,13 +161,13 @@ export default function EditProfile({ language = 'en' }) {
         } catch (err) {
           // fallback when dedicated endpoint not found on backend
           if (String(err?.message || '').includes('404')) {
-            await updateProfile({ ...form, email })
+            await updateProfile({ ...form, email, paymentMethods })
           } else {
             throw err
           }
         }
       } else {
-        await updateProfile(form)
+        await updateProfile({ ...form, email, paymentMethods })
       }
       setSubmitStatus({ type: 'success', message: 'Profile updated.' })
       navigate('/profile', { replace: true })
@@ -182,6 +220,19 @@ export default function EditProfile({ language = 'en' }) {
               {t(language, 'editProfile.location')}
               <input name="location" value={form.location} onChange={onChange} />
             </label>
+
+            <div style={{ marginTop: 16, padding: 14, borderRadius: 12, border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.04)' }}>
+              <p style={{ margin: 0, fontWeight: 600 }}>{t(language, 'editProfile.demoPaymentTitle')}</p>
+              <p style={{ margin: '6px 0 0', color: 'var(--muted-text, #666)' }}>{t(language, 'editProfile.demoPaymentCopy')}</p>
+              <button className="button button-secondary" type="button" onClick={addDemoPaymentMethod} disabled={isSaving} style={{ marginTop: 10 }}>
+                {paymentMethods.length ? t(language, 'editProfile.replaceDemoPaymentMethod') : t(language, 'editProfile.addDemoPaymentMethod')}
+              </button>
+              {paymentMethods.length ? (
+                <p style={{ margin: '10px 0 0', fontSize: 14 }}>
+                  {t(language, 'editProfile.currentSavedMethod')}: {paymentMethods[0]?.label || paymentMethods[0]?.provider || paymentMethods[0]?.type || 'Payment method'}
+                </p>
+              ) : null}
+            </div>
 
             {error ? <div className="profile-empty-state">{error}</div> : null}
             <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'center' }}>

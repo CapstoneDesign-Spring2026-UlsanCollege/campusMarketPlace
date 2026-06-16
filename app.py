@@ -712,9 +712,7 @@ def format_resend_available_at(sent_at):
 
 
 def build_user_payload(user_doc):
-    payment_methods = user_doc.get('paymentMethods', [])
-    if not isinstance(payment_methods, list):
-        payment_methods = []
+    payment_methods = get_safe_payment_methods(user_doc)
 
     favorite_item_ids = user_doc.get('favoriteItemIds', [])
     if not isinstance(favorite_item_ids, list):
@@ -762,6 +760,42 @@ def build_user_payload(user_doc):
         'reviewCount': rating_count,
         'averageRating': average_rating,
     }
+
+
+def normalize_payment_methods(payment_methods):
+    if not isinstance(payment_methods, list):
+        return []
+
+    normalized_methods = []
+    allowed_keys = {'id', 'label', 'type', 'provider', 'last4', 'isDefault'}
+    for method in payment_methods:
+        if isinstance(method, str):
+            label = method.strip()
+            if label:
+                normalized_methods.append({'label': label})
+            continue
+
+        if not isinstance(method, dict):
+            continue
+
+        normalized_method = {}
+        for key in allowed_keys:
+            if key not in method or method[key] is None:
+                continue
+
+            value = method[key]
+            if key == 'isDefault':
+                normalized_method[key] = bool(value)
+                continue
+
+            value_text = str(value).strip()
+            if value_text:
+                normalized_method[key] = value_text
+
+        if normalized_method:
+            normalized_methods.append(normalized_method)
+
+    return normalized_methods
 
 
 def serialize_review_document(review_doc):
@@ -820,19 +854,7 @@ def annotate_item_favorite_state(item_doc, favorite_item_ids):
 
 
 def get_safe_payment_methods(user_doc):
-    methods = user_doc.get('paymentMethods', [])
-    if not isinstance(methods, list):
-        return []
-
-    safe_methods = []
-    allowed_keys = {'id', 'label', 'type', 'provider', 'last4', 'isDefault'}
-    for method in methods:
-        if isinstance(method, dict):
-            safe_methods.append({key: method[key] for key in allowed_keys if key in method and method[key] is not None})
-        elif isinstance(method, str) and method.strip():
-            safe_methods.append({'label': method.strip()})
-
-    return safe_methods
+    return normalize_payment_methods(user_doc.get('paymentMethods', []))
 
 
 def fetch_user_activity(user_id):
@@ -1491,6 +1513,8 @@ def update_profile():
     if 'location' in data:
         loc = str(data.get('location', '')).strip()
         updates['location'] = loc
+    if 'paymentMethods' in data:
+        updates['paymentMethods'] = normalize_payment_methods(data.get('paymentMethods'))
 
     if not updates:
         return json_error('No profile fields provided to update.', 400)

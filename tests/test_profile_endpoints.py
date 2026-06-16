@@ -45,6 +45,58 @@ def test_signup_login_and_avatar_upload(client):
     assert rv2.status_code == 200
 
 
+def test_profile_can_store_dummy_payment_method(client):
+    email = 'payment-demo@example.com'
+    password = 'Test1234!'
+
+    signup = client.post('/api/auth/signup', json={'firstName': 'Pay', 'lastName': 'Demo', 'email': email, 'password': password})
+    assert signup.status_code == 201
+    token = signup.get_json()['token']
+
+    updated = client.put(
+        '/api/profile',
+        json={
+            'paymentMethods': [
+                {
+                    'id': 'demo-campus-card',
+                    'label': 'Campus Visa (Demo)',
+                    'type': 'Card',
+                    'provider': 'Demo card',
+                    'last4': '4242',
+                    'isDefault': True,
+                }
+            ]
+        },
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert updated.status_code == 200
+    updated_data = updated.get_json()
+    assert updated_data['user']['paymentMethods'] == [
+        {
+            'id': 'demo-campus-card',
+            'label': 'Campus Visa (Demo)',
+            'type': 'Card',
+            'provider': 'Demo card',
+            'last4': '4242',
+            'isDefault': True,
+        }
+    ]
+
+    profile = client.get('/api/profile', headers={'Authorization': f'Bearer {token}'})
+    assert profile.status_code == 200
+    profile_data = profile.get_json()
+    assert profile_data['user']['paymentMethods'] == [
+        {
+            'id': 'demo-campus-card',
+            'label': 'Campus Visa (Demo)',
+            'type': 'Card',
+            'provider': 'Demo card',
+            'last4': '4242',
+            'isDefault': True,
+        }
+    ]
+
+
 def test_item_status_can_be_updated_by_owner(client):
     email = 'item-owner@example.com'
     password = 'Test1234!'
