@@ -455,8 +455,8 @@ html.dark .subcopy { color: #dce9e7; font-weight: 500; letter-spacing: 0; }
 
 .feature-list, .category-chip-row { display: flex; flex-wrap: wrap; gap: 0.7rem; }
 .category-options-wrap { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 0.7rem; margin: 0.85rem 0 0.7rem; }
-.hero-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; align-items: stretch; }
-.feature-list { margin: 1.5rem 0; }
+.hero-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; align-items: stretch; margin-top: 2rem; }
+.feature-list { margin: 1.8rem 0 1.2rem; }
 .marketplace-hero { display: grid; gap: 1rem; }
 .dashboard-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.75rem; align-items: center; }
 .feature-pill, .category-chip, .badge, .category-badge, .status-badge, .item-category, .item-posted, .item-condition, .item-location, .trust-pill, .mini-location, .meta-pill, .hero-search-tag, .time-chip, .distance-chip {
@@ -710,8 +710,20 @@ html.dark .password-rules {
 .browse-toolbar h2 { margin-top: 0.15rem; }
 .browse-summary { margin: 0.4rem 0 0; }
 .search-page-hero { display: grid; gap: 1rem; }
-.search-toolbar-panel { display: grid; gap: 0.7rem; }
-.search-toolbar-search { grid-template-columns: minmax(0, 1fr) auto auto; align-items: start; gap: 0.7rem; }
+.search-toolbar-panel {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid rgba(15, 123, 69, 0.12);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(250, 253, 252, 0.98), rgba(239, 248, 245, 0.98));
+  box-shadow: 0 18px 36px rgba(6, 24, 19, 0.08);
+}
+.search-toolbar-search {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: stretch;
+  gap: 0.8rem;
+}
 .search-input-shell { position: relative; min-width: 0; }
 .search-input-shell input { width: 100%; }
 .search-suggestions {
@@ -746,14 +758,32 @@ html.dark .password-rules {
 }
 .search-suggestion small { color: var(--muted); font-size: 0.8rem; }
 .search-sort-select {
-  min-width: 220px;
-  padding-inline: 0.95rem;
-  border-radius: 16px;
+  min-width: 170px;
+  padding: 0.45rem 0.8rem;
+  border-radius: 14px;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.96);
   color: var(--muted-strong);
+  font-size: 0.9rem;
+}
+.search-input-shell input,
+.search-sort-select,
+.live-search-toggle {
+  min-height: 48px;
+}
+.search-input-shell input {
+  padding-inline: 1.05rem;
+  border-radius: 18px;
+}
+.live-search-toggle {
+  white-space: nowrap;
+  align-self: stretch;
+  padding: 0.45rem 0.85rem;
+  border-radius: 14px;
+  font-size: 0.9rem;
 }
 .search-toolbar-meta { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+.search-page-meta { margin-top: 0.15rem; }
 .search-toolbar-pill {
   display: inline-flex;
   align-items: center;
@@ -839,8 +869,11 @@ html.dark .password-rules {
 .item-comment-input:focus { outline: 3px solid rgba(15, 123, 69, 0.12); border-color: rgba(15, 123, 69, 0.24); }
 .item-comment-actions { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
 .item-comment-hint { color: var(--muted); font-size: 0.8rem; line-height: 1.4; }
-.hero-stat-grid, .trust-grid, .category-grid, .near-you-grid, .item-meta-grid, .listing-meta, .post-footer, .dashboard-grid { display: grid; gap: 0.75rem; }
-.hero-stat-grid, .trust-grid, .category-grid, .near-you-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.hero-stat-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-top: 2rem; margin-bottom: 1.6rem; }
+.trust-grid, .category-grid, .near-you-grid, .item-meta-grid, .listing-meta, .post-footer, .dashboard-grid { display: grid; gap: 0.75rem; }
+.trust-grid, .category-grid, .near-you-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.category-grid { margin-top: 2rem; margin-bottom: 1.6rem; gap: 1rem; }
+.trust-grid { margin-top: 2rem; margin-bottom: 1.6rem; }
 .hero-stat-card, .trust-card, .category-card, .near-you-card, .feed-panel, .composer, .messages-layout, .browse-hero, .state-card, .profile-card, .post-card { border: 1px solid var(--border); background: rgba(255, 255, 255, 0.94); box-shadow: var(--shadow-sm); color: var(--text); }
 .hero-stat-card, .trust-card, .category-card, .near-you-card { padding: 1rem; border-radius: 22px; }
 .hero-stat-label { color: var(--muted); font-size: 0.76rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; }
@@ -1104,9 +1137,28 @@ html.dark .item-action-comment.is-active {
 .thread-item small { display: block; font-size: 0.76rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
 .thread-item-info strong { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.88rem; font-weight: 700; }
 .thread-unread-badge {
-  min-width: 1.2rem; height: 1.2rem; padding: 0 0.25rem; border-radius: 999px;
+  min-width: 1.05rem; height: 1.05rem; padding: 0 0.2rem; border-radius: 999px;
   display: inline-grid; place-items: center;
-  background: var(--primary); color: #fff; font-size: 0.65rem; font-weight: 800; flex-shrink: 0;
+  background: var(--primary); color: #fff; font-size: 0.62rem; font-weight: 900; line-height: 1; flex-shrink: 0;
+}
+.messages-demo-chip {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  margin-top: 0.15rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 123, 69, 0.14);
+  background: rgba(15, 123, 69, 0.08);
+  color: var(--primary-strong);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+html.dark .messages-demo-chip {
+  border-color: rgba(129, 234, 255, 0.18);
+  background: rgba(129, 234, 255, 0.08);
+  color: #dffcff;
 }
 .thread-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 .thread-avatar-initials {
@@ -1216,6 +1268,23 @@ html.dark .message-compose { background: rgba(18,27,30,0.95); }
 .message-status { min-height: 1rem; font-size: 0.83rem; }
 .message-status.is-error { color: var(--danger); }
 .message-status.is-success { color: var(--primary-strong); }
+.messages-notification {
+  margin-bottom: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 123, 69, 0.16);
+  background: linear-gradient(135deg, rgba(15, 123, 69, 0.1), rgba(255, 255, 255, 0.95));
+  color: var(--primary-strong);
+  font-size: 0.9rem;
+  font-weight: 800;
+  box-shadow: 0 10px 22px rgba(6, 24, 19, 0.08);
+}
+
+html.dark .messages-notification {
+  border-color: rgba(129, 234, 255, 0.18);
+  background: linear-gradient(135deg, rgba(129, 234, 255, 0.12), rgba(18, 27, 30, 0.96));
+  color: #eaffff;
+}
 
 .footer {
   position: static; z-index: 20; width: 100%; margin-top: auto;
