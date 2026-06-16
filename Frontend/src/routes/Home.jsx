@@ -3,10 +3,49 @@ import { t } from '../services/i18n'
 
 const features = ['feature1', 'feature2', 'feature3']
 const highlights = [
-  { label: 'Verified students', value: '100%' },
-  { label: 'Campus-safe trades', value: '24/7' },
-  { label: 'Live deal alerts', value: 'Fast' },
+  { key: 'verifiedStudents', value: '100%' },
+  { key: 'campusSafeTrades', value: '24/7' },
+  { key: 'liveDealAlerts', value: 'Fast' },
 ]
+
+const HOME_COPY = {
+  en: {
+    categoryBrowse: 'Browse trusted campus listings in a cleaner, calmer experience.',
+    verifiedOnly: 'Verified student-only access',
+    verifiedOnlyBody: 'Campus accounts keep the marketplace safer and more relevant.',
+    meetups: 'On-campus meetups',
+    meetupsBody: 'Trade in familiar places with clear pickup guidance.',
+    checkout: 'Fast mobile checkout flow',
+    checkoutBody: 'Start from anywhere and keep the browsing experience fluid.',
+  },
+  ko: {
+    categoryBrowse: '더 깔끔하고 차분한 환경에서 신뢰할 수 있는 캠퍼스 게시글을 둘러보세요.',
+    verifiedOnly: '인증된 학생만 이용 가능',
+    verifiedOnlyBody: '캠퍼스 계정으로 더 안전하고 관련성 높은 거래가 가능합니다.',
+    meetups: '캠퍼스 내 만남',
+    meetupsBody: '익숙한 장소에서 명확한 수령 안내와 함께 거래하세요.',
+    checkout: '빠른 모바일 결제 흐름',
+    checkoutBody: '어디서든 시작하고 부드러운 탐색 경험을 유지하세요.',
+  },
+  ne: {
+    categoryBrowse: 'झन् सफा र शान्त अनुभवमा भरपर्दा क्याम्पस सूचिहरू ब्राउज गर्नुहोस्।',
+    verifiedOnly: 'प्रमाणित विद्यार्थीहरूका लागि मात्र पहुँच',
+    verifiedOnlyBody: 'क्याम्पस खाताले बजारलाई अझ सुरक्षित र सान्दर्भिक बनाउँछ।',
+    meetups: 'क्याम्पस भित्र भेटघाट',
+    meetupsBody: 'परिचित ठाउँमा स्पष्ट पिकअप निर्देशनसहित कारोबार गर्नुहोस्।',
+    checkout: 'छिटो मोबाइल चेकआउट प्रवाह',
+    checkoutBody: 'जहाँबाट भए पनि सुरु गर्नुहोस् र ब्राउजिङ अनुभव सहज राख्नुहोस्।',
+  },
+  hi: {
+    categoryBrowse: 'ज़्यादा साफ़ और शांत अनुभव में भरोसेमंद कैंपस लिस्टिंग देखें।',
+    verifiedOnly: 'केवल सत्यापित छात्र पहुँच',
+    verifiedOnlyBody: 'कैंपस खाते बाज़ार को अधिक सुरक्षित और प्रासंगिक रखते हैं।',
+    meetups: 'कैंपस के भीतर मिलना-जुलना',
+    meetupsBody: 'स्पष्ट पिकअप मार्गदर्शन के साथ परिचित जगहों पर व्यापार करें।',
+    checkout: 'तेज़ मोबाइल चेकआउट प्रवाह',
+    checkoutBody: 'कहीं से भी शुरू करें और ब्राउज़िंग अनुभव को सहज रखें।',
+  },
+}
 
 const CATEGORY_ICONS = {
   Textbooks: (
@@ -57,6 +96,8 @@ function fallbackIcon(label) {
 }
 
 export default function Home({ language = 'en' }) {
+  const copy = HOME_COPY[language] || HOME_COPY.en
+
   return (
     <main className="page-shell hero-shell">
       <section className="hero-card">
@@ -75,8 +116,8 @@ export default function Home({ language = 'en' }) {
 
         <div className="hero-stat-grid" aria-label="Marketplace highlights">
           {highlights.map((item) => (
-            <article className="hero-stat-card" key={item.label}>
-              <span className="hero-stat-label">{item.label}</span>
+            <article className="hero-stat-card" key={item.key}>
+              <span className="hero-stat-label">{t(language, `home.${item.key}`)}</span>
               <strong className="hero-stat-value">{item.value}</strong>
             </article>
           ))}
@@ -87,23 +128,23 @@ export default function Home({ language = 'en' }) {
             <article key={category.label} className={`category-card ${category.tone}`}>
               <div className="category-card-icon" aria-hidden="true">{category.icon || fallbackIcon(category.label)}</div>
               <strong>{category.label}</strong>
-              <span className="subcopy">Browse trusted campus listings in a cleaner, calmer experience.</span>
+              <span className="subcopy">{copy.categoryBrowse}</span>
             </article>
           ))}
         </div>
 
         <div className="trust-grid" aria-label="Trust and safety highlights">
           <article className="trust-card">
-            <strong>Verified student-only access</strong>
-            <p className="subcopy">Campus accounts keep the marketplace safer and more relevant.</p>
+            <strong>{copy.verifiedOnly}</strong>
+            <p className="subcopy">{copy.verifiedOnlyBody}</p>
           </article>
           <article className="trust-card">
-            <strong>On-campus meetups</strong>
-            <p className="subcopy">Trade in familiar places with clear pickup guidance.</p>
+            <strong>{copy.meetups}</strong>
+            <p className="subcopy">{copy.meetupsBody}</p>
           </article>
           <article className="trust-card">
-            <strong>Fast mobile checkout flow</strong>
-            <p className="subcopy">Start from anywhere and keep the browsing experience fluid.</p>
+            <strong>{copy.checkout}</strong>
+            <p className="subcopy">{copy.checkoutBody}</p>
           </article>
         </div>
 

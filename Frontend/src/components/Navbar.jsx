@@ -11,6 +11,13 @@ const LANGUAGE_OPTIONS = [
   { value: 'hi', label: 'Hindi' },
 ]
 
+const DARK_MODE_LABELS = {
+  en: { on: 'Switch to light mode', off: 'Switch to dark mode', titleOn: 'Light mode', titleOff: 'Dark mode' },
+  ko: { on: '라이트 모드로 전환', off: '다크 모드로 전환', titleOn: '라이트 모드', titleOff: '다크 모드' },
+  ne: { on: 'लाइट मोडमा बदल्नुहोस्', off: 'डार्क मोडमा बदल्नुहोस्', titleOn: 'लाइट मोड', titleOff: 'डार्क मोड' },
+  hi: { on: 'लाइट मोड पर जाएँ', off: 'डार्क मोड पर जाएँ', titleOn: 'लाइट मोड', titleOff: 'डार्क मोड' },
+}
+
 export default function Navbar({
   language,
   onLanguageChange,
@@ -29,6 +36,7 @@ export default function Navbar({
   const [showSignOutModal, setShowSignOutModal] = useState(false)
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false)
   const currentLangLabel = LANGUAGE_OPTIONS.find((o) => o.value === language)?.label || language
+  const darkModeLabels = DARK_MODE_LABELS[language] || DARK_MODE_LABELS.en
 
   const isDashboardHomeActive = isDashboard && (!dashboardMode || dashboardMode === 'home')
   const isBuyActive = isDashboard && dashboardMode === 'buy'
@@ -244,8 +252,8 @@ export default function Navbar({
               className="nav-pill"
               type="button"
               onClick={handleDarkModeToggle}
-              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              title={isDarkMode ? 'Light mode' : 'Dark mode'}
+              aria-label={isDarkMode ? darkModeLabels.on : darkModeLabels.off}
+              title={isDarkMode ? darkModeLabels.titleOn : darkModeLabels.titleOff}
             >
               <span aria-hidden>{isDarkMode ? '☀️' : '🌙'}</span>
             </button>

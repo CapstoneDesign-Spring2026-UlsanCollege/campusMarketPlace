@@ -5,6 +5,13 @@ import { fetchItems } from '../services/api'
 import { CATEGORIES } from '../constants/categories'
 import { t } from '../services/i18n'
 
+const BROWSE_COPY = {
+  en: { showOptions: 'Show options', quickFilters: 'Quick category filters' },
+  ko: { showOptions: '옵션 보기', quickFilters: '빠른 카테고리 필터' },
+  ne: { showOptions: 'विकल्प देखाउनुहोस्', quickFilters: 'छिटो श्रेणी फिल्टरहरू' },
+  hi: { showOptions: 'विकल्प दिखाएँ', quickFilters: 'त्वरित श्रेणी फ़िल्टर' },
+}
+
 const ITEMS_PER_PAGE = 20
 
 export default function Browse({ currency, language = 'en' }) {
@@ -18,6 +25,7 @@ export default function Browse({ currency, language = 'en' }) {
 
   const currentPage = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
   const currentCategory = searchParams.get('category') || ''
+  const copy = BROWSE_COPY[language] || BROWSE_COPY.en
 
   useEffect(() => {
     let isActive = true
@@ -95,11 +103,11 @@ export default function Browse({ currency, language = 'en' }) {
             aria-controls="browse-category-options"
             onClick={() => setShowCategories((current) => !current)}
           >
-            Show options <span aria-hidden="true">{showCategories ? '→' : '●'}</span>
+            {copy.showOptions} <span aria-hidden="true">{showCategories ? '→' : '●'}</span>
           </button>
 
           {showCategories && (
-            <div id="browse-category-options" className="category-chip-row" aria-label="Quick category filters">
+            <div id="browse-category-options" className="category-chip-row" aria-label={copy.quickFilters}>
             <button
               type="button"
               className={`category-chip ${!currentCategory ? 'is-active' : ''}`}

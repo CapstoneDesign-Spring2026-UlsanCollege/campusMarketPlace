@@ -54,6 +54,7 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, language)
+    document.documentElement.lang = language
   }, [language])
 
   useEffect(() => {
@@ -138,7 +139,7 @@ export default function App() {
           }
         />
       </Routes>
-      <Footer />
+      <Footer language={language} />
     </div>
   )
 }
