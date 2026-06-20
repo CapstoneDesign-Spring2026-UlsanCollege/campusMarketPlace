@@ -1,153 +1,322 @@
 
-## Campus Marketplace
+# Campus Marketplace
 
-Campus Marketplace is a campus-only buying and selling platform built for Ulsan College students. It lets verified users create accounts with their school email, sign in securely, and browse a shared marketplace experience designed for student-to-student trading.
+A campus-only buying and selling platform built for **Ulsan College students**. Users can create accounts with their school email (`@office.uc.ac.kr`), verify via OTP, and participate in a trusted student-to-student marketplace.
 
-The project combines a React + Vite frontend with a Flask + MongoDB backend. Current features include a validated signup flow, login, authenticated dashboard access, image uploads, and a marketplace feed for listings. It is meant to make it easy for students to post items, discover deals, and trade safely within the university community.
+## 🎯 Overview
 
-## Pages
-🚀 [Live Demo]([https://username.github.io/repo])(https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/)
+| Aspect | Details |
+|--------|---------|
+| **Team** | Gayatri K. Bhandari, Aayuska Rai, Sudarshan Rai, Sagar Sob, Ananda Tamang |
+| **Target Users** | Ulsan College students seeking affordable items, textbooks, electronics, dorm supplies |
+| **Problem Solved** | Safe, campus-verified marketplace for student trading (vs. public platforms) |
+| **Live Demo** | 🚀 [Frontend Demo](https://capstonedesign-spring2026-ulsancollege.github.io/campusMarketPlace/) |
+| **Repository** | [GitHub](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace) |
 
-## Repository
-[Repository](https://github.com/CapstoneDesign-Spring2026-UlsanCollege/campusMarketPlace)
-### Signup
-The Signup page provides a seamless experience for new users to create an account and join the campus marketplace community.
+## ✨ Features
 
-# Campus Marketplace Frontend
+### Core MVP Features
+- ✅ Campus email signup (`@office.uc.ac.kr`) with OTP verification
+- ✅ Secure login with JWT authentication
+- ✅ Browse marketplace listings with search and categories
+- ✅ Create, edit, and manage item listings
+- ✅ Image uploads (Cloudinary or local storage)
+- ✅ User profiles with avatar support
+- ✅ Public seller profiles and reviews
+- ✅ Favorites/liked items
+- ✅ Messaging between users
+- ✅ Dark mode toggle
+- ✅ Multi-language and currency preferences
 
-This repository now contains only the React + Vite frontend for Campus Marketplace.
+### Additional Features
+- Protected dashboard for authenticated users
+- Listing status management (active/sold/unavailable)
+- Password update and profile editing
+- Seller review system
+- Message thread conversations
 
-## Project Structure
-
-- `Frontend/` - React app powered by Vite
-- `docs/` - project documentation
-
-## Run Locally
-
-```bash
-# backend
-source .venv/bin/activate
-python app.py
-
-# frontend
-cd Frontend
-npm install
-npm run dev
-```
-
-Open the local URL shown by Vite (usually `http://localhost:5173`).
-
-### Email (SendGrid) setup for OTP delivery
-
-The app supports SendGrid (recommended) or an SMTP server for sending email OTPs during signup.
-
-1. Create a `.env` file at the project root (or copy `.env.example`) and set one of the following:
-
-	 - SendGrid (preferred):
-
-		 - `SENDGRID_API_KEY=SG.xxxxx` (create an API key in your SendGrid dashboard)
-		 - `SENDGRID_FROM=you@yourdomain.com` (optional, falls back to `EMAIL_FROM`)
-
-	 - SMTP fallback:
-
-		 - `SMTP_HOST=smtp.example.com`
-		 - `SMTP_PORT=587`
-		 - `SMTP_USER=smtp-user`
-		 - `SMTP_PASS=smtp-pass`
-		 - `EMAIL_FROM=you@yourdomain.com`
-
-2. Install dependencies and restart the backend:
-
-```bash
-pip install -r requirements.txt
-source .venv/bin/activate
-export FLASK_APP=app.py
-export FLASK_ENV=development
-flask run --port 5050
-```
-
-3. Signup using a `@office.uc.ac.kr` email. If SendGrid/SMTP is configured correctly, the OTP will be delivered to the user's inbox. If not configured, the OTP is printed in the backend console for local testing.
-
-If you need a quick SendGrid test, you can generate an API key in the SendGrid dashboard, set `SENDGRID_API_KEY` in `.env`, and restart the backend.
-
-
-## Image Upload Storage (Important)
-
-Uploaded listing images are written to the backend upload directory.
-
-- Local development default: `./uploads`
-- Production recommended: set `UPLOAD_DIR` to a persistent disk mount (example: `/var/data/uploads`)
-
-If `UPLOAD_DIR` is not set in production, images may disappear after app restarts or redeploys when using ephemeral filesystem hosting.
-
-### Recommended: Cloudinary (Permanent Object Storage)
-
-The backend now supports Cloudinary uploads for listing images and profile avatars.
-
-Add these environment variables to enable it:
-
-- `CLOUDINARY_CLOUD_NAME`
-- `CLOUDINARY_API_KEY`
-- `CLOUDINARY_API_SECRET`
-- Optional: `CLOUDINARY_UPLOAD_FOLDER` (default: `campus-marketplace`)
-
-When these variables are present, image uploads are stored in Cloudinary instead of local disk.
-
-Render note: the backend treats Render as production-like, so if Cloudinary is missing there, image uploads are rejected instead of being saved to ephemeral disk.
-
-### Render checklist
-
-Use this checklist after updating the Render service:
-
-1. Confirm `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` are set.
-2. Confirm `MONGODB_URI` and `JWT_SECRET` are set.
-3. Redeploy the backend service.
-4. Open `/api/health` and verify it returns `"cloudinaryConfigured": true` and `"imageStorage": "cloudinary"`.
-5. Upload a new image and confirm the response `storage` field is `cloudinary`.
-6. Re-upload any old items or avatars that were previously stored on local disk.
-
-Install dependencies after pulling this change:
-
-```bash
-pip install -r requirements.txt
-```
-
-## Build
-
-### Implemented
-- Home page with campus marketplace branding
-- Navigation layout shared across pages
-- Signup UI with front-end validation for required first/last name
-- Signup UI validation for campus email format: @office.uc.ac.kr
-- Signup UI validation for password strength and confirmation matching
-
-### Planned
-- Functional signup/login backend
-- Buy and sell listing workflows
-- Request board and tutoring/service posts
-- MongoDB integration for user and listing data
-
-## Tech Stack
+## 🛠 Tech Stack
 
 | Area | Technology |
 |------|------------|
-| Backend | Flask 3 |
-| Frontend | HTML, CSS, JavaScript, Bootstrap 5 |
-| Database (planned/in progress) | MongoDB (PyMongo) |
+| **Frontend** | React 18, Vite, React Router, CSS |
+| **Backend** | Flask 3, Python |
+| **Database** | MongoDB (PyMongo) |
+| **Authentication** | JWT, password hashing, OTP verification |
+| **File Storage** | Cloudinary (recommended) or local uploads |
+| **Email** | SendGrid (preferred) or SMTP |
+| **Deployment** | GitHub Pages (frontend), Render (backend) |
 
-## Project Structure
+## 📂 Project Structure
 
-```text
+```
 campusMarketPlace/
-|-- app.py
-|-- requirements.txt
-|-- README.md
-|-- index.html
-|-- package.json
-|-- package-lock.json
-|-- .env
-|-- .env.example
-|-- Frontend/
+├── Frontend/                    # React + Vite frontend
+│   ├── src/
+│   │   ├── components/         # Reusable UI components
+│   │   ├── routes/             # Page-level components
+│   │   ├── services/           # API, auth, i18n helpers
+│   │   ├── assets/styles/      # Global styling
+│   │   ├── App.jsx             # Main app component
+│   │   └── main.jsx            # React entry point
+│   ├── package.json
+│   └── vite.config.js
+├── backend/                     # Node.js configuration (reference)
+├── app.py                       # Flask backend server
+├── models/                      # Backend data models
+├── tests/                       # Integration tests
+├── docs/                        # Semester documentation
+├── portfolio/                   # Final project portfolio
+│   ├── 01-project-overview/    # Project summary and scope
+│   ├── 02-semester-journey/    # Sprint documentation
+│   ├── 03-design-and-planning/ # Architecture and design docs
+│   ├── 04-final-product/       # Final MVP documentation
+│   ├── 05-qa-and-stabilization/# QA reports and testing
+│   ├── 06-ai-and-code-ownership/# Code ownership audit
+│   ├── 07-final-presentation/  # Presentation materials
+│   └── 08-individual-portfolios/# Team member portfolios
+├── requirements.txt            # Python dependencies
+├── .env.example               # Environment variables template
+└── README.md                  # This file
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.8+
+- Node.js 14+
+- MongoDB URI (local or Atlas)
+- (Optional) SendGrid API key for email OTP
+
+### 1. Backend Setup
+
+```bash
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Create .env file
+cp .env.example .env
+# Edit .env with your configuration (see below)
+
+# Start Flask backend
+python app.py
+```
+
+Backend runs at: `http://localhost:5050`
+
+### 2. Frontend Setup
+
+```bash
+# Install dependencies
+cd Frontend
+npm install
+
+# Start Vite dev server
+npm run dev
+```
+
+Frontend runs at: `http://localhost:5173`
+
+### 3. Test the App
+
+1. Open `http://localhost:5173` in browser
+2. Sign up with `test@office.uc.ac.kr`
+3. Verify OTP (check console if email not configured)
+4. Browse marketplace and create listings
+
+## ⚙️ Environment Configuration
+
+Create a `.env` file in the project root with:
+
+```bash
+# MongoDB
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/campusmarketplace
+
+# JWT
+JWT_SECRET=your-secret-key-here
+
+# Email Configuration (choose one)
+# Option 1: SendGrid (recommended)
+SENDGRID_API_KEY=SG.xxxxx
+SENDGRID_FROM=noreply@campus-marketplace.com
+
+# Option 2: SMTP fallback
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+EMAIL_FROM=your-email@gmail.com
+
+# Image Storage (optional)
+# Option 1: Cloudinary (recommended for production)
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+CLOUDINARY_UPLOAD_FOLDER=campus-marketplace
+
+# Option 2: Local storage (development default)
+UPLOAD_DIR=./uploads
+
+# Environment
+FLASK_ENV=development
+FLASK_APP=app.py
+```
+
+## 📨 Email OTP Setup
+
+### Using SendGrid (Recommended)
+1. Create [SendGrid account](https://sendgrid.com)
+2. Generate API key from dashboard
+3. Set `SENDGRID_API_KEY` in `.env`
+4. Restart backend and test signup
+
+### Using SMTP
+1. Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`
+2. Restart backend
+
+### Local Testing (No Email Configured)
+- OTP will print to backend console
+- Use printed OTP for signup verification
+
+## 🖼️ Image Storage
+
+### Development
+- Images stored in `./uploads/` directory
+- No configuration needed
+
+### Production (Cloudinary - Recommended)
+1. Create [Cloudinary account](https://cloudinary.com)
+2. Set environment variables:
+   - `CLOUDINARY_CLOUD_NAME`
+   - `CLOUDINARY_API_KEY`
+   - `CLOUDINARY_API_SECRET`
+3. Redeploy backend
+4. Verify: `GET /api/health` should show `"imageStorage": "cloudinary"`
+
+### Render Deployment
+If deploying to Render, Cloudinary is required (Render has ephemeral filesystem).
+
+## 🏗️ Build & Deployment
+
+### Build Frontend
+```bash
+cd Frontend
+npm run build
+```
+Output: `Frontend/dist/`
+
+### Deploy Frontend (GitHub Pages)
+```bash
+npm run build
+# Commit and push to main branch
+# GitHub Actions will auto-deploy
+```
+
+### Deploy Backend (Render)
+1. Connect Render to GitHub repo
+2. Set environment variables in Render dashboard
+3. Deploy with `python app.py`
+
+### Deployment Checklist
+- [ ] MongoDB URI configured
+- [ ] JWT_SECRET set
+- [ ] Cloudinary credentials (or local storage confirmed)
+- [ ] Email service configured (SendGrid or SMTP)
+- [ ] All env vars set in deployment platform
+- [ ] Health check: `GET /api/health`
+
+## 📚 Documentation
+
+### Project Documentation
+- [Project Summary](portfolio/01-project-overview/PROJECT_SUMMARY.md) - Overview and value statement
+- [Final MVP Scope](portfolio/01-project-overview/FINAL_MVP_SCOPE.md) - Features and limitations
+- [Architecture](portfolio/04-final-product/ARCHITECTURE_FINAL.md) - Tech stack and data model
+- [Setup Guide](portfolio/04-final-product/SETUP_AND_RUN_GUIDE.md) - Detailed setup steps
+
+### Semester Documentation
+- [User Stories](docs/USERSTORIES.md) - Feature descriptions
+- [Design Doc](docs/Design%20Doc%20v1.md) - UI/UX design
+- [Wireframes](docs/WIREFRAME.md) - Page mockups
+- [Sprint Documentation](docs/Sprint_Packet/) - Weekly progress
+- [QA Report](portfolio/05-qa-and-stabilization/QA_REPORT.md) - Testing results
+
+### Team Portfolios
+- [Gayatri K. Bhandari](portfolio/08-individual-portfolios/GAYATRI_KUMARI_BHANDARI.md)
+- [Aayuska Rai](portfolio/08-individual-portfolios/RAI_AAYUSKA.md)
+- [Sudarshan Rai](portfolio/08-individual-portfolios/RAI_SUDARSHAN.md)
+- [Sagar Sob](portfolio/08-individual-portfolios/SAGAR_SOB.md)
+- [Ananda Tamang](portfolio/08-individual-portfolios/ANANDA_TAMANG.md)
+
+## 📋 API Endpoints
+
+### Authentication
+- `POST /api/auth/signup` - Register with campus email
+- `POST /api/auth/verify-email-otp` - Verify OTP
+- `POST /api/auth/login` - Login and get JWT
+- `POST /api/auth/resend-email-otp` - Resend OTP
+
+### Items (Listings)
+- `GET /api/items` - Browse all listings
+- `GET /api/items/<item_id>` - Get item details
+- `POST /api/items` - Create new listing
+- `PUT /api/items/<item_id>` - Update listing
+- `POST /api/items/<item_id>/favorite` - Favorite/unfavorite item
+
+### User Profiles
+- `GET /api/profile` - Get authenticated user profile
+- `PUT /api/profile` - Update profile
+- `PUT /api/profile/password` - Change password
+- `POST /api/profile/avatar` - Upload avatar
+- `DELETE /api/profile/avatar` - Delete avatar
+
+### Seller Pages
+- `GET /api/users/<user_id>` - Get public seller profile
+- `GET /api/users/<user_id>/reviews` - Get seller reviews
+- `POST /api/users/<user_id>/reviews` - Post review
+
+### Messaging
+- `GET /api/messages/threads` - List message threads
+- `POST /api/messages/threads` - Start new thread
+- `GET /api/messages/threads/<thread_id>/messages` - Get messages
+- `POST /api/messages/threads/<thread_id>/messages` - Send message
+
+### Utilities
+- `POST /api/uploads/image` - Upload image
+- `GET /api/health` - Health check
+
+## 🧪 Testing
+
+```bash
+# Run integration tests (requires TEST_MONGODB_URI)
+pytest tests/test_profile_endpoints.py
+
+# Frontend build test
+npm --prefix Frontend run build
+```
+
+## 📝 Notes
+
+- **Email Verification**: When email is not configured, OTP is printed to backend console
+- **Image Storage**: Development uses local uploads; production requires Cloudinary
+- **JWT Tokens**: Stored in localStorage on frontend; included in all authenticated requests
+- **Campus Email**: Signup restricted to `@office.uc.ac.kr` domain for university verification
+
+## 🤝 Contributing
+
+This is a capstone project for the Spring 2026 semester. For questions or suggestions, contact the team or open an issue on GitHub.
+
+## 📄 License
+
+MIT
+
+---
+
+**Last Updated**: June 2026
+**Team**: Capstone Design Spring 2026, Ulsan College
 |   |-- index.html
 |   |-- package.json
 |   |-- package-lock.json
